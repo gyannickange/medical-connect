@@ -1,0 +1,54 @@
+{
+  "version": 1,
+  "description": "Log of AI-agent skills/plugins installed into this project (folders are gitignored, so this file is the source of truth for reinstalling after a fresh clone).",
+  "entries": [
+    {
+      "name": "archify",
+      "type": "skill",
+      "manager": "skills CLI",
+      "source": "tt-a1i/archify",
+      "scope": "project",
+      "trackedIn": "skills-lock.json",
+      "reinstall": "npx skills@latest add tt-a1i/archify"
+    },
+    {
+      "name": "i-have-adhd",
+      "type": "claude-plugin",
+      "manager": "claude plugin",
+      "source": "https://github.com/ayghri/i-have-adhd",
+      "scope": "project",
+      "installedAt": "2026-08-09",
+      "notes": "User-invoked only (disable-model-invocation: true). Trigger with /i-have-adhd; stays on until \"stop adhd mode\".",
+      "reinstall": [
+        "git clone https://github.com/ayghri/i-have-adhd.git .claude-plugins/i-have-adhd",
+        "claude plugin marketplace add ./.claude-plugins/i-have-adhd",
+        "claude plugin install i-have-adhd@i-have-adhd --scope project"
+      ]
+    },
+    {
+      "name": "mattpocock-skills",
+      "type": "claude-plugin",
+      "manager": "claude plugin",
+      "source": "https://github.com/mattpocock/skills",
+      "scope": "project",
+      "installedAt": "2026-08-09",
+      "notes": "Bundle of ~25 engineering/productivity skills. Entry point: /ask-matt.",
+      "reinstall": [
+        "git clone https://github.com/mattpocock/skills.git .claude-plugins/mattpocock-skills",
+        "claude plugin marketplace add ./.claude-plugins/mattpocock-skills",
+        "claude plugin install mattpocock-skills@mattpocock --scope project"
+      ]
+    },
+    {
+      "name": "impeccable",
+      "type": "multi-harness-skill",
+      "manager": "impeccable CLI",
+      "source": "npm:impeccable",
+      "scope": "project",
+      "installedAt": "2026-08-09",
+      "harnesses": [".claude", ".cursor", ".agents", ".codex"],
+      "notes": "Requires Node >=22.12.0 (this machine runs v22.0.0 - installer works but prints an EBADENGINE warning).",
+      "reinstall": "npx impeccable install"
+    }
+  ]
+}

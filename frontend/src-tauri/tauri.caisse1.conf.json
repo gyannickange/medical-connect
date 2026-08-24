@@ -1,0 +1,23 @@
+{
+  "productName": "Business Connect Caisse 1",
+  "identifier": "com.businessconnect.desktop.caisse1",
+  "build": {
+    "beforeDevCommand": null
+  },
+  "app": {
+    "windows": [
+      {
+        "label": "main",
+        "title": "Business Connect — Caisse 1",
+        "dataDirectory": "simulator-caisse1",
+        "create": false,
+        "width": 1180,
+        "height": 780,
+        "minWidth": 900,
+        "minHeight": 650,
+        "x": 30,
+        "y": 40
+      }
+    ]
+  }
+}

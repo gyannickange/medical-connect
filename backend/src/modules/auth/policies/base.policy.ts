@@ -1,0 +1,36 @@
+import { Injectable } from "@nestjs/common";
+import type { UserRole, RequestWithUser } from "./policy.types";
+
+@Injectable()
+export abstract class BasePolicy {
+  protected user: RequestWithUser["user"];
+
+  setUser(user: RequestWithUser["user"]) {
+    this.user = user;
+  }
+
+  protected hasRole(role: UserRole): boolean {
+    return this.user?.role === role;
+  }
+
+  protected hasAnyRole(...roles: UserRole[]): boolean {
+    return roles.includes(this.user?.role as UserRole);
+  }
+
+  protected isAdmin(): boolean {
+    return this.hasRole("admin");
+  }
+
+  protected isManager(): boolean {
+    return this.hasRole("manager");
+  }
+
+  protected isCashier(): boolean {
+    return this.hasRole("cashier");
+  }
+
+  protected isAdminOrManager(): boolean {
+    return this.hasAnyRole("admin", "manager");
+  }
+}
+

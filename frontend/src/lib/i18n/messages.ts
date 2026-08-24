@@ -1,0 +1,177 @@
+import type { TranslationSection } from "./types";
+
+export const messages: TranslationSection = {
+  en: {
+    // Time
+    today: "Today",
+    yesterday: "Yesterday",
+    thisWeek: "This Week",
+    thisMonth: "This Month",
+
+    // Messages
+    searchPlaceholder: "Search products or scan barcode...",
+    noResults: "No results found",
+    loading: "Loading...",
+    error: "Error occurred",
+    success: "Operation successful",
+    savedOffline: "Saved Offline",
+    networkRequestFailed: "Unable to reach the server. Check your connection and try again.",
+    staffSavedOffline: "Staff member saved offline and will sync when online",
+    staffCreatedSuccessfully: "Staff member created successfully",
+    staffUpdatedSuccessfully: "Staff member updated successfully",
+    staffDeletedSuccessfully: "Staff member deleted successfully",
+    failedToSaveStaff: "Failed to save staff member",
+    failedToDeleteStaff: "Failed to delete staff member",
+    addStaffMember: "Add Staff Member",
+    addNewStaffMember: "Add New Staff Member",
+    editStaffMember: "Edit Staff Member",
+    deleteStaffMember: "Delete Staff Member",
+    saveStaffMember: "Save Staff Member",
+    staffMember: "Staff Member",
+    searchStaffPlaceholder: "Search staff by name, username, or email...",
+    noStaffMembersMatchSearch: "No staff members match your search",
+    noStaffMembersFound: "No staff members found",
+    addFirstStaffMember: "Add your first staff member",
+    leaveBlankToKeepCurrent: "leave blank to keep current",
+    confirmDeleteStaff: "Are you sure you want to delete",
+    staffDeleteQueuedOffline:
+      "Staff member deletion queued offline and will sync when online",
+    customerDeleteQueuedOffline:
+      "Customer deletion queued offline and will sync when online",
+    categorySavedOffline: "Category saved offline and will sync when online",
+    categoryDeleteQueuedOffline:
+      "Category deletion queued offline and will sync when online",
+    supplierDeleteQueuedOffline:
+      "Supplier deletion queued offline and will sync when online",
+    productDeleteQueuedOffline:
+      "Product deletion queued offline and will sync when online",
+    productArchiveQueuedOffline:
+      "Product archive queued offline and will sync when online",
+    productSavedOfflineWillSync:
+      "Product saved offline and will sync when online",
+    stockTransactionSavedOfflineWillSync:
+      "Stock transaction saved offline and will sync when online",
+    workingOffline: "Working Offline",
+    changesSyncWhenOnline: "changes will sync when you're back online.",
+    allChangesSynchronized: "All changes have been synchronized.",
+    vsLastMonth: "vs last month",
+    vsYesterday: "vs yesterday",
+    leaveEmptyForDefaultTaxRate: "Leave empty to use default tax rate",
+    barcodeScanner: "Barcode Scanner",
+    cameraError: "Camera Error",
+    cameraAccessDenied: "Camera access denied or not available",
+    tryAgain: "Try Again",
+    positionBarcodeWithinSquare: "Position barcode within the square",
+    startingCamera: "Starting camera...",
+    stop: "Stop",
+    failedToPrintInvoice: "Failed to print invoice",
+    warning: "Warning",
+    pleaseFixErrors: "Please fix the errors in the form before submitting",
+    type: "Type",
+    variantNotFound: "Variant not found",
+    selectType: "Select a type",
+    priceRequired: "Price is required",
+    priceMustBePositive: "Price must be positive",
+    minimumQuantityRequired: "Minimum quantity is required",
+    minimumQuantityMustBeAtLeastOne: "Minimum quantity must be at least 1",
+    allVariantsPlaceholder: "All variants",
+    noCustomer: "No customer",
+    accessDenied: "Access denied",
+    youDoNotHavePermissionToAccessSettings:
+      "You do not have permission to access settings",
+    item: "Item",
+    companyNameRequired: "Company name is required",
+    defaultCurrencyRequired: "Default currency is required",
+  },
+  fr: {
+    // Time
+    today: "Aujourd'hui",
+    yesterday: "Hier",
+    thisWeek: "Cette semaine",
+    thisMonth: "Ce mois",
+
+    // Messages
+    searchPlaceholder: "Rechercher des produits ou scanner un code-barres...",
+    noResults: "Aucun résultat trouvé",
+    loading: "Chargement...",
+    error: "Erreur survenue",
+    success: "Opération réussie",
+    savedOffline: "Enregistré Hors Ligne",
+    networkRequestFailed:
+      "Impossible de joindre le serveur. Vérifiez votre connexion et réessayez.",
+    staffSavedOffline:
+      "Membre du personnel enregistré hors ligne et sera synchronisé en ligne",
+    staffCreatedSuccessfully: "Membre du personnel créé avec succès",
+    staffUpdatedSuccessfully: "Membre du personnel mis à jour avec succès",
+    staffDeletedSuccessfully: "Membre du personnel supprimé avec succès",
+    failedToSaveStaff: "Échec de l'enregistrement du membre du personnel",
+    failedToDeleteStaff: "Échec de la suppression du membre du personnel",
+    addStaffMember: "Ajouter un membre du personnel",
+    addNewStaffMember: "Ajouter un nouveau membre du personnel",
+    editStaffMember: "Modifier le membre du personnel",
+    deleteStaffMember: "Supprimer le membre du personnel",
+    saveStaffMember: "Enregistrer le membre du personnel",
+    staffMember: "Membre du personnel",
+    searchStaffPlaceholder:
+      "Rechercher un membre par nom, nom d'utilisateur ou e-mail...",
+    noStaffMembersMatchSearch:
+      "Aucun membre du personnel ne correspond à votre recherche",
+    noStaffMembersFound: "Aucun membre du personnel trouvé",
+    addFirstStaffMember: "Ajouter votre premier membre du personnel",
+    leaveBlankToKeepCurrent: "laisser vide pour conserver l'actuel",
+    confirmDeleteStaff: "Voulez-vous vraiment supprimer",
+    staffDeleteQueuedOffline:
+      "Suppression du membre du personnel mise en attente hors ligne et sera synchronisée en ligne",
+    customerDeleteQueuedOffline:
+      "Suppression du client mise en attente hors ligne et sera synchronisée en ligne",
+    categorySavedOffline:
+      "Catégorie enregistrée hors ligne et sera synchronisée en ligne",
+    categoryDeleteQueuedOffline:
+      "Suppression de la catégorie mise en attente hors ligne et sera synchronisée en ligne",
+    supplierDeleteQueuedOffline:
+      "Suppression du fournisseur mise en attente hors ligne et sera synchronisée en ligne",
+    productDeleteQueuedOffline:
+      "Suppression du produit mise en attente hors ligne et sera synchronisée en ligne",
+    productArchiveQueuedOffline:
+      "Archivage du produit mis en attente hors ligne et sera synchronisé en ligne",
+    productSavedOfflineWillSync:
+      "Produit enregistré hors ligne et sera synchronisé en ligne",
+    stockTransactionSavedOfflineWillSync:
+      "Transaction de stock enregistrée hors ligne et sera synchronisée en ligne",
+    workingOffline: "Travail Hors Ligne",
+    changesSyncWhenOnline:
+      "modifications seront synchronisées lorsque vous serez de nouveau en ligne.",
+    allChangesSynchronized: "Toutes les modifications ont été synchronisées.",
+    vsLastMonth: "par rapport au mois dernier",
+    vsYesterday: "par rapport à hier",
+    leaveEmptyForDefaultTaxRate:
+      "Laisser vide pour utiliser le taux de taxe par défaut",
+    barcodeScanner: "Scanner de codes-barres",
+    cameraError: "Erreur de caméra",
+    cameraAccessDenied: "Accès à la caméra refusé ou caméra indisponible",
+    tryAgain: "Réessayer",
+    positionBarcodeWithinSquare: "Placez le code-barres dans le carré",
+    startingCamera: "Démarrage de la caméra...",
+    stop: "Arrêter",
+    failedToPrintInvoice: "Échec de l'impression de la facture",
+    warning: "Avertissement",
+    pleaseFixErrors:
+      "Veuillez corriger les erreurs du formulaire avant de l'envoyer",
+    type: "Type",
+    variantNotFound: "Variante introuvable",
+    selectType: "Sélectionner un type",
+    priceRequired: "Le prix est requis",
+    priceMustBePositive: "Le prix doit être positif",
+    minimumQuantityRequired: "La quantité minimale est requise",
+    minimumQuantityMustBeAtLeastOne:
+      "La quantité minimale doit être d'au moins 1",
+    allVariantsPlaceholder: "Toutes les variantes",
+    noCustomer: "Aucun client",
+    accessDenied: "Accès refusé",
+    youDoNotHavePermissionToAccessSettings:
+      "Vous n'avez pas l'autorisation d'accéder aux paramètres",
+    item: "Article",
+    companyNameRequired: "Le nom de l'entreprise est requis",
+    defaultCurrencyRequired: "La devise par défaut est requise",
+  },
+};

@@ -1,0 +1,45 @@
+import { z } from "zod";
+
+type Money = string;
+type MoneyInput = string | number;
+
+export interface User { id: string; username: string; password: string; firstName: string; lastName: string; email: string | null; role: "admin" | "manager" | "cashier"; tenantId: string; isActive: boolean; createdAt: string }
+export interface InsertUser { id?: string; username: string; password: string; firstName: string; lastName: string; email?: string | null; role?: User["role"]; tenantId: string; isActive?: boolean }
+export interface Tenant { id: string; name: string; address: string | null; phone: string | null; email: string | null; settings: unknown; isActive: boolean; createdAt: string }
+export interface InsertTenant { id?: string; name: string; address?: string | null; phone?: string | null; email?: string | null; settings?: unknown; isActive?: boolean }
+export interface Category { id: string; name: string; description: string | null; tenantId: string; parentCategoryId: string | null; taxRate: Money | null; isDefault: boolean; createdAt: string }
+export interface InsertCategory { id?: string; name: string; description?: string | null; tenantId: string; parentCategoryId?: string | null; taxRate?: MoneyInput | null; isDefault?: boolean }
+export interface Rayon { id: string; name: string; description: string | null; tenantId: string; createdAt: string; updatedAt: string }
+export interface InsertRayon { id?: string; name: string; description?: string | null; tenantId: string }
+export interface Product { id: string; name: string; description: string | null; price: Money; cost: Money; barcode: string | null; qrCode: string | null; categoryId: string | null; supplierId: string | null; rayonId: string | null; tenantId: string; minStockAlert: number; isActive: boolean; createdAt: string; updatedAt: string }
+export interface InsertProduct { id?: string; name: string; description?: string | null; price: MoneyInput; cost: MoneyInput; barcode?: string | null; qrCode?: string | null; categoryId?: string | null; supplierId?: string | null; rayonId?: string | null; tenantId: string; minStockAlert?: number; isActive?: boolean }
+export interface Stock { id: string; productId: string; quantity: number; reservedQuantity: number; tenantId: string; lastUpdated: string }
+export interface StockMovement { id: string; productId: string; variantId: string | null; type: "entry" | "exit" | "adjustment" | "transfer"; quantity: number; previousQuantity: number; newQuantity: number; reason: string | null; priceType: string | null; unitPrice: Money | null; purchaseId: string | null; userId: string | null; tenantId: string; createdAt: string }
+export interface Supplier { id: string; name: string; contactName: string | null; phone: string | null; email: string | null; tenantId: string; isActive: boolean; createdAt: string }
+export interface InsertSupplier { id?: string; name: string; contactName?: string | null; phone?: string | null; email?: string | null; tenantId: string; isActive?: boolean }
+export interface Customer { id: string; firstName: string; lastName: string; phone: string | null; email: string | null; address: string | null; tenantId: string; totalPurchases: Money; createdAt: string }
+export interface InsertCustomer { id?: string; firstName: string; lastName: string; phone?: string | null; email?: string | null; address?: string | null; tenantId: string; totalPurchases?: MoneyInput }
+export interface Sale { id: string; saleNumber: string; customerId: string | null; userId: string; subtotal: Money; tax: Money; total: Money; profit: Money; qrCode: string | null; paymentMethod: "cash" | "card" | "mobile"; status: "pending" | "completed" | "cancelled" | "refunded"; tenantId: string; createdAt: string }
+export interface SaleItem { id: string; saleId: string; productId: string; variantId: string | null; quantity: number; unitPrice: Money; totalPrice: Money; priceType: string | null; pricingId: string | null }
+export interface ProductVariant { id: string; productId: string; attributes: Array<{ name: string; value: string }>; sku: string | null; price: Money | null; cost: Money | null; barcode: string | null; quantity: number; minStockAlert: number; isActive: boolean; tenantId: string; createdAt: string; updatedAt: string }
+export interface InsertProductVariant { id?: string; productId: string; attributes: Array<{ name: string; value: string }>; sku?: string | null; price?: MoneyInput | null; cost?: MoneyInput | null; barcode?: string | null; quantity?: number; minStockAlert?: number; isActive?: boolean; tenantId: string }
+export interface ProductPricing { id: string; productId: string; variantId: string | null; priceType: "retail" | "wholesale" | "bulk" | "promotional"; price: Money; minQuantity: number; maxQuantity: number | null; validFrom: string | null; validTo: string | null; isActive: boolean; tenantId: string; createdAt: string }
+export interface InsertProductPricing { id?: string; productId: string; variantId?: string | null; priceType: ProductPricing["priceType"]; price: MoneyInput; minQuantity?: number; maxQuantity?: number | null; validFrom?: string | Date | null; validTo?: string | Date | null; isActive?: boolean; tenantId: string }
+export interface SellingPriceEntry { id: string; variantId: string | null; price: Money; effectiveAt: string; createdByUserId: string; createdAt: string }
+export interface InsertSellingPriceEntry { id?: string; variantId?: string | null; price: MoneyInput; effectiveAt?: string; createdByUserId: string }
+export interface Setting { id: string; tenantId: string; key: string; value: string; category: string; dataType: string; isEncrypted: boolean; createdAt: string; updatedAt: string }
+export interface AuditLog { id: string; userId: string; tenantId: string; action: "CREATE" | "UPDATE" | "DELETE" | "PATCH"; entityType: string; entityId: string | null; requestBody: unknown; responseBody: unknown; changes: unknown; metadata: unknown; status: "SUCCESS" | "FAILED"; errorMessage: string | null; createdAt: string }
+
+const id = z.string().uuid().optional();
+const money = z.union([z.string(), z.number()]);
+const nullableString = z.string().nullable().optional();
+export const insertUserSchema = z.object({ id, username: z.string().min(1), password: z.string().min(1), firstName: z.string().min(1), lastName: z.string().min(1), email: nullableString, role: z.enum(["admin", "manager", "cashier"]).optional(), tenantId: z.string(), isActive: z.boolean().optional() });
+export const insertTenantSchema = z.object({ id, name: z.string().min(1), address: nullableString, phone: nullableString, email: nullableString, settings: z.unknown().optional(), isActive: z.boolean().optional() });
+export const insertCategorySchema = z.object({ id, name: z.string().min(1), description: nullableString, tenantId: z.string(), parentCategoryId: nullableString, taxRate: money.nullable().optional(), isDefault: z.boolean().optional() });
+export const insertRayonSchema = z.object({ id, name: z.string().trim().min(1), description: nullableString, tenantId: z.string() });
+export const insertProductSchema = z.object({ id, name: z.string().min(1), description: nullableString, price: money, cost: money, barcode: nullableString, qrCode: nullableString, categoryId: nullableString, supplierId: nullableString, rayonId: nullableString, tenantId: z.string(), minStockAlert: z.number().int().optional(), isActive: z.boolean().optional() });
+export const insertSupplierSchema = z.object({ id, name: z.string().min(1), contactName: nullableString, phone: nullableString, email: nullableString, tenantId: z.string(), isActive: z.boolean().optional() });
+export const insertCustomerSchema = z.object({ id, firstName: z.string().min(1), lastName: z.string().min(1), phone: nullableString, email: nullableString, address: nullableString, tenantId: z.string(), totalPurchases: money.optional() });
+export const insertProductVariantSchema = z.object({ id, productId: z.string(), attributes: z.array(z.object({ name: z.string().min(1), value: z.string().min(1) })).min(1), sku: nullableString, price: money.nullable().optional(), cost: money.nullable().optional(), barcode: nullableString, quantity: z.number().int().optional(), minStockAlert: z.number().int().optional(), isActive: z.boolean().optional(), tenantId: z.string() });
+export const insertProductPricingSchema = z.object({ id, productId: z.string(), variantId: nullableString, priceType: z.enum(["retail", "wholesale", "bulk", "promotional"]), price: money, minQuantity: z.number().int().min(1).optional(), maxQuantity: z.number().int().min(1).nullable().optional(), validFrom: z.union([z.date(), z.string()]).nullable().optional(), validTo: z.union([z.date(), z.string()]).nullable().optional(), isActive: z.boolean().optional(), tenantId: z.string() });
+export const insertSettingSchema = z.object({ id, tenantId: z.string().optional(), key: z.string().min(1), value: z.string(), category: z.string().optional(), dataType: z.string().optional(), isEncrypted: z.boolean().optional() });

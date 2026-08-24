@@ -1,0 +1,60 @@
+name: Desktop Release
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+  workflow_dispatch:
+
+jobs:
+  build:
+    permissions:
+      contents: write
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: macos-latest
+            args: ""
+          - platform: windows-latest
+            args: ""
+
+    runs-on: ${{ matrix.platform }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: npm ci
+
+      - uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          projectPath: frontend
+          tagName: ${{ github.ref_name }}
+          releaseName: "Business Connect ${{ github.ref_name }}"
+          releaseBody: |
+            ## Install notes
+
+            These builds are not code-signed yet, so your OS will warn before first launch.
+
+            **macOS:** if you see "Business Connect is damaged and can't be opened" (or it ends up in the Trash), open Terminal and run:
+            ```
+            xattr -cr "/Applications/Business Connect.app"
+            ```
+            (move the app out of the Trash first if it landed there, then run the command, then open it normally.)
+
+            **Windows:** if SmartScreen blocks it, click "More info" then "Run anyway".
+          releaseDraft: true
+          prerelease: false
+          args: ${{ matrix.args }}

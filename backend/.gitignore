@@ -1,0 +1,13 @@
+node_modules
+dist
+*.tsbuildinfo
+.DS_Store
+server/public
+vite.config.ts.*
+*.tar.gz
+.env
+server.log
+
+# Drizzle Kit
+# We track SQL migrations but not the metadata
+drizzle/meta/
