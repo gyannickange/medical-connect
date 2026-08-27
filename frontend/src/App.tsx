@@ -27,6 +27,8 @@ const Consultations = lazy(() => import("./pages/consultations"));
 const NewConsultation = lazy(() => import("./pages/consultations/new"));
 const EditConsultation = lazy(() => import("./pages/consultations/edit"));
 const ConsultationDetails = lazy(() => import("./pages/consultations/show"));
+const PreConsultationForm = lazy(() => import("./pages/consultations/pre-consultation"));
+const ConsultationMedicaleForm = lazy(() => import("./pages/consultations/consultation-medicale"));
 const FileAttente = lazy(() => import("./pages/FileAttente"));
 const QueueRegister = lazy(() => import("./pages/QueueRegister"));
 const QueueEntryDetails = lazy(() => import("./pages/QueueEntryDetails"));
@@ -132,6 +134,20 @@ function Router() {
           <ProtectedRoute>
             <Layout>
               <EditConsultation />
+            </Layout>
+          </ProtectedRoute>
+        </Route>
+        <Route path="/consultations/:id/pre-consultation">
+          <ProtectedRoute>
+            <Layout>
+              <PreConsultationForm />
+            </Layout>
+          </ProtectedRoute>
+        </Route>
+        <Route path="/consultations/:id/consultation-medicale">
+          <ProtectedRoute>
+            <Layout>
+              <ConsultationMedicaleForm />
             </Layout>
           </ProtectedRoute>
         </Route>
