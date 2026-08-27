@@ -67,6 +67,58 @@ export interface DiagnosisPrincipal {
 export interface Consultation { id: string; tenantId: string; number: string | null; patientId: string; scheduledAt: string; specialty: string; assignedDoctorId: string; roomId: string | null; priority: ConsultationPriority; reason: string; nurseNotes: string | null; symptoms: string | null; vitals: VitalSigns | null; vitalsRecordedAt: string | null; relevantHistory: string[]; presentIllnessHistory: string | null; physicalExam: PhysicalExam | null; diagnosisPrincipal: DiagnosisPrincipal | null; diagnosisSecondary: string[]; diagnosisHypothesis: string | null; medicalConsultationSavedAt: string | null; status: ConsultationStatus; createdAt: string; updatedAt: string }
 export interface InsertConsultation { id?: string; patientId: string; scheduledAt: string; specialty: string; assignedDoctorId: string; roomId?: string | null; priority?: ConsultationPriority; reason: string; nurseNotes?: string | null; tenantId: string }
 
+export type LabOrderStatus = "demande" | "en_cours" | "a_valider" | "termine" | "probleme_signale" | "annule";
+
+export interface LabOrderExamLine { examName: string; resultText: string | null }
+
+export interface LabOrder {
+  id: string;
+  tenantId: string;
+  consultationId: string;
+  patientId: string;
+  examLines: LabOrderExamLine[];
+  requestedByUserId: string;
+  requestedAt: string;
+  priority: "normal" | "urgent";
+  clinicalContext: string | null;
+  specialInstructions: string | null;
+  status: LabOrderStatus;
+  takenInChargeByUserId: string | null;
+  takenInChargeAt: string | null;
+  validatedByUserId: string | null;
+  validatedAt: string | null;
+  problemReport: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export type PrescriptionStatus = "en_attente" | "prepare" | "delivre" | "delivre_partiel" | "annule";
+export type DispenseStatus = "en_attente" | "delivre" | "indisponible";
+
+export interface PrescriptionLine {
+  drugName: string;
+  dosage: string;
+  frequency: string;
+  durationDays: number | null;
+  quantity: string | null;
+  dispenseStatus: DispenseStatus;
+}
+
+export interface Prescription {
+  id: string;
+  tenantId: string;
+  consultationId: string;
+  patientId: string;
+  lines: PrescriptionLine[];
+  prescribedByUserId: string;
+  prescribedAt: string;
+  status: PrescriptionStatus;
+  dispensedByUserId: string | null;
+  dispensedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export type QueueEventType = "arrived" | "registered" | "waiting" | "called" | "in_care" | "in_consultation" | "completed" | "cancelled" | "transferred" | "priority_changed";
 export interface QueueEventPayload { priority: ConsultationPriority | null; targetService: string | null }
 export interface QueueEvent { id: string; tenantId: string; consultationId: string; patientId: string; eventType: QueueEventType; payload: QueueEventPayload | null; actorUserId: string; actorDeviceId: string | null; occurredAt: string }
