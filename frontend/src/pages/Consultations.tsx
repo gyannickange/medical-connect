@@ -1,6 +1,7 @@
-import React, { useState } from "react";
+import React from "react";
 import { Plus } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
+import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -8,8 +9,6 @@ import { useTranslation } from "../lib/i18n";
 import { useTenant } from "../contexts/TenantContext";
 import { ConsultationsPolicy } from "@/lib/policies/consultations.policy";
 import { PolicyGuard } from "@/components/PolicyGuard";
-import { ConsultationFormModal } from "@/components/ConsultationFormModal";
-import { ConsultationDetails } from "@/components/ConsultationDetails";
 import type { Consultation } from "@shared/schema";
 
 function statusVariant(status: Consultation["status"]): "default" | "secondary" | "destructive" {
@@ -25,17 +24,12 @@ function statusLabelKey(status: string): string {
 export default function Consultations() {
   const { t } = useTranslation();
   const { currentTenant } = useTenant();
-  const [showFormModal, setShowFormModal] = useState(false);
-  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [, setLocation] = useLocation();
 
   const { data: consultationsList = [], isLoading } = useQuery<Consultation[]>({
     queryKey: ["/api/consultations", currentTenant?.id],
     enabled: !!currentTenant?.id,
   });
-
-  if (selectedId) {
-    return <ConsultationDetails consultationId={selectedId} onBack={() => setSelectedId(null)} />;
-  }
 
   return (
     <div className="space-y-6" data-testid="consultations-page">
@@ -45,7 +39,7 @@ export default function Consultations() {
           <p className="text-sm text-muted-foreground">{t("consultationsOfTheDay")}</p>
         </div>
         <PolicyGuard policy={ConsultationsPolicy} action="canCreate">
-          <Button className="btn-primary" onClick={() => setShowFormModal(true)} data-testid="button-add-consultation">
+          <Button className="btn-primary" onClick={() => setLocation("/consultations/new")} data-testid="button-add-consultation">
             <Plus className="w-4 h-4 mr-2" />
             {t("newConsultation")}
           </Button>
@@ -64,7 +58,7 @@ export default function Consultations() {
             <div
               key={consultation.id}
               className="glass-card rounded-xl p-6 flex items-center justify-between cursor-pointer hover:bg-accent/50 transition-colors"
-              onClick={() => setSelectedId(consultation.id)}
+              onClick={() => setLocation(`/consultations/${consultation.id}`)}
               data-testid={`row-consultation-${consultation.id}`}>
               <div className="flex items-center gap-3">
                 <Avatar>
@@ -80,8 +74,6 @@ export default function Consultations() {
           ))
         )}
       </div>
-
-      <ConsultationFormModal open={showFormModal} onClose={() => setShowFormModal(false)} />
     </div>
   );
 }

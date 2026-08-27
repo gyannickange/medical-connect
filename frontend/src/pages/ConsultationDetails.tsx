@@ -1,6 +1,7 @@
 import React from "react";
 import { ArrowLeft } from "lucide-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useLocation, useParams } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
@@ -11,19 +12,16 @@ import { offlineApiRequest } from "@/lib/offlineApiRequest";
 import { showApiErrorToast } from "@/lib/errorHandler";
 import type { Consultation } from "@shared/schema";
 
-interface ConsultationDetailsProps {
-  consultationId: string;
-  onBack: () => void;
-}
-
 function statusLabelKey(status: string): string {
   return "consultationStatus" + status[0].toUpperCase() + status.slice(1).replace(/_([a-z])/g, (_, c: string) => c.toUpperCase());
 }
 
-export function ConsultationDetails({ consultationId, onBack }: ConsultationDetailsProps) {
+export default function ConsultationDetails() {
   const { t } = useTranslation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const [, setLocation] = useLocation();
+  const { id: consultationId } = useParams<{ id: string }>();
 
   const { data: consultation, isLoading } = useQuery<Consultation>({
     queryKey: ["/api/consultations/detail", consultationId],
@@ -31,6 +29,7 @@ export function ConsultationDetails({ consultationId, onBack }: ConsultationDeta
       const response = await fetch(`/api/consultations/detail/${consultationId}`, { credentials: "include" });
       return response.json();
     },
+    enabled: !!consultationId,
   });
 
   const patchMutation = useMutation({
@@ -74,7 +73,7 @@ export function ConsultationDetails({ consultationId, onBack }: ConsultationDeta
   return (
     <div className="space-y-6" data-testid="consultation-details">
       <div className="flex items-center justify-between">
-        <Button variant="ghost" onClick={onBack}>
+        <Button variant="ghost" onClick={() => setLocation("/consultations")}>
           <ArrowLeft className="w-4 h-4 mr-2" />
           {t("consultations")}
         </Button>
