@@ -363,7 +363,7 @@ describe("ProductsRepository", () => {
 
       await service.upsert(product() as any);
 
-      expect(couchDBService.getDatabase).toHaveBeenCalledWith("businessconnect_tenant-1");
+      expect(couchDBService.getDatabase).toHaveBeenCalledWith("medicalconnect_tenant-1");
       expect(db.insert).toHaveBeenCalledWith(
         expect.objectContaining({
           _id: "product:product-1",
@@ -774,9 +774,9 @@ describe("ProductsRepository", () => {
 
       const result = await service.findByTenant("tenant-1");
 
-      expect(couchDBService.getDatabase).toHaveBeenCalledWith("businessconnect_tenant-1");
+      expect(couchDBService.getDatabase).toHaveBeenCalledWith("medicalconnect_tenant-1");
       expect(couchDBService.ensureIndex).toHaveBeenCalledWith(
-        "businessconnect_tenant-1",
+        "medicalconnect_tenant-1",
         "products_by_tenant_name",
         ["tenantId", "type", "isActive", "name"]
       );
@@ -868,7 +868,7 @@ describe("ProductsRepository", () => {
       const result = await service.findByBarcode("ABC-1", "tenant-1");
 
       expect(couchDBService.ensureIndex).toHaveBeenCalledWith(
-        "businessconnect_tenant-1",
+        "medicalconnect_tenant-1",
         "products_by_tenant_barcode",
         ["tenantId", "type", "barcode"]
       );
@@ -1140,7 +1140,7 @@ describe("ProductsRepository", () => {
 
       const result = await service.findById("product-1", "tenant-1");
 
-      expect(couchDBService.getDatabase).toHaveBeenCalledWith("businessconnect_tenant-1");
+      expect(couchDBService.getDatabase).toHaveBeenCalledWith("medicalconnect_tenant-1");
       expect(db.get).toHaveBeenCalledWith("product:product-1");
       expect(result).toEqual(doc);
     });

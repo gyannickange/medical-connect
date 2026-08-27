@@ -1,6 +1,6 @@
-# Business Connect - NestJS Server
+# Medical Connect - NestJS Server
 
-A modern, high-performance backend for Business Connect built with **NestJS** and **Fastify**.
+A modern, high-performance backend for Medical Connect built with **NestJS** and **Fastify**.
 
 ## 🚀 Quick Start
 

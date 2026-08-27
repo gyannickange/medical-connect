@@ -94,7 +94,7 @@ export const Sidebar: React.FC = () => {
           <BrandMark className="w-10 h-10 flex-shrink-0 drop-shadow-[0_4px_10px_rgba(29,78,216,0.35)]" />
           <div className="hidden lg:block">
             <h1 className="text-lg font-display font-bold text-foreground">
-              Business Connect
+              Medical Connect
             </h1>
           </div>
         </div>

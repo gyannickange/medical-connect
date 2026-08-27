@@ -80,7 +80,7 @@ describe("errorLogStore", () => {
         // Only simulate quota exhaustion for the error log key — logError()
         // also triggers deviceIdentity's lazy device id/name writes, which
         // store plain (non-JSON) strings under other keys and must succeed.
-        if (key === "businessconnect_error_logs") {
+        if (key === "medicalconnect_error_logs") {
           const count = (JSON.parse(value) as unknown[]).length;
           if (count > 3) {
             throw new Error("QuotaExceededError");

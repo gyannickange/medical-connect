@@ -2,7 +2,7 @@ import type { TranslationSection } from "./types";
 
 export const auth: TranslationSection = {
   en: {
-    welcomeToBusinessConnect: "Welcome to Business Connect",
+    welcomeToMedicalConnect: "Welcome to Medical Connect",
     enterCredentials: "Enter your credentials to access your account",
     username: "Username",
     enterUsername: "Enter your username",
@@ -25,7 +25,7 @@ export const auth: TranslationSection = {
       "Accounts are created and stored only on this device. No server connection is ever required.",
     installModeConnectedTitle: "Connect this installation to a server",
     installModeConnectedDescription:
-      "Sign in with an account managed by your central Business Connect server.",
+      "Sign in with an account managed by your central Medical Connect server.",
     createLocalAdminTitle: "Create the administrator account",
     createLocalAdminDescription:
       "This is the first launch on this device. Choose a username and password for the administrator account.",
@@ -44,7 +44,7 @@ export const auth: TranslationSection = {
     loginFailed: "Login failed",
     invalidCredentials: "Invalid credentials",
     createAccount: "Create Account",
-    registerToBusinessConnect: "Register to start using Business Connect",
+    registerToMedicalConnect: "Register to start using Medical Connect",
     confirmPassword: "Confirm Password",
     tenantShop: "Account/Shop",
     selectTenant: "Select an account",
@@ -81,7 +81,7 @@ export const auth: TranslationSection = {
     logout: "Logout",
   },
   fr: {
-    welcomeToBusinessConnect: "Bienvenue sur Business Connect",
+    welcomeToMedicalConnect: "Bienvenue sur Medical Connect",
     enterCredentials: "Entrez vos identifiants pour accéder à votre compte",
     username: "Nom d'utilisateur",
     enterUsername: "Entrez votre nom d'utilisateur",
@@ -104,7 +104,7 @@ export const auth: TranslationSection = {
       "Les comptes sont créés et stockés uniquement sur cet appareil. Aucune connexion à un serveur n'est jamais nécessaire.",
     installModeConnectedTitle: "Connecter cette installation à un serveur",
     installModeConnectedDescription:
-      "Se connecter avec un compte géré par votre serveur Business Connect central.",
+      "Se connecter avec un compte géré par votre serveur Medical Connect central.",
     createLocalAdminTitle: "Créer le compte administrateur",
     createLocalAdminDescription:
       "C'est le premier démarrage sur cet appareil. Choisissez un nom d'utilisateur et un mot de passe pour le compte administrateur.",
@@ -124,7 +124,7 @@ export const auth: TranslationSection = {
     loginFailed: "Échec de la connexion",
     invalidCredentials: "Identifiants invalides",
     createAccount: "Créer un compte",
-    registerToBusinessConnect: "Inscrivez-vous pour commencer à utiliser Business Connect",
+    registerToMedicalConnect: "Inscrivez-vous pour commencer à utiliser Medical Connect",
     confirmPassword: "Confirmer le mot de passe",
     tenantShop: "Compte/Boutique",
     selectTenant: "Sélectionner un compte",

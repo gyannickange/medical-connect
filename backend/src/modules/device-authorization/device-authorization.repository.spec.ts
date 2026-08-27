@@ -28,7 +28,7 @@ describe("DeviceAuthorizationRepository", () => {
       devicePublicKey: "base64-x25519-pubkey",
     });
 
-    expect(couchDBService.getDatabase).toHaveBeenCalledWith("businessconnect_identity");
+    expect(couchDBService.getDatabase).toHaveBeenCalledWith("medicalconnect_identity");
     expect(created.status).toBe("pending");
     expect(db.insert).toHaveBeenCalledWith(
       expect.objectContaining({

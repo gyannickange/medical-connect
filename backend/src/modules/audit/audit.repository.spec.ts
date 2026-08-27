@@ -34,7 +34,7 @@ describe("AuditRepository", () => {
       status: "SUCCESS",
     } as any);
 
-    expect(couch.getDatabase).toHaveBeenCalledWith("businessconnect_tenant-1");
+    expect(couch.getDatabase).toHaveBeenCalledWith("medicalconnect_tenant-1");
     expect(db.insert).toHaveBeenCalledWith(
       expect.objectContaining({ _id: "audit_log:audit-1", type: "audit_log" })
     );

@@ -10,7 +10,7 @@ describe("SuppliersRepository", () => {
       { id: "supplier-1", tenantId: "tenant-1", name: "Acme" } as any
     );
 
-    expect(couch.getDatabase).toHaveBeenCalledWith("businessconnect_tenant-1");
+    expect(couch.getDatabase).toHaveBeenCalledWith("medicalconnect_tenant-1");
     expect(db.insert).toHaveBeenCalledWith(
       expect.objectContaining({
         _id: "supplier:supplier-1",

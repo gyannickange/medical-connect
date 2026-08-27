@@ -527,7 +527,7 @@ export default function InitialSetup() {
                   {form.formState.isSubmitting && (
                     <Loader2 className="animate-spin" aria-hidden="true" />
                   )}
-                  {t("configureBusinessConnect")}
+                  {t("configureMedicalConnect")}
                 </Button>
               )}
             </div>

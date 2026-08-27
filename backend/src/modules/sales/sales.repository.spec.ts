@@ -46,7 +46,7 @@ describe("SalesRepository", () => {
       const result = await service.record(sale(), items());
 
       expect(result).toBe(true);
-      expect(couchDBService.getDatabase).toHaveBeenCalledWith("businessconnect_tenant-1");
+      expect(couchDBService.getDatabase).toHaveBeenCalledWith("medicalconnect_tenant-1");
       const inserted = db.insert.mock.calls[0][0];
       expect(inserted).toMatchObject({
         _id: "sale:sale-1",
@@ -116,9 +116,9 @@ describe("SalesRepository", () => {
 
       const result = await service.findByTenant("tenant-1");
 
-      expect(couchDBService.getDatabase).toHaveBeenCalledWith("businessconnect_tenant-1");
+      expect(couchDBService.getDatabase).toHaveBeenCalledWith("medicalconnect_tenant-1");
       expect(couchDBService.ensureIndex).toHaveBeenCalledWith(
-        "businessconnect_tenant-1",
+        "medicalconnect_tenant-1",
         "sales_by_tenant_createdAt",
         ["tenantId", "type", "createdAt"]
       );

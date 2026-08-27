@@ -20,7 +20,7 @@ describe("CouchProxyAuthService", () => {
       await expect(
         service.authorize({
           method,
-          url: "/api/couch-proxy/businessconnect_tenant-1/_bulk_docs",
+          url: "/api/couch-proxy/medicalconnect_tenant-1/_bulk_docs",
           cookies: { access_token: "good-token" },
         })
       ).rejects.toThrow(ForbiddenException);
@@ -36,7 +36,7 @@ describe("CouchProxyAuthService", () => {
     await expect(
       service.authorize({
         method: "GET",
-        url: "/api/couch-proxy/businessconnect_tenant-1/_all_docs",
+        url: "/api/couch-proxy/medicalconnect_tenant-1/_all_docs",
         cookies: {},
       })
     ).rejects.toThrow(UnauthorizedException);
@@ -55,7 +55,7 @@ describe("CouchProxyAuthService", () => {
     await expect(
       service.authorize({
         method: "GET",
-        url: "/api/couch-proxy/businessconnect_tenant-1/_all_docs",
+        url: "/api/couch-proxy/medicalconnect_tenant-1/_all_docs",
         cookies: { access_token: "bad-token" },
       })
     ).rejects.toThrow(UnauthorizedException);
@@ -70,7 +70,7 @@ describe("CouchProxyAuthService", () => {
     await expect(
       service.authorize({
         method: "GET",
-        url: "/api/couch-proxy/businessconnect_tenant-1/_all_docs",
+        url: "/api/couch-proxy/medicalconnect_tenant-1/_all_docs",
         cookies: { access_token: "good-token" },
       })
     ).rejects.toThrow(UnauthorizedException);
@@ -86,7 +86,7 @@ describe("CouchProxyAuthService", () => {
     await expect(
       service.authorize({
         method: "GET",
-        url: "/api/couch-proxy/businessconnect_tenant-2/_all_docs",
+        url: "/api/couch-proxy/medicalconnect_tenant-2/_all_docs",
         cookies: { access_token: "good-token" },
       })
     ).rejects.toThrow(ForbiddenException);
@@ -102,7 +102,7 @@ describe("CouchProxyAuthService", () => {
     await expect(
       service.authorize({
         method: "GET",
-        url: "/api/couch-proxy/businessconnect_tenant-1/_all_docs?limit=5",
+        url: "/api/couch-proxy/medicalconnect_tenant-1/_all_docs?limit=5",
         cookies: { access_token: "good-token" },
       })
     ).resolves.toBeUndefined();
@@ -118,7 +118,7 @@ describe("CouchProxyAuthService", () => {
     await expect(
       service.authorize({
         method: "GET",
-        url: "/api/couch-proxy/businessconnect_tenant-1/_all_docs?limit=5",
+        url: "/api/couch-proxy/medicalconnect_tenant-1/_all_docs?limit=5",
         cookies: { access_token: "good-token" },
       })
     ).resolves.toBeUndefined();
@@ -134,7 +134,7 @@ describe("CouchProxyAuthService", () => {
     await expect(
       service.authorize({
         method: "GET",
-        url: "/api/couch-proxy/businessconnect_tenant-2/_all_docs",
+        url: "/api/couch-proxy/medicalconnect_tenant-2/_all_docs",
         cookies: { access_token: "good-token" },
       })
     ).rejects.toThrow(ForbiddenException);
@@ -150,7 +150,7 @@ describe("CouchProxyAuthService", () => {
     await expect(
       service.authorize({
         method: "GET",
-        url: "/api/couch-proxy/businessconnect_tenant-1/_all_docs?limit=5",
+        url: "/api/couch-proxy/medicalconnect_tenant-1/_all_docs?limit=5",
         cookies: { access_token: "good-token" },
       })
     ).resolves.toBeUndefined();
@@ -166,7 +166,7 @@ describe("CouchProxyAuthService", () => {
     await expect(
       service.authorize({
         method: "GET",
-        url: "/api/couch-proxy/businessconnect_tenant-2/_all_docs",
+        url: "/api/couch-proxy/medicalconnect_tenant-2/_all_docs",
         cookies: { access_token: "good-token" },
       })
     ).rejects.toThrow(ForbiddenException);
@@ -198,7 +198,7 @@ describe("CouchProxyAuthService", () => {
     await expect(
       service.authorize({
         method: "HEAD",
-        url: "/api/couch-proxy/businessconnect_tenant-1",
+        url: "/api/couch-proxy/medicalconnect_tenant-1",
         cookies: { access_token: "good-token" },
       })
     ).resolves.toBeUndefined();

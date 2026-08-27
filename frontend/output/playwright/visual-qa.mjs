@@ -151,9 +151,9 @@ async function collectMetrics(page, pageName) {
 async function prepareContext(browser, viewport, theme) {
   const context = await browser.newContext({ viewport });
   await context.addInitScript(({ selectedTheme }) => {
-    localStorage.setItem("businessconnect_install_mode", "connected");
-    localStorage.setItem("businessconnect_language", "fr");
-    localStorage.setItem("businessconnect_theme", selectedTheme);
+    localStorage.setItem("medicalconnect_install_mode", "connected");
+    localStorage.setItem("medicalconnect_language", "fr");
+    localStorage.setItem("medicalconnect_theme", selectedTheme);
   }, { selectedTheme: theme });
   return context;
 }

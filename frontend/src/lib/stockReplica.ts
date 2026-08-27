@@ -5,7 +5,7 @@ export interface StockReplicaHandle {
 }
 
 export function stockReplicaDatabaseName(tenantId: string): string {
-  return `businessconnect_${tenantId}`;
+  return `medicalconnect_${tenantId}`;
 }
 
 export function stockReplicaSourceUrl(tenantId: string): string {

@@ -412,8 +412,8 @@ export const usePouchDB = (dbName: string) => {
       // Sync with remote CouchDB or other PouchDB instances
       const cloudUrl = `${couchUrl}/${dbName}`;
 
-      // Get tenant ID from dbName (format: businessconnect_<tenantId>)
-      const tenantId = dbName.replace("businessconnect_", "");
+      // Get tenant ID from dbName (format: medicalconnect_<tenantId>)
+      const tenantId = dbName.replace("medicalconnect_", "");
 
       // Get authenticated sync options
       const syncOptions = await pouchdbAuthManager.getSyncOptions(tenantId, {

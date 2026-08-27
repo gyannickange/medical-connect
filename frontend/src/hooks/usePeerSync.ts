@@ -33,7 +33,7 @@ export const usePeerSync = (
     startPeerSync,
     stopPeerSync,
     stopAllPeerSyncs,
-  } = usePouchDB(`businessconnect_${currentTenant?.id || "default"}`);
+  } = usePouchDB(`medicalconnect_${currentTenant?.id || "default"}`);
 
   // Update peer sync status
   const updatePeerSyncStatus = useCallback(

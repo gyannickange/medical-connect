@@ -10,7 +10,7 @@ let cacheDb: any = null;
 // Get or create cache database instance
 async function getCacheDB() {
   if (!cacheDb) {
-    cacheDb = await createEncryptedLocalPouchDB("businessconnect_cache");
+    cacheDb = await createEncryptedLocalPouchDB("medicalconnect_cache");
   }
   return cacheDb;
 }

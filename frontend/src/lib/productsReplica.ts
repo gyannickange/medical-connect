@@ -136,7 +136,7 @@ export interface ProductsReplicaHandle {
 }
 
 export function productsReplicaDatabaseName(tenantId: string): string {
-  return `businessconnect_${tenantId}`;
+  return `medicalconnect_${tenantId}`;
 }
 
 export function productsReplicaSourceUrl(tenantId: string): string {

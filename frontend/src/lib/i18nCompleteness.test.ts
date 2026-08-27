@@ -62,7 +62,7 @@ describe("i18n completeness", () => {
   });
 
   it("keeps the initial setup French copy explicit", () => {
-    expect(translations.fr.configureBusinessConnect).toBe("Configurer Business Connect");
+    expect(translations.fr.configureMedicalConnect).toBe("Configurer Medical Connect");
     expect(translations.fr.chooseDocumentFormat).toBe(
       "Quel format voulez-vous utiliser ?",
     );

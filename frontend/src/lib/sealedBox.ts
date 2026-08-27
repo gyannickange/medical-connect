@@ -29,7 +29,7 @@ async function deriveWrapKey(
       name: "HKDF",
       hash: "SHA-256",
       salt: new Uint8Array(0),
-      info: new TextEncoder().encode("business-connect-tenant-key-wrap-v1"),
+      info: new TextEncoder().encode("medical-connect-tenant-key-wrap-v1"),
     },
     baseKey,
     { name: "AES-GCM", length: 256 },

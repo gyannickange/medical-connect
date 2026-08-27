@@ -63,7 +63,7 @@ export default function Login() {
             <BrandMark className="w-16 h-16 drop-shadow-[0_4px_10px_rgba(29,78,216,0.35)]" />
           </div>
           <CardTitle className="text-xl font-bold">
-            {t("welcomeToBusinessConnect")}
+            {t("welcomeToMedicalConnect")}
           </CardTitle>
         </CardHeader>
         <CardContent>

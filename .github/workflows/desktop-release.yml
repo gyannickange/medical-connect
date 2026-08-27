@@ -42,15 +42,15 @@ jobs:
         with:
           projectPath: frontend
           tagName: ${{ github.ref_name }}
-          releaseName: "Business Connect ${{ github.ref_name }}"
+          releaseName: "Medical Connect ${{ github.ref_name }}"
           releaseBody: |
             ## Install notes
 
             These builds are not code-signed yet, so your OS will warn before first launch.
 
-            **macOS:** if you see "Business Connect is damaged and can't be opened" (or it ends up in the Trash), open Terminal and run:
+            **macOS:** if you see "Medical Connect is damaged and can't be opened" (or it ends up in the Trash), open Terminal and run:
             ```
-            xattr -cr "/Applications/Business Connect.app"
+            xattr -cr "/Applications/Medical Connect.app"
             ```
             (move the app out of the Trash first if it landed there, then run the command, then open it normally.)
 

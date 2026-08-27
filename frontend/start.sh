@@ -1,8 +1,8 @@
 #!/bin/bash
 
-# Business Connect Client - Start Script
+# Medical Connect Client - Start Script
 
-echo "🚀 Starting Business Connect Client..."
+echo "🚀 Starting Medical Connect Client..."
 echo ""
 
 # Check if node_modules exists
@@ -17,7 +17,7 @@ echo "🔍 Checking if backend is running on port 5000..."
 if ! curl -s http://localhost:5000 > /dev/null; then
     echo "⚠️  WARNING: Backend is not responding on port 5000"
     echo "   Please start the backend first:"
-    echo "   cd /Users/gyannick97/Sites/React/Business Connect/backend && npm run dev"
+    echo "   cd /Users/gyannick97/Sites/React/Medical Connect/backend && npm run dev"
     echo ""
     echo "❓ Continue anyway? (y/n)"
     read -r response

@@ -1,8 +1,8 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "Business Connect",
+  "productName": "Medical Connect",
   "version": "0.1.1",
-  "identifier": "com.businessconnect.desktop",
+  "identifier": "com.medicalconnect.desktop",
   "build": {
     "beforeDevCommand": "npm run dev",
     "devUrl": "http://localhost:3000",
@@ -13,7 +13,7 @@
     "withGlobalTauri": true,
     "windows": [
       {
-        "title": "Business Connect",
+        "title": "Medical Connect",
         "width": 1440,
         "height": 900,
         "minWidth": 1024,

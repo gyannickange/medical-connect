@@ -1,7 +1,7 @@
 {
-  "name": "business-connect-nestjs",
+  "name": "medical-connect-nestjs",
   "version": "1.0.0",
-  "description": "Business Connect - NestJS + Fastify Backend",
+  "description": "Medical Connect - NestJS + Fastify Backend",
   "author": "",
   "private": true,
   "license": "MIT",

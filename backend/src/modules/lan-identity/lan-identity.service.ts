@@ -165,7 +165,7 @@ export class LanIdentityService {
       );
     }
     return createHmac("sha256", secret)
-      .update(`business-connect-tenant:${tenantId}`)
+      .update(`medical-connect-tenant:${tenantId}`)
       .digest("base64url");
   }
 }

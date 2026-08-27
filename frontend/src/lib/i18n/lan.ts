@@ -14,7 +14,7 @@ export const lan: TranslationSection = {
     lanDiagnosticsAutomaticDescription:
       "Nearby register discovery and synchronization start automatically on this device.",
     lanAgentDesktopOnlyDescription:
-      "LAN synchronization is available in the Business Connect desktop application.",
+      "LAN synchronization is available in the Medical Connect desktop application.",
     lanAgentError: "Agent error",
     unavailable: "Unavailable",
     nearbyRegisters: "Nearby registers",
@@ -94,7 +94,7 @@ export const lan: TranslationSection = {
     lanDiagnosticsAutomaticDescription:
       "La découverte et la synchronisation des caisses à proximité démarrent automatiquement sur cet appareil.",
     lanAgentDesktopOnlyDescription:
-      "La synchronisation LAN est disponible dans l’application de bureau Business Connect.",
+      "La synchronisation LAN est disponible dans l’application de bureau Medical Connect.",
     lanAgentError: "Erreur de l’agent",
     unavailable: "Indisponible",
     nearbyRegisters: "Caisses à proximité",

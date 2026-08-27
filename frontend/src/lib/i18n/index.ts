@@ -64,11 +64,11 @@ let currentLanguage: Language = "fr";
 
 export const setLanguage = (lang: Language) => {
   currentLanguage = lang;
-  localStorage.setItem("businessconnect_language", lang);
+  localStorage.setItem("medicalconnect_language", lang);
 };
 
 export const getLanguage = (): Language => {
-  const stored = localStorage.getItem("businessconnect_language") as Language;
+  const stored = localStorage.getItem("medicalconnect_language") as Language;
   return stored || currentLanguage;
 };
 

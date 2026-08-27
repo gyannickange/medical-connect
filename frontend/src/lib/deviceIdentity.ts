@@ -1,4 +1,4 @@
-const DEVICE_ID_STORAGE_KEY = "businessconnect_device_id";
+const DEVICE_ID_STORAGE_KEY = "medicalconnect_device_id";
 
 function createDeviceId(): string {
   const randomPart =
@@ -22,7 +22,7 @@ export function getDeviceId(): string {
   return deviceId;
 }
 
-const DEVICE_NAME_STORAGE_KEY = "businessconnect_device_name";
+const DEVICE_NAME_STORAGE_KEY = "medicalconnect_device_name";
 
 function createDeviceName(deviceId: string): string {
   const suffix = deviceId

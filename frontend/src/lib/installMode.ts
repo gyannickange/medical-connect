@@ -1,4 +1,4 @@
-const INSTALL_MODE_KEY = "businessconnect_install_mode";
+const INSTALL_MODE_KEY = "medicalconnect_install_mode";
 
 export type InstallMode = "local" | "connected";
 

@@ -7,7 +7,7 @@ export interface CategoriesReplicaHandle {
 }
 
 export function categoriesReplicaDatabaseName(tenantId: string): string {
-  return `businessconnect_${tenantId}`;
+  return `medicalconnect_${tenantId}`;
 }
 
 export function categoriesReplicaSourceUrl(tenantId: string): string {

@@ -195,7 +195,7 @@ describe("RayonsRepository", () => {
       const result = await repository.findByTenant("tenant-1");
 
       expect(couchDBService.ensureIndex).toHaveBeenCalledWith(
-        "businessconnect_tenant-1",
+        "medicalconnect_tenant-1",
         "rayons_by_tenant_name",
         ["tenantId", "type", "name"]
       );

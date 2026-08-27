@@ -1,6 +1,6 @@
 # E2E Smoke Tests
 
-Playwright end-to-end tests for the Business Connect application.
+Playwright end-to-end tests for the Medical Connect application.
 
 **Test file:** `tests/app.spec.ts`
 **Coverage:** Auth, Dashboard, Navigation, LAN Discovery, Products, Reports & Sales, Customers, Categories, Suppliers, Staff, Settings, UI Features

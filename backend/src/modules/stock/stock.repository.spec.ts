@@ -55,7 +55,7 @@ describe("StockRepository", () => {
     const result = await service.record(movement());
 
     expect(result).toBe(true);
-    expect(couchDBService.getDatabase).toHaveBeenCalledWith("businessconnect_tenant-1");
+    expect(couchDBService.getDatabase).toHaveBeenCalledWith("medicalconnect_tenant-1");
     const inserted = db.insert.mock.calls[0][0];
     expect(inserted).toMatchObject({
       _id: "stock_movement:movement-1",
@@ -114,7 +114,7 @@ describe("StockRepository", () => {
 
       const result = await service.findByProduct("product-1", "tenant-1");
 
-      expect(couchDBService.getDatabase).toHaveBeenCalledWith("businessconnect_tenant-1");
+      expect(couchDBService.getDatabase).toHaveBeenCalledWith("medicalconnect_tenant-1");
       expect(db.find).toHaveBeenCalledWith({
         selector: { type: "stock_movement", tenantId: "tenant-1", productId: "product-1" },
       });

@@ -13,14 +13,14 @@ import {
 
 describe("categoriesReplicaDatabaseName", () => {
   it("uses the unified tenant database", () => {
-    expect(categoriesReplicaDatabaseName("tenant-1")).toBe("businessconnect_tenant-1");
+    expect(categoriesReplicaDatabaseName("tenant-1")).toBe("medicalconnect_tenant-1");
   });
 });
 
 describe("categoriesReplicaSourceUrl", () => {
   it("points at the authenticated CouchDB proxy for that tenant's categories database", () => {
     expect(categoriesReplicaSourceUrl("tenant-1")).toBe(
-      "/api/couch-proxy/businessconnect_tenant-1"
+      "/api/couch-proxy/medicalconnect_tenant-1"
     );
   });
 });
@@ -42,9 +42,9 @@ describe("startCategoriesReplication", () => {
 
     await startCategoriesReplication("tenant-1");
 
-    expect(createPouchDB).toHaveBeenCalledWith("businessconnect_tenant-1");
+    expect(createPouchDB).toHaveBeenCalledWith("medicalconnect_tenant-1");
     expect(db.replicate.from).toHaveBeenCalledWith(
-      "/api/couch-proxy/businessconnect_tenant-1",
+      "/api/couch-proxy/medicalconnect_tenant-1",
       expect.objectContaining({ live: true, retry: true, checkpoint: "target" })
     );
     const options = db.replicate.from.mock.calls[0][1];

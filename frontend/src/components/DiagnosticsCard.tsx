@@ -29,7 +29,7 @@ function downloadDiagnostic(): void {
   const url = URL.createObjectURL(blob);
   const link = document.createElement("a");
   link.href = url;
-  link.download = `business-connect-diagnostic-${new Date()
+  link.download = `medical-connect-diagnostic-${new Date()
     .toISOString()
     .replace(/[:.]/g, "-")}.json`;
   document.body.appendChild(link);

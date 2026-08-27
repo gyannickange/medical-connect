@@ -25,7 +25,7 @@ describe("getProductLock", () => {
     mockDb(() => Promise.reject({ name: "not_found" }));
 
     await expect(getProductLock("tenant-1", "product-1")).resolves.toBeNull();
-    expect(createPouchDB).toHaveBeenCalledWith("businessconnect_tenant-1");
+    expect(createPouchDB).toHaveBeenCalledWith("medicalconnect_tenant-1");
   });
 
   it("returns the lock document when it is still valid", async () => {
@@ -94,7 +94,7 @@ describe("releaseProductLock", () => {
 describe("decideLockAction", () => {
   const peer = (overrides: Partial<NativeLanPeer> = {}): NativeLanPeer => ({
     deviceId: "device-holder",
-    serviceName: "businessconnect",
+    serviceName: "medicalconnect",
     addresses: ["192.168.1.5"],
     port: 45839,
     protocolVersion: "1",

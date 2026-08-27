@@ -1,6 +1,6 @@
 {
-  "productName": "Business Connect Caisse 1",
-  "identifier": "com.businessconnect.desktop.caisse1",
+  "productName": "Medical Connect Caisse 1",
+  "identifier": "com.medicalconnect.desktop.caisse1",
   "build": {
     "beforeDevCommand": null
   },
@@ -8,7 +8,7 @@
     "windows": [
       {
         "label": "main",
-        "title": "Business Connect — Caisse 1",
+        "title": "Medical Connect — Caisse 1",
         "dataDirectory": "simulator-caisse1",
         "create": false,
         "width": 1180,

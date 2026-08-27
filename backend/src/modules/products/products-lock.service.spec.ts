@@ -13,7 +13,7 @@ describe("ProductsLockService", () => {
 
       await service.acquireOrRenew("product-1", "tenant-1", "device-a", "Caisse A");
 
-      expect(couchDBService.getDatabase).toHaveBeenCalledWith("businessconnect_tenant-1");
+      expect(couchDBService.getDatabase).toHaveBeenCalledWith("medicalconnect_tenant-1");
       const inserted = db.insert.mock.calls[0][0];
       expect(inserted).toMatchObject({
         _id: "lock_product-1",

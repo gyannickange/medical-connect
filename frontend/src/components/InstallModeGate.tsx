@@ -62,7 +62,7 @@ export const InstallModeGate: React.FC<{ children: React.ReactNode }> = ({
           if (count === 0) {
             const credentials = await fetchInitialAdminCredentials();
             if (!credentials) {
-              // No BUSINESSCONNECT_INITIAL_ADMIN_USERNAME/PASSWORD configured for
+              // No MEDICALCONNECT_INITIAL_ADMIN_USERNAME/PASSWORD configured for
               // this installation and no dev fallback applies (production
               // build) - let the user set their own admin username/password
               // instead of falling back to a guessable identifier.

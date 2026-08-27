@@ -94,14 +94,14 @@ describe("isActiveProductDoc", () => {
 
 describe("productsReplicaDatabaseName", () => {
   it("uses the unified tenant database", () => {
-    expect(productsReplicaDatabaseName("tenant-1")).toBe("businessconnect_tenant-1");
+    expect(productsReplicaDatabaseName("tenant-1")).toBe("medicalconnect_tenant-1");
   });
 });
 
 describe("productsReplicaSourceUrl", () => {
   it("points at the authenticated CouchDB proxy for that tenant's database", () => {
     expect(productsReplicaSourceUrl("tenant-1")).toBe(
-      "/api/couch-proxy/businessconnect_tenant-1"
+      "/api/couch-proxy/medicalconnect_tenant-1"
     );
   });
 });
@@ -123,9 +123,9 @@ describe("startProductsReplication", () => {
 
     await startProductsReplication("tenant-1");
 
-    expect(createPouchDB).toHaveBeenCalledWith("businessconnect_tenant-1");
+    expect(createPouchDB).toHaveBeenCalledWith("medicalconnect_tenant-1");
     expect(db.replicate.from).toHaveBeenCalledWith(
-      "/api/couch-proxy/businessconnect_tenant-1",
+      "/api/couch-proxy/medicalconnect_tenant-1",
       expect.objectContaining({ live: true, retry: true })
     );
     const options = db.replicate.from.mock.calls[0][1];
@@ -220,7 +220,7 @@ describe("writeLocalProductDoc", () => {
       tenantId: "local",
     });
 
-    expect(createPouchDB).toHaveBeenCalledWith("businessconnect_local");
+    expect(createPouchDB).toHaveBeenCalledWith("medicalconnect_local");
     const written = db.put.mock.calls[0][0];
     expect(written).toMatchObject({
       _id: "product:prod-1",

@@ -1,11 +1,11 @@
-export const IDENTITY_DATABASE = "businessconnect_identity";
+export const IDENTITY_DATABASE = "medicalconnect_identity";
 
 export function identityDatabaseName(): string {
   return IDENTITY_DATABASE;
 }
 
 export function tenantDatabaseName(tenantId: string): string {
-  return `businessconnect_${tenantId}`;
+  return `medicalconnect_${tenantId}`;
 }
 
 export function couchDocumentId(type: string, publicId: string): string {

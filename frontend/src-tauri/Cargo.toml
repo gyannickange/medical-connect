@@ -1,12 +1,12 @@
 [package]
-name = "business-connect-desktop"
+name = "medical-connect-desktop"
 version = "0.1.0"
-description = "Business Connect desktop shell and local LAN agent"
-authors = ["Business Connect"]
+description = "Medical Connect desktop shell and local LAN agent"
+authors = ["Medical Connect"]
 edition = "2021"
 
 [lib]
-name = "businessconnect_desktop_lib"
+name = "medicalconnect_desktop_lib"
 crate-type = ["staticlib", "cdylib", "rlib"]
 
 [build-dependencies]

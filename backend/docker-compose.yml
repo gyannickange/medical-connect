@@ -1,13 +1,13 @@
 services:
   couchdb:
     image: couchdb:3.3
-    container_name: business-connect-couchdb
+    container_name: medical-connect-couchdb
     restart: unless-stopped
     ports:
       - "127.0.0.1:5984:5984"
     environment:
-      COUCHDB_USER: businessconnect
-      COUCHDB_PASSWORD: business-connect-dev-password
+      COUCHDB_USER: medicalconnect
+      COUCHDB_PASSWORD: medical-connect-dev-password
     volumes:
       - couchdb-data:/opt/couchdb/data
 

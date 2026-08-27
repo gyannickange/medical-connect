@@ -68,7 +68,7 @@ interface SavedResponse {
   text: () => Promise<string>;
 }
 
-export const OFFLINE_MUTATION_SAVED_EVENT = "businessconnect:offline-mutation-saved";
+export const OFFLINE_MUTATION_SAVED_EVENT = "medicalconnect:offline-mutation-saved";
 const API_REACHABILITY_TIMEOUT_MS = 3000;
 
 // Create a synthetic Response object from saved data (for POST/PUT offline)
