@@ -63,7 +63,7 @@ async function bootstrap() {
   // the middleware below and CouchProxyAuthService), are expected to be
   // high-frequency by design (continuous replication), and WS already has
   // its own message-level rate limiting - this guards the previously
-  // unprotected REST endpoints (auth, products, sales, stock, ...).
+  // unprotected REST endpoints (auth, patients, consultations, queue, ...).
   await app.register(require("@fastify/rate-limit"), {
     max: 300,
     timeWindow: "1 minute",

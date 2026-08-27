@@ -4,8 +4,6 @@ import { CouchDBService } from "../src/database/couchdb.service";
 import { TenantsRepository } from "../src/modules/identity/tenants.repository";
 import { UsersRepository } from "../src/modules/identity/users.repository";
 import { SettingsRepository } from "../src/modules/settings/settings.repository";
-import { CategoriesRepository } from "../src/modules/categories/categories.repository";
-import { ProductsRepository } from "../src/modules/products/products.repository";
 
 async function main() {
   if (!process.env.COUCHDB_URL) throw new Error("COUCHDB_URL is required");
@@ -13,8 +11,6 @@ async function main() {
   const tenants = new TenantsRepository(couch);
   const users = new UsersRepository(couch);
   const settings = new SettingsRepository(couch);
-  const categories = new CategoriesRepository(couch);
-  const products = new ProductsRepository(couch);
 
   const { tenant } = await tenants.create({
     id: "00000000-0000-4000-8000-000000000001",
@@ -61,20 +57,6 @@ async function main() {
     { key: "currency", value: "XOF", category: "company", dataType: "string" },
     tenant.id
   );
-  const category = await categories.create({
-    id: "00000000-0000-4000-8000-000000000003",
-    name: "General",
-    tenantId: tenant.id,
-    isDefault: true,
-  });
-  await products.create({
-    id: "00000000-0000-4000-8000-000000000004",
-    name: "Sample product",
-    price: "1000.00",
-    cost: "500.00",
-    categoryId: category.id,
-    tenantId: tenant.id,
-  });
   console.log(`Seeded tenant ${tenant.id}; login: admin`);
 }
 

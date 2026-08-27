@@ -4,14 +4,12 @@ import {
   Param,
   Query,
   UseGuards,
-  UseInterceptors,
 } from "@nestjs/common";
 import { AuditService } from "./audit.service";
 import { JwtAuthGuard } from "../auth/jwt-auth.guard";
 import { PolicyGuard } from "../auth/guards/policy.guard";
 import { CheckPolicy } from "../auth/decorators/check-policy.decorator";
 import { AuditPolicy } from "./audit.policy";
-import { RoleDataFilterInterceptor } from "../auth/interceptors/role-data-filter.interceptor";
 
 @Controller("api/audit-logs")
 @UseGuards(JwtAuthGuard, PolicyGuard)
@@ -20,7 +18,6 @@ export class AuditController {
 
   @Get(":tenantId")
   @CheckPolicy(AuditPolicy, "view")
-  @UseInterceptors(RoleDataFilterInterceptor)
   async getAuditLogs(
     @Param("tenantId") tenantId: string,
     @Query("limit") limit?: number,
@@ -68,7 +65,6 @@ export class AuditController {
 
   @Get(":tenantId/entity/:entityType/:entityId")
   @CheckPolicy(AuditPolicy, "view")
-  @UseInterceptors(RoleDataFilterInterceptor)
   async getAuditLogsByEntity(
     @Param("tenantId") tenantId: string,
     @Param("entityType") entityType: string,
@@ -89,7 +85,6 @@ export class AuditController {
 
   @Get(":tenantId/user/:userId")
   @CheckPolicy(AuditPolicy, "view")
-  @UseInterceptors(RoleDataFilterInterceptor)
   async getAuditLogsByUser(
     @Param("tenantId") tenantId: string,
     @Param("userId") userId: string,

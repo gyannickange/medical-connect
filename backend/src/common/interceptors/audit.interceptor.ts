@@ -150,61 +150,33 @@ export class AuditInterceptor implements NestInterceptor {
   } {
     // Extract entity type from path
     // Examples:
-    // /api/products/:id -> products
-    // /api/products/:productId/variants -> productVariants
-    // /api/categories/:id -> categories
-    // /api/customers/:id -> customers
-    // /api/sales -> sales (no ID in path, use body.id)
+    // /api/patients/:id -> patients
+    // /api/consultations/:id -> consultations
+    // /api/queue/:tenantId -> queue (no ID in path, use body.id)
 
     const pathParts = path.split("/").filter(Boolean);
     let entityType = "unknown";
-    let entityId: string | null = null;
 
     // Find the entity type from the path
     const entityMap: { [key: string]: string } = {
-      products: "products",
-      categories: "categories",
-      customers: "customers",
-      suppliers: "suppliers",
+      patients: "patients",
+      consultations: "consultations",
+      queue: "queue",
       staff: "staff",
-      sales: "sales",
       settings: "settings",
-      stock: "stock",
       tenants: "tenants",
     };
 
-    // Check for nested routes first
-    if (pathParts.includes("variants")) {
-      entityType = "productVariants";
-      entityId = params.id || params.variantId || null;
-    } else if (pathParts.includes("pricing")) {
-      entityType = "productPricings";
-      entityId = params.id || params.pricingId || null;
-    } else if (pathParts.includes("analytics")) {
-      entityType = "productAnalytics";
-      entityId = params.id || null;
-    } else {
-      // Find entity type from path
-      for (const [key, value] of Object.entries(entityMap)) {
-        if (pathParts.includes(key)) {
-          entityType = value;
-          break;
-        }
+    for (const [key, value] of Object.entries(entityMap)) {
+      if (pathParts.includes(key)) {
+        entityType = value;
+        break;
       }
-
-      // Extract entity ID from params
-      entityId =
-        params.id ||
-        params.productId ||
-        params.categoryId ||
-        params.customerId ||
-        params.supplierId ||
-        params.userId ||
-        params.saleId ||
-        params.tenantId ||
-        body?.id ||
-        null;
     }
+
+    // Extract entity ID from params
+    const entityId: string | null =
+      params.id || params.userId || params.tenantId || body?.id || null;
 
     // Extract changes for UPDATE/PATCH operations
     let changes = null;

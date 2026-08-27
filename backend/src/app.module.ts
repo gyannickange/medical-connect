@@ -2,19 +2,11 @@ import { Module } from "@nestjs/common";
 import { APP_INTERCEPTOR, APP_FILTER } from "@nestjs/core";
 import { AuthModule } from "./modules/auth/auth.module";
 import { TenantsModule } from "./modules/tenants/tenants.module";
-import { CategoriesModule } from "./modules/categories/categories.module";
-import { RayonsModule } from "./modules/rayons/rayons.module";
 import { PatientsModule } from "./modules/patients/patients.module";
 import { ConsultationsModule } from "./modules/consultations/consultations.module";
 import { QueueModule } from "./modules/queue/queue.module";
-import { ProductsModule } from "./modules/products/products.module";
-import { StockModule } from "./modules/stock/stock.module";
-import { CustomersModule } from "./modules/customers/customers.module";
-import { SuppliersModule } from "./modules/suppliers/suppliers.module";
-import { SalesModule } from "./modules/sales/sales.module";
 import { StaffModule } from "./modules/staff/staff.module";
 import { SettingsModule } from "./modules/settings/settings.module";
-import { DashboardModule } from "./modules/dashboard/dashboard.module";
 import { SyncModule } from "./modules/sync/sync.module";
 import { PeersModule } from "./modules/peers/peers.module";
 import { PouchDBModule } from "./modules/pouchdb/pouchdb.module";
@@ -31,19 +23,11 @@ import { AuditInterceptor } from "./common/interceptors/audit.interceptor";
   imports: [
     AuthModule,
     TenantsModule,
-    CategoriesModule,
-    RayonsModule,
     PatientsModule,
     ConsultationsModule,
     QueueModule,
-    ProductsModule,
-    StockModule,
-    CustomersModule,
-    SuppliersModule,
-    SalesModule,
     StaffModule,
     SettingsModule,
-    DashboardModule,
     SyncModule,
     PeersModule,
     PouchDBModule,
