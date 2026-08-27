@@ -66,10 +66,88 @@ describe("ConsultationsRepository", () => {
         patientsRepoStub() as any
       );
 
-      const result = await repository.update("c1", "tenant-1", { status: "terminee", diagnosis: "RAS" } as any);
+      const result = await repository.update("c1", "tenant-1", { status: "terminee", diagnosisPrincipal: { label: "RAS", certainty: "confirme" } } as any);
 
-      expect(db.insert).toHaveBeenCalledWith(expect.objectContaining({ number: "C-2026-0904", status: "terminee", diagnosis: "RAS" }));
+      expect(db.insert).toHaveBeenCalledWith(
+        expect.objectContaining({ number: "C-2026-0904", status: "terminee", diagnosisPrincipal: { label: "RAS", certainty: "confirme" } })
+      );
       expect(result.status).toBe("terminee");
+    });
+
+    it("sets vitalsRecordedAt when vitals is included in the update payload", async () => {
+      const existing = {
+        _id: "consultation:c1",
+        _rev: "2-a",
+        id: "c1",
+        type: "consultation",
+        tenantId: "tenant-1",
+        number: "C-2026-0904",
+        status: "en_cours",
+        vitalsRecordedAt: null,
+      };
+      const db = { get: jest.fn().mockResolvedValue(existing), insert: jest.fn().mockResolvedValue({ ok: true }) };
+      const repository = new ConsultationsRepository(
+        { getDatabase: jest.fn().mockResolvedValue(db) } as any,
+        { next: jest.fn() } as any,
+        patientsRepoStub() as any
+      );
+
+      const vitals = { bloodPressureSystolic: 128, bloodPressureDiastolic: 82, heartRate: 72, temperature: 36.8, oxygenSaturation: 98, respiratoryRate: 16, weightKg: 78, heightCm: 179, bmi: 24.3, capillaryGlycemia: null, painScoreEva: 3, isPregnant: false };
+      const result = await repository.update("c1", "tenant-1", { vitals } as any);
+
+      expect(db.insert).toHaveBeenCalledWith(expect.objectContaining({ vitals, vitalsRecordedAt: expect.any(String) }));
+      expect(result.vitalsRecordedAt).toBeInstanceOf(Date);
+    });
+
+    it("sets medicalConsultationSavedAt when physicalExam or diagnosisPrincipal is included", async () => {
+      const existing = {
+        _id: "consultation:c1",
+        _rev: "2-a",
+        id: "c1",
+        type: "consultation",
+        tenantId: "tenant-1",
+        number: "C-2026-0904",
+        status: "en_cours",
+        medicalConsultationSavedAt: null,
+      };
+      const db = { get: jest.fn().mockResolvedValue(existing), insert: jest.fn().mockResolvedValue({ ok: true }) };
+      const repository = new ConsultationsRepository(
+        { getDatabase: jest.fn().mockResolvedValue(db) } as any,
+        { next: jest.fn() } as any,
+        patientsRepoStub() as any
+      );
+
+      const diagnosisPrincipal = { label: "Hypertension artérielle", certainty: "confirme" as const };
+      const result = await repository.update("c1", "tenant-1", { diagnosisPrincipal } as any);
+
+      expect(db.insert).toHaveBeenCalledWith(expect.objectContaining({ diagnosisPrincipal, medicalConsultationSavedAt: expect.any(String) }));
+      expect(result.medicalConsultationSavedAt).toBeInstanceOf(Date);
+    });
+
+    it("leaves vitalsRecordedAt and medicalConsultationSavedAt untouched when neither vitals, physicalExam, nor diagnosisPrincipal is in the payload", async () => {
+      const existing = {
+        _id: "consultation:c1",
+        _rev: "2-a",
+        id: "c1",
+        type: "consultation",
+        tenantId: "tenant-1",
+        number: "C-2026-0904",
+        status: "en_cours",
+        vitalsRecordedAt: "2026-08-27T10:25:00.000Z",
+        medicalConsultationSavedAt: null,
+      };
+      const db = { get: jest.fn().mockResolvedValue(existing), insert: jest.fn().mockResolvedValue({ ok: true }) };
+      const repository = new ConsultationsRepository(
+        { getDatabase: jest.fn().mockResolvedValue(db) } as any,
+        { next: jest.fn() } as any,
+        patientsRepoStub() as any
+      );
+
+      await repository.update("c1", "tenant-1", { roomId: "Salle 3" } as any);
+
+      expect(db.insert).toHaveBeenCalledWith(
+        expect.objectContaining({ vitalsRecordedAt: "2026-08-27T10:25:00.000Z", medicalConsultationSavedAt: null })
+      );
     });
   });
 

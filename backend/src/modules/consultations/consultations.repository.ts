@@ -48,8 +48,16 @@ export class ConsultationsRepository {
       priority: data.priority ?? "normal",
       reason: data.reason,
       nurseNotes: data.nurseNotes ?? null,
-      clinicalObservations: null,
-      diagnosis: null,
+      symptoms: null,
+      vitals: null,
+      vitalsRecordedAt: null,
+      relevantHistory: [],
+      presentIllnessHistory: null,
+      physicalExam: null,
+      diagnosisPrincipal: null,
+      diagnosisSecondary: [],
+      diagnosisHypothesis: null,
+      medicalConsultationSavedAt: null,
       status: "planifiee",
       createdAt: now,
       updatedAt: now,
@@ -63,17 +71,14 @@ export class ConsultationsRepository {
     }
   }
 
-  async update(
-    id: string,
-    tenantId: string,
-    data: Partial<InsertConsultation> & { status?: Consultation["status"]; clinicalObservations?: string | null; diagnosis?: string | null }
-  ): Promise<Consultation> {
+  async update(id: string, tenantId: string, data: Partial<InsertConsultation> & Record<string, unknown>): Promise<Consultation> {
     const db = await this.database(tenantId);
     const current = await this.findExisting(db, id);
     if (!current || current.type !== "consultation" || current.tenantId !== tenantId) {
       throw new NotFoundException("Consultation not found");
     }
 
+    const now = new Date().toISOString();
     const updated = {
       ...current,
       ...data,
@@ -84,7 +89,10 @@ export class ConsultationsRepository {
       tenantId,
       number: current.number,
       createdAt: current.createdAt,
-      updatedAt: new Date().toISOString(),
+      updatedAt: now,
+      vitalsRecordedAt: "vitals" in data ? now : (current.vitalsRecordedAt ?? null),
+      medicalConsultationSavedAt:
+        "physicalExam" in data || "diagnosisPrincipal" in data ? now : (current.medicalConsultationSavedAt ?? null),
     };
 
     try {
@@ -160,6 +168,8 @@ export class ConsultationsRepository {
       scheduledAt: new Date(doc.scheduledAt),
       createdAt: new Date(doc.createdAt),
       updatedAt: new Date(doc.updatedAt),
+      vitalsRecordedAt: doc.vitalsRecordedAt ? new Date(doc.vitalsRecordedAt) : null,
+      medicalConsultationSavedAt: doc.medicalConsultationSavedAt ? new Date(doc.medicalConsultationSavedAt) : null,
     } as Consultation;
   }
 
