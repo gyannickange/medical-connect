@@ -10,11 +10,16 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useTranslation } from "../../lib/i18n";
+import { useTenant } from "../../contexts/TenantContext";
 import { useToast } from "@/hooks/use-toast";
 import { offlineApiRequest } from "@/lib/offlineApiRequest";
 import { showApiErrorToast } from "@/lib/errorHandler";
-import type { Consultation, DiagnosisPrincipal, ExamSystem, Patient, PhysicalExam } from "@shared/schema";
+import { LabOrdersPolicy } from "@/lib/policies/labOrders.policy";
+import { PrescriptionsPolicy } from "@/lib/policies/prescriptions.policy";
+import { PolicyGuard } from "@/components/PolicyGuard";
+import type { Consultation, DiagnosisPrincipal, ExamSystem, LabOrder, Patient, PhysicalExam, Prescription } from "@shared/schema";
 
 const EXAM_SYSTEMS: ExamSystem[] = ["cardiovasculaire", "respiratoire", "neurologique", "digestif", "orl", "dermatologique"];
 
@@ -29,6 +34,7 @@ export default function ConsultationMedicaleForm() {
   const { t } = useTranslation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { currentTenant } = useTenant();
   const [, setLocation] = useLocation();
   const { id: consultationId } = useParams<{ id: string }>();
 
@@ -41,6 +47,9 @@ export default function ConsultationMedicaleForm() {
   const [newSecondaryDiagnosis, setNewSecondaryDiagnosis] = useState("");
   const [diagnosisHypothesis, setDiagnosisHypothesis] = useState("");
   const [initialized, setInitialized] = useState(false);
+  const [newDrugName, setNewDrugName] = useState("");
+  const [newDosage, setNewDosage] = useState("");
+  const [newFrequency, setNewFrequency] = useState("");
 
   const { data: consultation } = useQuery<Consultation>({
     queryKey: ["/api/consultations/detail", consultationId],
@@ -57,6 +66,16 @@ export default function ConsultationMedicaleForm() {
       return response.json();
     },
     enabled: !!consultation?.patientId,
+  });
+
+  const { data: labOrders = [] } = useQuery<LabOrder[]>({
+    queryKey: [`/api/lab-orders/${currentTenant?.id}?consultationId=${consultationId}`],
+    enabled: !!currentTenant?.id && !!consultationId,
+  });
+
+  const { data: prescriptions = [] } = useQuery<Prescription[]>({
+    queryKey: [`/api/prescriptions/${currentTenant?.id}?consultationId=${consultationId}`],
+    enabled: !!currentTenant?.id && !!consultationId,
   });
 
   if (consultation && !initialized) {
@@ -99,6 +118,28 @@ export default function ConsultationMedicaleForm() {
     },
     onError: (error: unknown) => {
       void showApiErrorToast(toast, error, t("error"), t("failedToSaveConsultation"), t("networkRequestFailed"));
+    },
+  });
+
+  const addPrescriptionLineMutation = useMutation({
+    mutationFn: async () => {
+      const response = await offlineApiRequest(
+        "POST",
+        "/api/prescriptions",
+        { consultationId, lines: [{ drugName: newDrugName, dosage: newDosage, frequency: newFrequency }] },
+        { collection: "prescriptions" }
+      );
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [`/api/prescriptions/${currentTenant?.id}?consultationId=${consultationId}`] });
+      toast({ title: t("success"), description: t("prescriptionCreatedSuccessfully") });
+      setNewDrugName("");
+      setNewDosage("");
+      setNewFrequency("");
+    },
+    onError: (error: unknown) => {
+      void showApiErrorToast(toast, error, t("error"), t("failedToCreatePrescription"), t("networkRequestFailed"));
     },
   });
 
@@ -310,14 +351,90 @@ export default function ConsultationMedicaleForm() {
         </div>
       </Card>
 
-      <Card className="p-6 space-y-2 opacity-60" data-testid="card-future-phase-sections">
-        <h2 className="font-semibold text-foreground">{t("requestExams")} · {t("prescribeAction")} · {t("closeConsultationAction")}</h2>
-        <p className="text-sm text-muted-foreground">{t("availableInFuturePhase")}</p>
+      <Card className="p-6 space-y-4" data-testid="card-lab-orders">
+        <div className="flex items-center justify-between">
+          <h2 className="font-semibold text-foreground">{t("examTypesRequested")}</h2>
+          <PolicyGuard policy={LabOrdersPolicy} action="canCreate">
+            <Button variant="outline" size="sm" onClick={() => setLocation(`/laboratoire/new?consultationId=${consultationId}`)} data-testid="button-request-exams">
+              {t("newLabOrder")}
+            </Button>
+          </PolicyGuard>
+        </div>
+        {labOrders.length === 0 ? (
+          <p className="text-sm text-muted-foreground">{t("noLabOrders")}</p>
+        ) : (
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>{t("examTypesRequested")}</TableHead>
+                <TableHead>{t("statusColumnLabel")}</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {labOrders.map((order) => (
+                <TableRow key={order.id} className="cursor-pointer hover:bg-accent/50" onClick={() => setLocation(`/laboratoire/${order.id}`)} data-testid={`row-lab-order-${order.id}`}>
+                  <TableCell>
+                    <div className="flex flex-wrap gap-1">
+                      {order.examLines.map((line, index) => (
+                        <Badge key={index} variant="secondary">{line.examName}</Badge>
+                      ))}
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <Badge>{t("labOrderStatus" + order.status[0].toUpperCase() + order.status.slice(1).replace(/_([a-z])/g, (_, c: string) => c.toUpperCase()))}</Badge>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        )}
+      </Card>
+
+      <Card className="p-6 space-y-4" data-testid="card-prescriptions">
+        <h2 className="font-semibold text-foreground">{t("medicationsPrescribedSection")}</h2>
+        {prescriptions.length === 0 ? (
+          <p className="text-sm text-muted-foreground">{t("noPrescriptions")}</p>
+        ) : (
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>{t("drugNameLabel")}</TableHead>
+                <TableHead>{t("dosageLabel")}</TableHead>
+                <TableHead>{t("frequencyLabel")}</TableHead>
+                <TableHead>{t("statusColumnLabel")}</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {prescriptions.map((prescription) => (
+                <TableRow key={prescription.id} className="cursor-pointer hover:bg-accent/50" onClick={() => setLocation(`/pharmacie/${prescription.id}`)} data-testid={`row-prescription-${prescription.id}`}>
+                  <TableCell>{prescription.lines.map((l) => l.drugName).join(", ")}</TableCell>
+                  <TableCell>{prescription.lines.map((l) => l.dosage).join(", ")}</TableCell>
+                  <TableCell>{prescription.lines.map((l) => l.frequency).join(", ")}</TableCell>
+                  <TableCell>
+                    <Badge>{t("prescriptionStatus" + prescription.status[0].toUpperCase() + prescription.status.slice(1).replace(/_([a-z])/g, (_, c: string) => c.toUpperCase()))}</Badge>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        )}
+        <PolicyGuard policy={PrescriptionsPolicy} action="canCreate">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+            <Input value={newDrugName} onChange={(e) => setNewDrugName(e.target.value)} placeholder={t("drugNameLabel")} className="glass-input" data-testid="input-new-drug-name" />
+            <Input value={newDosage} onChange={(e) => setNewDosage(e.target.value)} placeholder={t("dosageLabel")} className="glass-input" data-testid="input-new-dosage" />
+            <Input value={newFrequency} onChange={(e) => setNewFrequency(e.target.value)} placeholder={t("frequencyLabel")} className="glass-input" data-testid="input-new-frequency" />
+          </div>
+          <Button
+            variant="outline"
+            onClick={() => addPrescriptionLineMutation.mutate()}
+            disabled={!newDrugName.trim() || !newDosage.trim() || !newFrequency.trim() || addPrescriptionLineMutation.isPending}
+            data-testid="button-prescribe">
+            {t("addMedicationLine")}
+          </Button>
+        </PolicyGuard>
       </Card>
 
       <div className="fixed bottom-0 left-0 right-0 md:left-64 bg-background border-t border-border p-4 flex items-center justify-end gap-2">
-        <Button variant="outline" disabled data-testid="button-request-exams">{t("requestExams")}</Button>
-        <Button variant="outline" disabled data-testid="button-prescribe">{t("prescribeAction")}</Button>
         <Button variant="outline" onClick={() => saveDraftMutation.mutate()} disabled={isPending} data-testid="button-save-draft">
           {saveDraftMutation.isPending ? t("saving") : t("saveDraft")}
         </Button>
