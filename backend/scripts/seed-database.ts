@@ -16,7 +16,7 @@ async function main() {
   const categories = new CategoriesRepository(couch);
   const products = new ProductsRepository(couch);
 
-  const tenant = await tenants.create({
+  const { tenant } = await tenants.create({
     id: "00000000-0000-4000-8000-000000000001",
     name: "Medical Connect Store",
     settings: { currency: "XOF", timezone: "Africa/Porto-Novo" },
