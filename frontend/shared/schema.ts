@@ -27,7 +27,44 @@ export interface InsertPatient { id?: string; lastName: string; firstName: strin
 export type ConsultationStatus = "planifiee" | "en_attente" | "en_cours" | "terminee" | "annulee";
 export type ConsultationPriority = "normal" | "urgent" | "tres_urgent";
 
-export interface Consultation { id: string; tenantId: string; number: string | null; patientId: string; scheduledAt: string; specialty: string; assignedDoctorId: string; roomId: string | null; priority: ConsultationPriority; reason: string; nurseNotes: string | null; clinicalObservations: string | null; diagnosis: string | null; status: ConsultationStatus; createdAt: string; updatedAt: string }
+export interface VitalSigns {
+  bloodPressureSystolic: number | null;
+  bloodPressureDiastolic: number | null;
+  heartRate: number | null;
+  temperature: number | null;
+  oxygenSaturation: number | null;
+  respiratoryRate: number | null;
+  weightKg: number | null;
+  heightCm: number | null;
+  bmi: number | null;
+  capillaryGlycemia: number | null;
+  painScoreEva: number | null;
+  isPregnant: boolean | null;
+}
+
+export type ExamSystem = "cardiovasculaire" | "respiratoire" | "neurologique" | "digestif" | "orl" | "dermatologique";
+export type ExamSystemStatus = "normal" | "anormal" | "non_examine";
+
+export interface SystemExamFinding {
+  system: ExamSystem;
+  status: ExamSystemStatus;
+  notes: string | null;
+}
+
+export interface PhysicalExam {
+  generalState: string | null;
+  consciousness: string | null;
+  hydration: string | null;
+  systemFindings: SystemExamFinding[];
+}
+
+export type DiagnosisCertainty = "confirme" | "suspecte";
+export interface DiagnosisPrincipal {
+  label: string;
+  certainty: DiagnosisCertainty;
+}
+
+export interface Consultation { id: string; tenantId: string; number: string | null; patientId: string; scheduledAt: string; specialty: string; assignedDoctorId: string; roomId: string | null; priority: ConsultationPriority; reason: string; nurseNotes: string | null; symptoms: string | null; vitals: VitalSigns | null; vitalsRecordedAt: string | null; relevantHistory: string[]; presentIllnessHistory: string | null; physicalExam: PhysicalExam | null; diagnosisPrincipal: DiagnosisPrincipal | null; diagnosisSecondary: string[]; diagnosisHypothesis: string | null; medicalConsultationSavedAt: string | null; status: ConsultationStatus; createdAt: string; updatedAt: string }
 export interface InsertConsultation { id?: string; patientId: string; scheduledAt: string; specialty: string; assignedDoctorId: string; roomId?: string | null; priority?: ConsultationPriority; reason: string; nurseNotes?: string | null; tenantId: string }
 
 export type QueueEventType = "arrived" | "registered" | "waiting" | "called" | "in_care" | "in_consultation" | "completed" | "cancelled" | "transferred" | "priority_changed";
