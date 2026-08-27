@@ -1,6 +1,7 @@
-import React, { useState } from "react";
+import React from "react";
 import { Plus } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
+import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useTranslation } from "../lib/i18n";
@@ -8,8 +9,6 @@ import { useTenant } from "../contexts/TenantContext";
 import { QueuePolicy } from "@/lib/policies/queue.policy";
 import { PolicyGuard } from "@/components/PolicyGuard";
 import { bucketQueueItems } from "@/lib/queueColumns";
-import { QueueRegistrationModal } from "@/components/QueueRegistrationModal";
-import { QueueEntryDetails } from "@/components/QueueEntryDetails";
 import type { QueueItem } from "@shared/schema";
 
 function priorityVariant(priority: QueueItem["priority"]): "default" | "secondary" | "destructive" {
@@ -25,18 +24,13 @@ function priorityLabelKey(priority: string): string {
 export default function FileAttente() {
   const { t } = useTranslation();
   const { currentTenant } = useTenant();
-  const [showRegistrationModal, setShowRegistrationModal] = useState(false);
-  const [selectedItem, setSelectedItem] = useState<QueueItem | null>(null);
+  const [, setLocation] = useLocation();
 
   const { data: queueItems = [], isLoading } = useQuery<QueueItem[]>({
     queryKey: ["/api/queue", currentTenant?.id],
     enabled: !!currentTenant?.id,
     refetchInterval: 15_000,
   });
-
-  if (selectedItem) {
-    return <QueueEntryDetails item={selectedItem} onBack={() => setSelectedItem(null)} />;
-  }
 
   const columns = bucketQueueItems(queueItems);
 
@@ -46,7 +40,7 @@ export default function FileAttente() {
       <div
         key={item.consultationId}
         className="glass-card rounded-xl p-4 space-y-2 cursor-pointer hover:bg-accent/50 transition-colors"
-        onClick={() => setSelectedItem(item)}
+        onClick={() => setLocation(`/file-attente/${item.consultationId}`)}
         data-testid={`queue-card-${item.consultationId}`}>
         <div className="flex items-center justify-between">
           <span className="font-medium text-foreground">{item.patientId}</span>
@@ -67,7 +61,7 @@ export default function FileAttente() {
           <p className="text-sm text-muted-foreground">{t("queueSubtitle")}</p>
         </div>
         <PolicyGuard policy={QueuePolicy} action="canAppendEvent">
-          <Button className="btn-primary" onClick={() => setShowRegistrationModal(true)} data-testid="button-register-queue-patient">
+          <Button className="btn-primary" onClick={() => setLocation("/file-attente/new")} data-testid="button-register-queue-patient">
             <Plus className="w-4 h-4 mr-2" />
             {t("registerPatient")}
           </Button>
@@ -94,8 +88,6 @@ export default function FileAttente() {
           </div>
         </div>
       )}
-
-      <QueueRegistrationModal open={showRegistrationModal} onClose={() => setShowRegistrationModal(false)} />
     </div>
   );
 }
