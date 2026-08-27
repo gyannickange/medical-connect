@@ -18,6 +18,7 @@ import {
   ChevronsUpDown,
   LayoutGrid,
   CalendarCheck,
+  CircleX,
 } from "lucide-react";
 import { BrandMark } from "./BrandMark";
 import { useTranslation } from "../lib/i18n";
@@ -29,6 +30,7 @@ import { AuditPolicy } from "@/lib/policies/audit.policy";
 import { SalesPolicy } from "@/lib/policies/sales.policy";
 import { PatientsPolicy } from "@/lib/policies/patients.policy";
 import { ConsultationsPolicy } from "@/lib/policies/consultations.policy";
+import { QueuePolicy } from "@/lib/policies/queue.policy";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -47,6 +49,7 @@ export const Sidebar: React.FC = () => {
   const salesPolicy = usePolicy(SalesPolicy);
   const patientsPolicy = usePolicy(PatientsPolicy);
   const consultationsPolicy = usePolicy(ConsultationsPolicy);
+  const queuePolicy = usePolicy(QueuePolicy);
 
   const menuItems = [
     { icon: LayoutDashboard, label: t("dashboard"), path: "/" },
@@ -58,6 +61,9 @@ export const Sidebar: React.FC = () => {
       : []),
     ...(consultationsPolicy.canView()
       ? [{ icon: CalendarCheck, label: t("consultations"), path: "/consultations" }]
+      : []),
+    ...(queuePolicy.canView()
+      ? [{ icon: CircleX, label: t("queueTitle"), path: "/file-attente" }]
       : []),
     { icon: Users, label: t("customers"), path: "/customers" },
     { icon: Truck, label: t("suppliers"), path: "/suppliers" },

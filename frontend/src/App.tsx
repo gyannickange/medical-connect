@@ -29,6 +29,7 @@ const Categories = lazy(() => import("./pages/Categories"));
 const Rayons = lazy(() => import("./pages/Rayons"));
 const Patients = lazy(() => import("./pages/Patients"));
 const Consultations = lazy(() => import("./pages/Consultations"));
+const FileAttente = lazy(() => import("./pages/FileAttente"));
 const Customers = lazy(() => import("./pages/Customers"));
 const Suppliers = lazy(() => import("./pages/Suppliers"));
 const Staff = lazy(() => import("./pages/Staff"));
@@ -123,6 +124,13 @@ function Router() {
           <ProtectedRoute>
             <Layout>
               <Consultations />
+            </Layout>
+          </ProtectedRoute>
+        </Route>
+        <Route path="/file-attente">
+          <ProtectedRoute>
+            <Layout>
+              <FileAttente />
             </Layout>
           </ProtectedRoute>
         </Route>

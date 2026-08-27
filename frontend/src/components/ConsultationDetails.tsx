@@ -47,6 +47,22 @@ export function ConsultationDetails({ consultationId, onBack }: ConsultationDeta
     },
   });
 
+  const queueMutation = useMutation({
+    mutationFn: async () =>
+      offlineApiRequest(
+        "POST",
+        "/api/queue/events",
+        { consultationId: consultation!.id, patientId: consultation!.patientId, eventType: "arrived" },
+        { collection: "queue" }
+      ),
+    onSuccess: () => {
+      toast({ title: t("success"), description: t("queueEntryAddedSuccessfully") });
+    },
+    onError: (error: unknown) => {
+      void showApiErrorToast(toast, error, t("error"), t("failedToAddToQueue"), t("networkRequestFailed"));
+    },
+  });
+
   if (isLoading || !consultation) {
     return (
       <div className="flex items-center justify-center min-h-64">
@@ -63,7 +79,7 @@ export function ConsultationDetails({ consultationId, onBack }: ConsultationDeta
           {t("consultations")}
         </Button>
         <div className="flex gap-2">
-          <Button variant="outline" disabled data-testid="button-put-in-queue">
+          <Button variant="outline" onClick={() => queueMutation.mutate()} disabled={queueMutation.isPending} data-testid="button-put-in-queue">
             {t("putInQueue")}
           </Button>
           <Button
