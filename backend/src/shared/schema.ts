@@ -40,6 +40,13 @@ export type ConsultationPriority = "normal" | "urgent" | "tres_urgent";
 export interface Consultation { id: string; tenantId: string; number: string | null; patientId: string; scheduledAt: Date; specialty: string; assignedDoctorId: string; roomId: string | null; priority: ConsultationPriority; reason: string; nurseNotes: string | null; clinicalObservations: string | null; diagnosis: string | null; status: ConsultationStatus; createdAt: Date; updatedAt: Date }
 export interface InsertConsultation { id?: string; patientId: string; scheduledAt: Date | string; specialty: string; assignedDoctorId: string; roomId?: string | null; priority?: ConsultationPriority; reason: string; nurseNotes?: string | null; tenantId: string }
 
+export type QueueEventType = "arrived" | "registered" | "waiting" | "called" | "in_care" | "in_consultation" | "completed" | "cancelled" | "transferred" | "priority_changed";
+export interface QueueEventPayload { priority: ConsultationPriority | null; targetService: string | null }
+export interface QueueEvent { id: string; tenantId: string; consultationId: string; patientId: string; eventType: QueueEventType; payload: QueueEventPayload | null; actorUserId: string; actorDeviceId: string | null; occurredAt: Date }
+export interface InsertQueueEvent { id?: string; consultationId: string; patientId: string; eventType: QueueEventType; payload?: QueueEventPayload | null; actorUserId: string; actorDeviceId?: string | null; tenantId: string }
+export interface QueueTimelineEntry { eventType: QueueEventType; occurredAt: string }
+export interface QueueItem { consultationId: string; patientId: string; status: QueueEventType; priority: ConsultationPriority; waitingSinceMs: number | null; timeline: QueueTimelineEntry[] }
+
 export interface Product { id: string; name: string; description: string | null; price: Money; cost: Money; barcode: string | null; qrCode: string | null; categoryId: string | null; supplierId: string | null; rayonId: string | null; tenantId: string; minStockAlert: number; isActive: boolean; createdAt: Date; updatedAt: Date }
 export interface InsertProduct { id?: string; name: string; description?: string | null; price: MoneyInput; cost: MoneyInput; barcode?: string | null; qrCode?: string | null; categoryId?: string | null; supplierId?: string | null; rayonId?: string | null; tenantId: string; minStockAlert?: number; isActive?: boolean }
 
