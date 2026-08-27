@@ -14,7 +14,7 @@ import { showApiErrorToast } from "@/lib/errorHandler";
 import { ConsultationsPolicy } from "@/lib/policies/consultations.policy";
 import { PolicyGuard } from "@/components/PolicyGuard";
 import { computeConsultationJourney, type JourneyStep } from "@/lib/consultationJourney";
-import type { Consultation, Patient, QueueItem } from "@shared/schema";
+import type { Consultation, LabOrder, Patient, Prescription, QueueItem } from "@shared/schema";
 
 const STEP_LABEL_KEYS: Record<string, string> = {
   patientIdentified: "journeyStepPatientIdentified",
@@ -58,6 +58,16 @@ export default function ConsultationHub() {
     enabled: !!currentTenant?.id,
   });
 
+  const { data: labOrders = [] } = useQuery<LabOrder[]>({
+    queryKey: [`/api/lab-orders/${currentTenant?.id}?consultationId=${consultationId}`],
+    enabled: !!currentTenant?.id && !!consultationId,
+  });
+
+  const { data: prescriptions = [] } = useQuery<Prescription[]>({
+    queryKey: [`/api/prescriptions/${currentTenant?.id}?consultationId=${consultationId}`],
+    enabled: !!currentTenant?.id && !!consultationId,
+  });
+
   const cancelMutation = useMutation({
     mutationFn: async () => {
       const response = await offlineApiRequest("PUT", `/api/consultations/${consultationId}`, { status: "annulee" }, { collection: "consultations", entityId: consultationId });
@@ -98,7 +108,7 @@ export default function ConsultationHub() {
   }
 
   const queueItem = queueItems.find((item) => item.consultationId === consultationId);
-  const steps = computeConsultationJourney(patient, consultation, queueItem);
+  const steps = computeConsultationJourney(patient, consultation, queueItem, labOrders, prescriptions);
   const currentStep = steps.find((s) => s.state === "current");
   const completedCount = steps.filter((s) => s.state === "completed").length;
 
@@ -218,13 +228,27 @@ export default function ConsultationHub() {
             <p className="text-sm text-muted-foreground">{consultation.diagnosisPrincipal?.label ?? t("notStartedYet")}</p>
           </Card>
 
-          <Card className="p-4 space-y-1 opacity-60" data-testid="card-hub-exams">
-            <span className="text-sm font-medium">{t("examsCardTitle")}</span>
-            <p className="text-sm text-muted-foreground">{t("notStartedYet")}</p>
+          <Card className="p-4 space-y-1" data-testid="card-hub-exams">
+            <div className="flex items-center justify-between">
+              <span className="text-sm font-medium">{t("examsCardTitle")}</span>
+              {labOrders.length > 0 && (
+                <Button variant="link" size="sm" className="h-auto p-0" onClick={() => setLocation(`/consultations/${consultationId}/consultation-medicale`)}>{t("viewLabel")}</Button>
+              )}
+            </div>
+            <p className="text-sm text-muted-foreground">
+              {labOrders.length === 0 ? t("notStartedYet") : labOrders.map((o) => o.examLines.map((l) => l.examName).join(", ")).join(" · ")}
+            </p>
           </Card>
-          <Card className="p-4 space-y-1 opacity-60" data-testid="card-hub-prescription">
-            <span className="text-sm font-medium">{t("prescriptionCardTitle")}</span>
-            <p className="text-sm text-muted-foreground">{t("notStartedYet")}</p>
+          <Card className="p-4 space-y-1" data-testid="card-hub-prescription">
+            <div className="flex items-center justify-between">
+              <span className="text-sm font-medium">{t("prescriptionCardTitle")}</span>
+              {prescriptions.length > 0 && (
+                <Button variant="link" size="sm" className="h-auto p-0" onClick={() => setLocation(`/consultations/${consultationId}/consultation-medicale`)}>{t("viewLabel")}</Button>
+              )}
+            </div>
+            <p className="text-sm text-muted-foreground">
+              {prescriptions.length === 0 ? t("notStartedYet") : prescriptions.flatMap((p) => p.lines.map((l) => l.drugName)).join(", ")}
+            </p>
           </Card>
           <Card className="p-4 space-y-1 opacity-60" data-testid="card-hub-care-plan">
             <span className="text-sm font-medium">{t("carePlanCardTitle")}</span>
