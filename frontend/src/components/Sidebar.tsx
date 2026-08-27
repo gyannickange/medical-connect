@@ -10,6 +10,8 @@ import {
   Users,
   CalendarCheck,
   CircleX,
+  FlaskConical,
+  Pill,
 } from "lucide-react";
 import { BrandMark } from "./BrandMark";
 import { useTranslation } from "../lib/i18n";
@@ -21,6 +23,8 @@ import { AuditPolicy } from "@/lib/policies/audit.policy";
 import { PatientsPolicy } from "@/lib/policies/patients.policy";
 import { ConsultationsPolicy } from "@/lib/policies/consultations.policy";
 import { QueuePolicy } from "@/lib/policies/queue.policy";
+import { LabOrdersPolicy } from "@/lib/policies/labOrders.policy";
+import { PrescriptionsPolicy } from "@/lib/policies/prescriptions.policy";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -39,6 +43,8 @@ export const Sidebar: React.FC = () => {
   const patientsPolicy = usePolicy(PatientsPolicy);
   const consultationsPolicy = usePolicy(ConsultationsPolicy);
   const queuePolicy = usePolicy(QueuePolicy);
+  const labOrdersPolicy = usePolicy(LabOrdersPolicy);
+  const prescriptionsPolicy = usePolicy(PrescriptionsPolicy);
 
   const menuItems = [
     ...(patientsPolicy.canView()
@@ -49,6 +55,12 @@ export const Sidebar: React.FC = () => {
       : []),
     ...(queuePolicy.canView()
       ? [{ icon: CircleX, label: t("queueTitle"), path: "/file-attente" }]
+      : []),
+    ...(labOrdersPolicy.canView()
+      ? [{ icon: FlaskConical, label: t("laboratoireTitle"), path: "/laboratoire" }]
+      : []),
+    ...(prescriptionsPolicy.canView()
+      ? [{ icon: Pill, label: t("pharmacieTitle"), path: "/pharmacie" }]
       : []),
     // Only show staff menu if user can view staff
     ...(staffPolicy.canView()
