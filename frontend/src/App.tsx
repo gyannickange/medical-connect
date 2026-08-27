@@ -28,8 +28,14 @@ const Products = lazy(() => import("./pages/Products"));
 const Categories = lazy(() => import("./pages/Categories"));
 const Rayons = lazy(() => import("./pages/Rayons"));
 const Patients = lazy(() => import("./pages/Patients"));
+const PatientForm = lazy(() => import("./pages/PatientForm"));
+const PatientDetails = lazy(() => import("./pages/PatientDetails"));
 const Consultations = lazy(() => import("./pages/Consultations"));
+const ConsultationForm = lazy(() => import("./pages/ConsultationForm"));
+const ConsultationDetails = lazy(() => import("./pages/ConsultationDetails"));
 const FileAttente = lazy(() => import("./pages/FileAttente"));
+const QueueRegister = lazy(() => import("./pages/QueueRegister"));
+const QueueEntryDetails = lazy(() => import("./pages/QueueEntryDetails"));
 const Customers = lazy(() => import("./pages/Customers"));
 const Suppliers = lazy(() => import("./pages/Suppliers"));
 const Staff = lazy(() => import("./pages/Staff"));
@@ -120,6 +126,27 @@ function Router() {
             </Layout>
           </ProtectedRoute>
         </Route>
+        <Route path="/patients/new">
+          <ProtectedRoute>
+            <Layout>
+              <PatientForm />
+            </Layout>
+          </ProtectedRoute>
+        </Route>
+        <Route path="/patients/:id/edit">
+          <ProtectedRoute>
+            <Layout>
+              <PatientForm />
+            </Layout>
+          </ProtectedRoute>
+        </Route>
+        <Route path="/patients/:id">
+          <ProtectedRoute>
+            <Layout>
+              <PatientDetails />
+            </Layout>
+          </ProtectedRoute>
+        </Route>
         <Route path="/consultations">
           <ProtectedRoute>
             <Layout>
@@ -127,10 +154,38 @@ function Router() {
             </Layout>
           </ProtectedRoute>
         </Route>
+        <Route path="/consultations/new">
+          <ProtectedRoute>
+            <Layout>
+              <ConsultationForm />
+            </Layout>
+          </ProtectedRoute>
+        </Route>
+        <Route path="/consultations/:id">
+          <ProtectedRoute>
+            <Layout>
+              <ConsultationDetails />
+            </Layout>
+          </ProtectedRoute>
+        </Route>
         <Route path="/file-attente">
           <ProtectedRoute>
             <Layout>
               <FileAttente />
+            </Layout>
+          </ProtectedRoute>
+        </Route>
+        <Route path="/file-attente/new">
+          <ProtectedRoute>
+            <Layout>
+              <QueueRegister />
+            </Layout>
+          </ProtectedRoute>
+        </Route>
+        <Route path="/file-attente/:consultationId">
+          <ProtectedRoute>
+            <Layout>
+              <QueueEntryDetails />
             </Layout>
           </ProtectedRoute>
         </Route>

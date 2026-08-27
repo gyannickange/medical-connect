@@ -1,6 +1,7 @@
 import React, { useRef, useState } from "react";
 import { ArrowLeft, Edit, Upload } from "lucide-react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useLocation, useParams } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -12,12 +13,6 @@ import { showApiErrorToast } from "@/lib/errorHandler";
 import { calculateAge } from "@/lib/patientAge";
 import type { Patient } from "@shared/schema";
 
-interface PatientDetailsProps {
-  patientId: string;
-  onBack: () => void;
-  onEdit: (patient: Patient) => void;
-}
-
 function fileToBase64(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -27,10 +22,12 @@ function fileToBase64(file: File): Promise<string> {
   });
 }
 
-export function PatientDetails({ patientId, onBack, onEdit }: PatientDetailsProps) {
+export default function PatientDetails() {
   const { t } = useTranslation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const [, setLocation] = useLocation();
+  const { id: patientId } = useParams<{ id: string }>();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
 
@@ -40,6 +37,7 @@ export function PatientDetails({ patientId, onBack, onEdit }: PatientDetailsProp
       const response = await fetch(`/api/patients/detail/${patientId}`, { credentials: "include" });
       return response.json();
     },
+    enabled: !!patientId,
   });
 
   const { data: photoUrl } = useQuery<string | null>({
@@ -83,11 +81,11 @@ export function PatientDetails({ patientId, onBack, onEdit }: PatientDetailsProp
   return (
     <div className="space-y-6" data-testid="patient-details">
       <div className="flex items-center justify-between">
-        <Button variant="ghost" onClick={onBack} data-testid="button-back-to-patients">
+        <Button variant="ghost" onClick={() => setLocation("/patients")} data-testid="button-back-to-patients">
           <ArrowLeft className="w-4 h-4 mr-2" />
           {t("patients")}
         </Button>
-        <Button onClick={() => onEdit(patient)} data-testid="button-edit-patient">
+        <Button onClick={() => setLocation(`/patients/${patientId}/edit`)} data-testid="button-edit-patient">
           <Edit className="w-4 h-4 mr-2" />
           {t("editPatient")}
         </Button>

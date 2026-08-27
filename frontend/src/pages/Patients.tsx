@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Plus, Search, ChevronRight } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
+import { useLocation } from "wouter";
 import {
   Table,
   TableBody,
@@ -18,8 +19,6 @@ import { useTenant } from "../contexts/TenantContext";
 import { PatientsPolicy } from "@/lib/policies/patients.policy";
 import { PolicyGuard } from "@/components/PolicyGuard";
 import { calculateAge } from "@/lib/patientAge";
-import { PatientFormModal } from "@/components/PatientFormModal";
-import { PatientDetails } from "@/components/PatientDetails";
 import type { Patient } from "@shared/schema";
 
 function statusVariant(status: Patient["status"]): "default" | "secondary" | "destructive" {
@@ -31,10 +30,8 @@ function statusVariant(status: Patient["status"]): "default" | "secondary" | "de
 export default function Patients() {
   const { t } = useTranslation();
   const { currentTenant } = useTenant();
+  const [, setLocation] = useLocation();
   const [searchQuery, setSearchQuery] = useState("");
-  const [showFormModal, setShowFormModal] = useState(false);
-  const [editingPatient, setEditingPatient] = useState<Patient | null>(null);
-  const [selectedPatientId, setSelectedPatientId] = useState<string | null>(null);
 
   const { data: patientsList = [], isLoading } = useQuery<Patient[]>({
     queryKey: ["/api/patients", currentTenant?.id, searchQuery],
@@ -48,19 +45,6 @@ export default function Patients() {
     enabled: !!currentTenant?.id,
   });
 
-  if (selectedPatientId) {
-    return (
-      <PatientDetails
-        patientId={selectedPatientId}
-        onBack={() => setSelectedPatientId(null)}
-        onEdit={(patient) => {
-          setEditingPatient(patient);
-          setShowFormModal(true);
-        }}
-      />
-    );
-  }
-
   return (
     <div className="space-y-6" data-testid="patients-page">
       <div className="flex items-center justify-between">
@@ -68,13 +52,7 @@ export default function Patients() {
           <h1 className="text-2xl font-display font-bold text-foreground">{t("patients")}</h1>
         </div>
         <PolicyGuard policy={PatientsPolicy} action="canCreate">
-          <Button
-            className="btn-primary"
-            onClick={() => {
-              setEditingPatient(null);
-              setShowFormModal(true);
-            }}
-            data-testid="button-add-patient">
+          <Button className="btn-primary" onClick={() => setLocation("/patients/new")} data-testid="button-add-patient">
             <Plus className="w-4 h-4 mr-2" />
             {t("addPatient")}
           </Button>
@@ -130,7 +108,7 @@ export default function Patients() {
                 <TableRow
                   key={patient.id}
                   className="border-border hover:bg-accent/50 transition-colors cursor-pointer"
-                  onClick={() => setSelectedPatientId(patient.id)}
+                  onClick={() => setLocation(`/patients/${patient.id}`)}
                   data-testid={`row-patient-${patient.id}`}>
                   <TableCell>
                     <div className="flex items-center gap-3">
@@ -161,15 +139,6 @@ export default function Patients() {
           </TableBody>
         </Table>
       </div>
-
-      <PatientFormModal
-        open={showFormModal}
-        editingPatient={editingPatient}
-        onClose={() => {
-          setShowFormModal(false);
-          setEditingPatient(null);
-        }}
-      />
     </div>
   );
 }
