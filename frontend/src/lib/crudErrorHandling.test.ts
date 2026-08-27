@@ -19,28 +19,6 @@ describe("scoped CRUD error handling", () => {
     expect(contents).not.toContain("console.log");
   });
 
-  it("7. Customers save/delete uses normalized error toast", () => {
-    expectNormalizedMutationErrors("../pages/Customers.tsx");
-    expect(source("../pages/Customers.tsx")).toContain("useOfflineDeleteMutation");
-  });
-
-  it("8. Categories save/delete uses normalized error toast", () => {
-    expectNormalizedMutationErrors("../pages/Categories.tsx");
-    expect(source("../pages/Categories.tsx")).toContain("useOfflineDeleteMutation");
-  });
-
-  it("9. Suppliers save/delete uses normalized error toast", () => {
-    expectNormalizedMutationErrors("../pages/Suppliers.tsx");
-    expect(source("../pages/Suppliers.tsx")).toContain("useOfflineDeleteMutation");
-  });
-
-  it("10. Products, variants, and pricing mutations use normalized error toast", () => {
-    expectNormalizedMutationErrors("../components/ProductModal.tsx");
-    expectNormalizedMutationErrors("../components/ProductVariants.tsx");
-    expectNormalizedMutationErrors("../components/ProductPricing.tsx");
-    expect(source("../pages/Products.tsx")).toContain("useOfflineDeleteMutation");
-  });
-
   it("11. queued offline success is not rendered as an error", () => {
     const offlineRequest = source("./offlineApiRequest.ts");
     expect(offlineRequest).toContain('response._savedOffline === true');
@@ -54,11 +32,6 @@ describe("scoped CRUD error handling", () => {
       "networkRequestFailed",
       "staffSavedOffline",
       "staffDeleteQueuedOffline",
-      "customerDeleteQueuedOffline",
-      "categorySavedOffline",
-      "categoryDeleteQueuedOffline",
-      "supplierDeleteQueuedOffline",
-      "productDeleteQueuedOffline",
     ] as const;
 
     const english = translations.en as Record<string, string>;

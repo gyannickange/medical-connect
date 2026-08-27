@@ -4,13 +4,10 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import {
   ArrowLeft,
   ArrowRight,
-  FileText,
   Loader2,
-  ReceiptText,
 } from "lucide-react";
 import { useLocation } from "wouter";
 import { BrandMark } from "@/components/BrandMark";
-import { ReceiptPreview } from "@/components/ReceiptPreview";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -21,7 +18,6 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
   Select,
   SelectContent,
@@ -29,7 +25,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { useSettings } from "@/hooks/useSettings";
 import { useToast } from "@/hooks/use-toast";
@@ -57,7 +52,6 @@ const STEP_FIELDS: Array<Array<keyof InitialSetupValues>> = [
     "decimalPlaces",
   ],
   ["defaultTaxRate"],
-  ["autoPrintReceipt", "receiptFormat"],
 ];
 
 const LAST_STEP = STEP_FIELDS.length - 1;
@@ -80,13 +74,10 @@ export default function InitialSetup() {
     getDefaultCurrency,
     getCurrencyFormat,
     getDefaultTaxRate,
-    getAutoPrintReceipt,
-    getSetting,
     updateSetting,
     refreshSettings,
   } = useSettings();
   const [step, setStep] = React.useState(0);
-  const storedReceiptFormat = getSetting("receiptFormat", "retail");
 
   const form = useForm<InitialSetupValues>({
     resolver: zodResolver(initialSetupSchema),
@@ -99,12 +90,9 @@ export default function InitialSetup() {
       defaultCurrency: getDefaultCurrency(),
       ...getCurrencyFormat(),
       defaultTaxRate: getDefaultTaxRate(),
-      autoPrintReceipt: getAutoPrintReceipt(),
-      receiptFormat: storedReceiptFormat === "invoice" ? "invoice" : "retail",
     },
   });
 
-  const previewValues = form.watch();
   const stepLabel = t("stepOf")
     .replace("{current}", String(step + 1))
     .replace("{total}", String(STEP_FIELDS.length));
@@ -374,125 +362,6 @@ export default function InitialSetup() {
                     {...form.register("defaultTaxRate", { valueAsNumber: true })}
                   />
                   <FieldError message={form.formState.errors.defaultTaxRate?.message} />
-                </div>
-              </div>
-            )}
-
-            {step === 3 && (
-              <div className="space-y-6">
-                <div>
-                  <h2 className="font-display text-lg font-semibold">
-                    {t("chooseDocumentFormat")}
-                  </h2>
-                  <p className="mt-2 text-sm text-muted-foreground">
-                    {t("receiptInvoiceDescription")}
-                  </p>
-                </div>
-
-                <Controller
-                  control={form.control}
-                  name="receiptFormat"
-                  render={({ field }) => (
-                    <RadioGroup
-                      value={field.value}
-                      onValueChange={field.onChange}
-                      className="grid gap-3 sm:grid-cols-2"
-                    >
-                      <Label
-                        htmlFor="setup-format-retail"
-                        className={cn(
-                          "glass-input flex min-h-16 cursor-pointer items-center gap-3 p-3 transition-colors hover:bg-muted/70",
-                          field.value === "retail" && "bg-primary/10 ring-2 ring-primary",
-                        )}
-                      >
-                        <RadioGroupItem
-                          id="setup-format-retail"
-                          value="retail"
-                          className="mt-0.5 h-5 w-5 shrink-0"
-                        />
-                        <ReceiptText className="mt-0.5 h-5 w-5 shrink-0 text-primary" aria-hidden="true" />
-                        <span className="space-y-1">
-                          <span className="block text-base font-semibold text-foreground">
-                            {t("retailReceipt")}
-                          </span>
-                          <span className="block text-sm font-normal leading-relaxed text-muted-foreground">
-                            {t("thermalReceiptSize")}
-                          </span>
-                        </span>
-                      </Label>
-
-                      <Label
-                        htmlFor="setup-format-invoice"
-                        className={cn(
-                          "glass-input flex min-h-16 cursor-pointer items-center gap-3 p-3 transition-colors hover:bg-muted/70",
-                          field.value === "invoice" && "bg-primary/10 ring-2 ring-primary",
-                        )}
-                      >
-                        <RadioGroupItem
-                          id="setup-format-invoice"
-                          value="invoice"
-                          className="mt-0.5 h-5 w-5 shrink-0"
-                        />
-                        <FileText className="mt-0.5 h-5 w-5 shrink-0 text-primary" aria-hidden="true" />
-                        <span className="space-y-1">
-                          <span className="block text-base font-semibold text-foreground">
-                            {t("formalInvoice")}
-                          </span>
-                          <span className="block text-sm font-normal leading-relaxed text-muted-foreground">
-                            {t("a4InvoiceSize")}
-                          </span>
-                        </span>
-                      </Label>
-                    </RadioGroup>
-                  )}
-                />
-
-                <Controller
-                  control={form.control}
-                  name="autoPrintReceipt"
-                  render={({ field }) => (
-                    <div className="glass-input flex min-h-14 items-center justify-between gap-5 px-4 py-2">
-                      <Label
-                        htmlFor="setup-auto-print"
-                        className="flex min-h-11 flex-1 cursor-pointer flex-col justify-center"
-                      >
-                        <span className="text-base">
-                          {t("autoPrintReceipt")}
-                        </span>
-                        <span className="mt-1 text-sm font-normal leading-relaxed text-muted-foreground">
-                          {t("autoPrintReceiptDescription")}
-                        </span>
-                      </Label>
-                      <Switch
-                        id="setup-auto-print"
-                        checked={field.value}
-                        onCheckedChange={field.onChange}
-                        className="relative after:absolute after:-inset-x-1 after:-inset-y-2.5"
-                      />
-                    </div>
-                  )}
-                />
-
-                <div className="space-y-3">
-                  <h3 className="font-display text-lg font-semibold">
-                    {previewValues.receiptFormat === "retail"
-                      ? t("receiptPreview")
-                      : t("invoicePreview")}
-                  </h3>
-                  <ReceiptPreview
-                    format={previewValues.receiptFormat}
-                    companyName={previewValues.companyName}
-                    companyAddress={previewValues.companyAddress}
-                    companyPhone={previewValues.companyPhone}
-                    companyEmail={previewValues.companyEmail}
-                    companyWebsite={previewValues.companyWebsite}
-                    currency={previewValues.defaultCurrency}
-                    decimalSeparator={previewValues.decimalSeparator}
-                    thousandSeparator={previewValues.thousandSeparator}
-                    decimalPlaces={previewValues.decimalPlaces}
-                    symbolPosition={previewValues.symbolPosition}
-                    taxRate={previewValues.defaultTaxRate}
-                  />
                 </div>
               </div>
             )}

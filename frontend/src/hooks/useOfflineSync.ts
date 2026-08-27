@@ -178,15 +178,10 @@ const useOfflineSyncEngine = () => {
         );
 
         for (const resource of [
-          "products",
-          "sales",
-          "customers",
-          "stock",
+          "patients",
+          "consultations",
+          "queue",
           "staff",
-          "categories",
-          "rayons",
-          "suppliers",
-          "dashboard",
         ]) {
           queryClient.invalidateQueries({
             queryKey: [`/api/${resource}`, currentTenant.id],

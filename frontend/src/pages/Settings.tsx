@@ -12,7 +12,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Checkbox } from "@/components/ui/checkbox";
 import {
   Select,
   SelectContent,
@@ -40,13 +39,11 @@ import {
   Save,
   AlertTriangle,
   Info,
-  FileText,
 } from "lucide-react";
 import { getCacheInfo, clearAllCache } from "@/lib/offlineCache";
 import { NativeLANDiagnosticsCard } from "@/components/NativeLANDiagnosticsCard";
 import { DeviceAuthorizationCard } from "@/components/DeviceAuthorizationCard";
 import { DiagnosticsCard } from "@/components/DiagnosticsCard";
-import { ReceiptPreview } from "@/components/ReceiptPreview";
 
 // Form schemas
 const createCompanySettingsSchema = (t: (key: string) => string) => z.object({
@@ -89,23 +86,14 @@ export default function Settings() {
     getDefaultCurrency,
     getCurrencyFormat,
     getDefaultTaxRate,
-    getAutoPrintReceipt,
     updateCompanyInfo,
     updateCurrencySettings,
     updateTaxSettings,
-    updateSetting,
-    getSetting,
     isLoading,
   } = useSettings();
 
   const [showClearConfirm, setShowClearConfirm] = useState(false);
   const [cacheSize, setCacheSize] = useState<number | null>(null);
-  const [autoPrintReceipt, setAutoPrintReceipt] = useState<boolean>(
-    getAutoPrintReceipt()
-  );
-  const [receiptFormat, setReceiptFormat] = useState<string>(
-    getSetting("receiptFormat", "retail")
-  );
 
   // Company form
   const companyForm = useForm<CompanySettingsForm>({
@@ -167,9 +155,6 @@ export default function Settings() {
       taxForm.reset({
         defaultTaxRate: getDefaultTaxRate(),
       });
-
-      setAutoPrintReceipt(getAutoPrintReceipt());
-      setReceiptFormat(getSetting("receiptFormat", "retail"));
     }
   }, [isLoading, settingsPolicy]);
 
@@ -214,42 +199,6 @@ export default function Settings() {
   const handleSaveTaxSettings = async (data: TaxSettingsForm) => {
     try {
       await updateTaxSettings(data.defaultTaxRate);
-      toast({
-        title: t("success"),
-        description: t("settingsSaved"),
-      });
-    } catch (error) {
-      toast({
-        title: t("error"),
-        description: t("settingsError"),
-        variant: "destructive",
-      });
-    }
-  };
-
-  const handleToggleAutoPrintReceipt = async (checked: boolean) => {
-    try {
-      await updateSetting("autoPrintReceipt", checked, { category: "system" });
-      setAutoPrintReceipt(checked);
-      toast({
-        title: t("success"),
-        description: t("settingsSaved"),
-      });
-    } catch (error) {
-      toast({
-        title: t("error"),
-        description: t("settingsError"),
-        variant: "destructive",
-      });
-    }
-  };
-
-  const handleReceiptFormatChange = async (format: string) => {
-    try {
-      await updateSetting("receiptFormat", format, {
-        category: "receipts",
-      });
-      setReceiptFormat(format);
       toast({
         title: t("success"),
         description: t("settingsSaved"),
@@ -566,88 +515,6 @@ export default function Settings() {
               {t("saveSettings")}
             </Button>
           </form>
-        </CardContent>
-      </Card>
-
-      {/* Receipt & Invoice Settings */}
-      <Card className="glass-card">
-        <CardHeader>
-          <CardTitle className="flex items-center">
-            <FileText className="w-5 h-5 mr-2 text-primary" />
-            {t("receiptInvoiceSettings")}
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            <div className="flex min-h-11 items-start gap-3 p-4 bg-muted/50 rounded-lg">
-              <Checkbox
-                id="autoPrintReceipt"
-                checked={autoPrintReceipt}
-                onCheckedChange={handleToggleAutoPrintReceipt}
-                aria-describedby="autoPrintReceiptDescription"
-                className="mt-0.5 h-5 w-5 rounded-md border-2 border-primary/70 bg-background shadow-sm"
-              />
-              <div className="space-y-0.5">
-                <Label
-                  htmlFor="autoPrintReceipt"
-                  className="cursor-pointer text-base">
-                  {t("autoPrintReceipt")}
-                </Label>
-                <p
-                  id="autoPrintReceiptDescription"
-                  className="text-sm text-muted-foreground">
-                  {t("autoPrintReceiptDescription")}
-                </p>
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="receiptFormat" className="text-base">
-                {t("receiptFormatSetting")}
-              </Label>
-              <Select
-                value={receiptFormat}
-                onValueChange={handleReceiptFormatChange}>
-                <SelectTrigger className="glass-input min-h-11">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent className="glass-card border-border">
-                  <SelectItem value="retail">
-                    <div className="flex flex-col">
-                      <span>{t("retailReceipt")}</span>
-                      <span className="text-xs text-muted-foreground">
-                        {t("retailReceiptDescription")}
-                      </span>
-                    </div>
-                  </SelectItem>
-                  <SelectItem value="invoice">
-                    <div className="flex flex-col">
-                      <span>{t("formalInvoice")}</span>
-                      <span className="text-xs text-muted-foreground">
-                        {t("formalInvoiceDescription")}
-                      </span>
-                    </div>
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-              <ReceiptPreview
-                format={receiptFormat as "retail" | "invoice"}
-                companyName={getCompanyName()}
-                companyAddress={getCompanyAddress()}
-                companyPhone={getCompanyPhone()}
-                companyEmail={getCompanyEmail()}
-                companyWebsite={getCompanyWebsite()}
-                currency={getDefaultCurrency()}
-                {...getCurrencyFormat()}
-                taxRate={getDefaultTaxRate()}
-              />
-            </div>
-
-            <Alert>
-              <Info className="h-4 w-4" />
-              <AlertDescription>{t("formatSettingsApplied")}</AlertDescription>
-            </Alert>
-          </div>
         </CardContent>
       </Card>
 

@@ -39,16 +39,10 @@ export const useSettings = () => {
   const getDefaultTaxRate = (): number => getSetting("defaultTaxRate", 20);
 
   // System Settings
-  const getLowStockThreshold = (): number =>
-    getSetting("lowStockThreshold", 10);
   const getAutoBackup = (): boolean => getSetting("autoBackup", true);
-  const getPrintTemplate = (): string =>
-    getSetting("printTemplate", "standard");
   const getDateFormat = (): string => getSetting("dateFormat", "DD/MM/YYYY");
   const getTimeFormat = (): string => getSetting("timeFormat", "24h");
   const getLanguage = (): string => getSetting("language", "en");
-  const getAutoPrintReceipt = (): boolean =>
-    getSetting("autoPrintReceipt", true);
 
   // Update methods for common settings
   const updateCompanyInfo = async (info: {
@@ -147,13 +141,10 @@ export const useSettings = () => {
     getDefaultTaxRate,
 
     // System getters
-    getLowStockThreshold,
     getAutoBackup,
-    getPrintTemplate,
     getDateFormat,
     getTimeFormat,
     getLanguage,
-    getAutoPrintReceipt,
 
     // Update methods
     updateCompanyInfo,

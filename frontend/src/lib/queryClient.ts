@@ -39,14 +39,8 @@ export async function apiRequest(
 
 // Helper to extract collection from URL
 function extractCollectionFromUrl(url: string): string {
-  if (url.includes("/api/products")) return "products";
-  if (url.includes("/api/sales")) return "sales";
-  if (url.includes("/api/customers")) return "customers";
   if (url.includes("/api/staff")) return "staff";
-  if (url.includes("/api/categories")) return "categories";
-  if (url.includes("/api/stock")) return "stock";
-  if (url.includes("/api/dashboard")) return "dashboard";
-  
+
   const match = url.match(/\/api\/(\w+)/);
   return match ? match[1] : "general";
 }
