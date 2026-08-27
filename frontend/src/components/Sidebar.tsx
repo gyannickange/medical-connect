@@ -17,6 +17,7 @@ import {
   Check,
   ChevronsUpDown,
   LayoutGrid,
+  CalendarCheck,
 } from "lucide-react";
 import { BrandMark } from "./BrandMark";
 import { useTranslation } from "../lib/i18n";
@@ -27,6 +28,7 @@ import { SettingsPolicy } from "@/lib/policies/settings.policy";
 import { AuditPolicy } from "@/lib/policies/audit.policy";
 import { SalesPolicy } from "@/lib/policies/sales.policy";
 import { PatientsPolicy } from "@/lib/policies/patients.policy";
+import { ConsultationsPolicy } from "@/lib/policies/consultations.policy";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -44,6 +46,7 @@ export const Sidebar: React.FC = () => {
   const auditPolicy = usePolicy(AuditPolicy);
   const salesPolicy = usePolicy(SalesPolicy);
   const patientsPolicy = usePolicy(PatientsPolicy);
+  const consultationsPolicy = usePolicy(ConsultationsPolicy);
 
   const menuItems = [
     { icon: LayoutDashboard, label: t("dashboard"), path: "/" },
@@ -52,6 +55,9 @@ export const Sidebar: React.FC = () => {
     { icon: LayoutGrid, label: t("rayons"), path: "/rayons" },
     ...(patientsPolicy.canView()
       ? [{ icon: Users, label: t("patients"), path: "/patients" }]
+      : []),
+    ...(consultationsPolicy.canView()
+      ? [{ icon: CalendarCheck, label: t("consultations"), path: "/consultations" }]
       : []),
     { icon: Users, label: t("customers"), path: "/customers" },
     { icon: Truck, label: t("suppliers"), path: "/suppliers" },

@@ -24,6 +24,7 @@ import { salesReports } from "./salesReports";
 import { setup } from "./setup";
 import { rayons } from "./rayons";
 import { patients } from "./patients";
+import { consultations } from "./consultations";
 
 export type { Language } from "./types";
 
@@ -51,6 +52,7 @@ const sections: TranslationSection[] = [
   setup,
   rayons,
   patients,
+  consultations,
 ];
 
 const en: Record<string, string> = {};
