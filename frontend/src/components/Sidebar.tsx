@@ -26,6 +26,7 @@ import { StaffPolicy } from "@/lib/policies/staff.policy";
 import { SettingsPolicy } from "@/lib/policies/settings.policy";
 import { AuditPolicy } from "@/lib/policies/audit.policy";
 import { SalesPolicy } from "@/lib/policies/sales.policy";
+import { PatientsPolicy } from "@/lib/policies/patients.policy";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -42,12 +43,16 @@ export const Sidebar: React.FC = () => {
   const settingsPolicy = usePolicy(SettingsPolicy);
   const auditPolicy = usePolicy(AuditPolicy);
   const salesPolicy = usePolicy(SalesPolicy);
+  const patientsPolicy = usePolicy(PatientsPolicy);
 
   const menuItems = [
     { icon: LayoutDashboard, label: t("dashboard"), path: "/" },
     { icon: Package, label: t("products"), path: "/products" },
     { icon: FolderTree, label: t("categories"), path: "/categories" },
     { icon: LayoutGrid, label: t("rayons"), path: "/rayons" },
+    ...(patientsPolicy.canView()
+      ? [{ icon: Users, label: t("patients"), path: "/patients" }]
+      : []),
     { icon: Users, label: t("customers"), path: "/customers" },
     { icon: Truck, label: t("suppliers"), path: "/suppliers" },
     // Only show staff menu if user can view staff

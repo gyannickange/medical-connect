@@ -27,6 +27,7 @@ const Dashboard = lazy(() => import("./pages/Dashboard"));
 const Products = lazy(() => import("./pages/Products"));
 const Categories = lazy(() => import("./pages/Categories"));
 const Rayons = lazy(() => import("./pages/Rayons"));
+const Patients = lazy(() => import("./pages/Patients"));
 const Customers = lazy(() => import("./pages/Customers"));
 const Suppliers = lazy(() => import("./pages/Suppliers"));
 const Staff = lazy(() => import("./pages/Staff"));
@@ -107,6 +108,13 @@ function Router() {
           <ProtectedRoute>
             <Layout>
               <Rayons />
+            </Layout>
+          </ProtectedRoute>
+        </Route>
+        <Route path="/patients">
+          <ProtectedRoute>
+            <Layout>
+              <Patients />
             </Layout>
           </ProtectedRoute>
         </Route>
