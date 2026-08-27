@@ -27,6 +27,26 @@ export abstract class BasePolicy {
     return this.hasRole("cashier");
   }
 
+  protected isAccueil(): boolean {
+    return this.hasRole("accueil");
+  }
+
+  protected isInfirmier(): boolean {
+    return this.hasRole("infirmier");
+  }
+
+  protected isMedecin(): boolean {
+    return this.hasRole("medecin");
+  }
+
+  protected isLaboratoire(): boolean {
+    return this.hasRole("laboratoire");
+  }
+
+  protected isPharmacien(): boolean {
+    return this.hasRole("pharmacien");
+  }
+
   protected isAdminOrManager(): boolean {
     return this.hasAnyRole("admin", "manager");
   }

@@ -296,6 +296,11 @@ export default function Staff() {
       admin: { label: t("admin"), variant: "destructive" as const },
       manager: { label: t("manager"), variant: "default" as const },
       cashier: { label: t("cashier"), variant: "secondary" as const },
+      accueil: { label: t("accueil"), variant: "secondary" as const },
+      infirmier: { label: t("infirmier"), variant: "secondary" as const },
+      medecin: { label: t("medecin"), variant: "default" as const },
+      laboratoire: { label: t("laboratoire"), variant: "secondary" as const },
+      pharmacien: { label: t("pharmacien"), variant: "secondary" as const },
     };
 
     const { label, variant } =
@@ -653,6 +658,36 @@ export default function Staff() {
                     <div className="flex items-center space-x-2">
                       <Crown className="w-4 h-4" />
                       <span>{t("admin")}</span>
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="accueil">
+                    <div className="flex items-center space-x-2">
+                      <UserCheck className="w-4 h-4" />
+                      <span>{t("accueil")}</span>
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="infirmier">
+                    <div className="flex items-center space-x-2">
+                      <UserCheck className="w-4 h-4" />
+                      <span>{t("infirmier")}</span>
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="medecin">
+                    <div className="flex items-center space-x-2">
+                      <Shield className="w-4 h-4" />
+                      <span>{t("medecin")}</span>
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="laboratoire">
+                    <div className="flex items-center space-x-2">
+                      <UserCheck className="w-4 h-4" />
+                      <span>{t("laboratoire")}</span>
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="pharmacien">
+                    <div className="flex items-center space-x-2">
+                      <UserCheck className="w-4 h-4" />
+                      <span>{t("pharmacien")}</span>
                     </div>
                   </SelectItem>
                 </SelectContent>

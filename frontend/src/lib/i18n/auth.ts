@@ -78,6 +78,11 @@ export const auth: TranslationSection = {
     anErrorOccurred: "An error occurred",
     admin: "Admin",
     manager: "Manager",
+    accueil: "Front Desk",
+    infirmier: "Nurse",
+    medecin: "Doctor",
+    laboratoire: "Lab Technician",
+    pharmacien: "Pharmacist",
     logout: "Logout",
   },
   fr: {
@@ -160,6 +165,11 @@ export const auth: TranslationSection = {
     anErrorOccurred: "Une erreur s'est produite",
     admin: "Administrateur",
     manager: "Gestionnaire",
+    accueil: "Accueil",
+    infirmier: "Infirmier",
+    medecin: "Médecin",
+    laboratoire: "Laborantin",
+    pharmacien: "Pharmacien",
     logout: "Déconnexion",
   },
 };

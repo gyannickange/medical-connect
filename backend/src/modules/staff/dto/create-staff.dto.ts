@@ -35,8 +35,8 @@ export class CreateStaffDto {
 
   @IsString()
   @IsOptional()
-  @IsIn(["admin", "manager", "cashier"])
-  role?: "admin" | "manager" | "cashier";
+  @IsIn(["admin", "manager", "cashier", "accueil", "infirmier", "medecin", "laboratoire", "pharmacien"])
+  role?: "admin" | "manager" | "cashier" | "accueil" | "infirmier" | "medecin" | "laboratoire" | "pharmacien";
 
   @IsString()
   @IsNotEmpty()

@@ -1,6 +1,14 @@
 import { Request } from "express";
 
-export type UserRole = "admin" | "manager" | "cashier";
+export type UserRole =
+  | "admin"
+  | "manager"
+  | "cashier"
+  | "accueil"
+  | "infirmier"
+  | "medecin"
+  | "laboratoire"
+  | "pharmacien";
 
 export interface RequestWithUser extends Request {
   user: {

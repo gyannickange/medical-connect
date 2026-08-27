@@ -30,6 +30,33 @@ async function main() {
     role: "admin",
     tenantId: tenant.id,
   });
+  await users.create({
+    id: "00000000-0000-4000-8000-000000000005",
+    username: "accueil",
+    password: await bcrypt.hash(process.env.SEED_ADMIN_PASSWORD ?? "admin123", 10),
+    firstName: "Medical Connect",
+    lastName: "Accueil",
+    role: "accueil",
+    tenantId: tenant.id,
+  });
+  await users.create({
+    id: "00000000-0000-4000-8000-000000000006",
+    username: "infirmier",
+    password: await bcrypt.hash(process.env.SEED_ADMIN_PASSWORD ?? "admin123", 10),
+    firstName: "Medical Connect",
+    lastName: "Infirmier",
+    role: "infirmier",
+    tenantId: tenant.id,
+  });
+  await users.create({
+    id: "00000000-0000-4000-8000-000000000007",
+    username: "medecin",
+    password: await bcrypt.hash(process.env.SEED_ADMIN_PASSWORD ?? "admin123", 10),
+    firstName: "Dr.",
+    lastName: "Mbarga",
+    role: "medecin",
+    tenantId: tenant.id,
+  });
   await settings.create(
     { key: "currency", value: "XOF", category: "company", dataType: "string" },
     tenant.id
