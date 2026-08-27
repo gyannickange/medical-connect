@@ -5,6 +5,7 @@ import { TenantsModule } from "./modules/tenants/tenants.module";
 import { CategoriesModule } from "./modules/categories/categories.module";
 import { RayonsModule } from "./modules/rayons/rayons.module";
 import { PatientsModule } from "./modules/patients/patients.module";
+import { ConsultationsModule } from "./modules/consultations/consultations.module";
 import { ProductsModule } from "./modules/products/products.module";
 import { StockModule } from "./modules/stock/stock.module";
 import { CustomersModule } from "./modules/customers/customers.module";
@@ -32,6 +33,7 @@ import { AuditInterceptor } from "./common/interceptors/audit.interceptor";
     CategoriesModule,
     RayonsModule,
     PatientsModule,
+    ConsultationsModule,
     ProductsModule,
     StockModule,
     CustomersModule,
