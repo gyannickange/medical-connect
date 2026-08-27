@@ -4,6 +4,8 @@ import { AuthModule } from "./modules/auth/auth.module";
 import { TenantsModule } from "./modules/tenants/tenants.module";
 import { PatientsModule } from "./modules/patients/patients.module";
 import { ConsultationsModule } from "./modules/consultations/consultations.module";
+import { LabOrdersModule } from "./modules/lab-orders/lab-orders.module";
+import { PrescriptionsModule } from "./modules/prescriptions/prescriptions.module";
 import { QueueModule } from "./modules/queue/queue.module";
 import { StaffModule } from "./modules/staff/staff.module";
 import { SettingsModule } from "./modules/settings/settings.module";
@@ -25,6 +27,8 @@ import { AuditInterceptor } from "./common/interceptors/audit.interceptor";
     TenantsModule,
     PatientsModule,
     ConsultationsModule,
+    LabOrdersModule,
+    PrescriptionsModule,
     QueueModule,
     StaffModule,
     SettingsModule,
