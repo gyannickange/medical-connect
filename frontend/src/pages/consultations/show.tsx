@@ -1,12 +1,12 @@
 import React from "react";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Edit } from "lucide-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useLocation, useParams } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { useTranslation } from "../lib/i18n";
+import { useTranslation } from "../../lib/i18n";
 import { useToast } from "@/hooks/use-toast";
 import { offlineApiRequest } from "@/lib/offlineApiRequest";
 import { showApiErrorToast } from "@/lib/errorHandler";
@@ -78,6 +78,10 @@ export default function ConsultationDetails() {
           {t("consultations")}
         </Button>
         <div className="flex gap-2">
+          <Button variant="outline" onClick={() => setLocation(`/consultations/${consultationId}/edit`)} data-testid="button-edit-consultation">
+            <Edit className="w-4 h-4 mr-2" />
+            {t("editConsultation")}
+          </Button>
           <Button variant="outline" onClick={() => queueMutation.mutate()} disabled={queueMutation.isPending} data-testid="button-put-in-queue">
             {t("putInQueue")}
           </Button>

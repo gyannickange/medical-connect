@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useLocation, useParams } from "wouter";
+import { useLocation } from "wouter";
 import { Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,8 +11,8 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useTranslation } from "../lib/i18n";
-import { useTenant } from "../contexts/TenantContext";
+import { useTranslation } from "../../lib/i18n";
+import { useTenant } from "../../contexts/TenantContext";
 import { useToast } from "@/hooks/use-toast";
 import { offlineApiRequest } from "@/lib/offlineApiRequest";
 import { showApiErrorToast } from "@/lib/errorHandler";
@@ -40,14 +40,16 @@ function defaultValuesFor(patient: Patient | null, tenantId: string): InsertPati
   return { ...rest, tenantId } as InsertPatient;
 }
 
-export default function PatientForm() {
+export interface PatientFormFieldsProps {
+  patientId?: string;
+}
+
+export default function PatientFormFields({ patientId: editingId }: PatientFormFieldsProps) {
   const { t } = useTranslation();
   const { currentTenant } = useTenant();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [, setLocation] = useLocation();
-  const params = useParams<{ id?: string }>();
-  const editingId = params.id;
   const [pendingPhoto, setPendingPhoto] = useState<File | null>(null);
 
   const { data: existingPatient } = useQuery<Patient>({
