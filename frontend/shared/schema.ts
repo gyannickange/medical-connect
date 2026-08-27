@@ -33,7 +33,7 @@ export interface AuditLog { id: string; userId: string; tenantId: string; action
 const id = z.string().uuid().optional();
 const money = z.union([z.string(), z.number()]);
 const nullableString = z.string().nullable().optional();
-export const insertUserSchema = z.object({ id, username: z.string().min(1), password: z.string().min(1), firstName: z.string().min(1), lastName: z.string().min(1), email: nullableString, role: z.enum(["admin", "manager", "cashier"]).optional(), tenantId: z.string(), isActive: z.boolean().optional() });
+export const insertUserSchema = z.object({ id, username: z.string().min(1), password: z.string().min(1), firstName: z.string().min(1), lastName: z.string().min(1), email: nullableString, role: z.enum(["admin", "manager", "cashier", "accueil", "infirmier", "medecin", "laboratoire", "pharmacien"]).optional(), tenantId: z.string(), isActive: z.boolean().optional() });
 export const insertTenantSchema = z.object({ id, name: z.string().min(1), address: nullableString, phone: nullableString, email: nullableString, settings: z.unknown().optional(), isActive: z.boolean().optional() });
 export const insertCategorySchema = z.object({ id, name: z.string().min(1), description: nullableString, tenantId: z.string(), parentCategoryId: nullableString, taxRate: money.nullable().optional(), isDefault: z.boolean().optional() });
 export const insertRayonSchema = z.object({ id, name: z.string().trim().min(1), description: nullableString, tenantId: z.string() });
