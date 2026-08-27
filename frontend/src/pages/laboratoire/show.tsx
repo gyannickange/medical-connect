@@ -9,6 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { useTranslation } from "../../lib/i18n";
+import { useTenant } from "../../contexts/TenantContext";
 import { useToast } from "@/hooks/use-toast";
 import { offlineApiRequest } from "@/lib/offlineApiRequest";
 import { showApiErrorToast } from "@/lib/errorHandler";
@@ -23,6 +24,7 @@ function statusLabelKey(status: string): string {
 export default function LabOrderDetails() {
   const { t } = useTranslation();
   const { toast } = useToast();
+  const { currentTenant } = useTenant();
   const queryClient = useQueryClient();
   const [, setLocation] = useLocation();
   const { id } = useParams<{ id: string }>();
@@ -50,6 +52,10 @@ export default function LabOrderDetails() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/lab-orders/detail", id] });
+      queryClient.invalidateQueries({ queryKey: [`/api/lab-orders/${currentTenant?.id}`] });
+      if (labOrder) {
+        queryClient.invalidateQueries({ queryKey: [`/api/lab-orders/${currentTenant?.id}?consultationId=${labOrder.consultationId}`] });
+      }
       toast({ title: t("success"), description: t("labOrderUpdatedSuccessfully") });
     },
     onError: (error: unknown) => {

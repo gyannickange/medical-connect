@@ -10,6 +10,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { useTranslation } from "../../lib/i18n";
+import { useTenant } from "../../contexts/TenantContext";
 import { useToast } from "@/hooks/use-toast";
 import { offlineApiRequest } from "@/lib/offlineApiRequest";
 import { showApiErrorToast } from "@/lib/errorHandler";
@@ -28,6 +29,7 @@ function dispenseStatusLabelKey(status: string): string {
 export default function PrescriptionDetails() {
   const { t } = useTranslation();
   const { toast } = useToast();
+  const { currentTenant } = useTenant();
   const queryClient = useQueryClient();
   const [, setLocation] = useLocation();
   const { id } = useParams<{ id: string }>();
@@ -50,6 +52,10 @@ export default function PrescriptionDetails() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/prescriptions/detail", id] });
+      queryClient.invalidateQueries({ queryKey: [`/api/prescriptions/${currentTenant?.id}`] });
+      if (prescription) {
+        queryClient.invalidateQueries({ queryKey: [`/api/prescriptions/${currentTenant?.id}?consultationId=${prescription.consultationId}`] });
+      }
       toast({ title: t("success"), description: t("prescriptionUpdatedSuccessfully") });
     },
     onError: (error: unknown) => {

@@ -10,6 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useTranslation } from "../../lib/i18n";
+import { useTenant } from "../../contexts/TenantContext";
 import { useToast } from "@/hooks/use-toast";
 import { offlineApiRequest } from "@/lib/offlineApiRequest";
 import { showApiErrorToast } from "@/lib/errorHandler";
@@ -18,6 +19,7 @@ import type { Consultation, Patient } from "@shared/schema";
 export default function NewLabOrder() {
   const { t } = useTranslation();
   const { toast } = useToast();
+  const { currentTenant } = useTenant();
   const queryClient = useQueryClient();
   const [, setLocation] = useLocation();
   const [searchParams] = useSearchParams();
@@ -58,7 +60,8 @@ export default function NewLabOrder() {
       return response.json();
     },
     onSuccess: (created) => {
-      queryClient.invalidateQueries({ queryKey: [`/api/lab-orders`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/lab-orders/${currentTenant?.id}`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/lab-orders/${currentTenant?.id}?consultationId=${consultationId}`] });
       toast({ title: t("success"), description: t("labOrderCreatedSuccessfully") });
       setLocation(`/laboratoire/${created.id}`);
     },
