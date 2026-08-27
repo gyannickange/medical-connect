@@ -1,22 +1,15 @@
 import React from "react";
 import { Link, useLocation } from "wouter";
 import {
-  LayoutDashboard,
-  Package,
-  FolderTree,
-  BarChart3,
-  ShoppingCart,
-  Users,
   UserCheck,
-  FileText,
   ClipboardList,
   Settings,
   Store,
-  Truck,
-  BoxesIcon,
   Check,
   ChevronsUpDown,
-  LayoutGrid,
+  Users,
+  CalendarCheck,
+  CircleX,
 } from "lucide-react";
 import { BrandMark } from "./BrandMark";
 import { useTranslation } from "../lib/i18n";
@@ -25,7 +18,9 @@ import { usePolicy } from "@/hooks/usePolicy";
 import { StaffPolicy } from "@/lib/policies/staff.policy";
 import { SettingsPolicy } from "@/lib/policies/settings.policy";
 import { AuditPolicy } from "@/lib/policies/audit.policy";
-import { SalesPolicy } from "@/lib/policies/sales.policy";
+import { PatientsPolicy } from "@/lib/policies/patients.policy";
+import { ConsultationsPolicy } from "@/lib/policies/consultations.policy";
+import { QueuePolicy } from "@/lib/policies/queue.policy";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -41,23 +36,24 @@ export const Sidebar: React.FC = () => {
   const staffPolicy = usePolicy(StaffPolicy);
   const settingsPolicy = usePolicy(SettingsPolicy);
   const auditPolicy = usePolicy(AuditPolicy);
-  const salesPolicy = usePolicy(SalesPolicy);
+  const patientsPolicy = usePolicy(PatientsPolicy);
+  const consultationsPolicy = usePolicy(ConsultationsPolicy);
+  const queuePolicy = usePolicy(QueuePolicy);
 
   const menuItems = [
-    { icon: LayoutDashboard, label: t("dashboard"), path: "/" },
-    { icon: Package, label: t("products"), path: "/products" },
-    { icon: FolderTree, label: t("categories"), path: "/categories" },
-    { icon: LayoutGrid, label: t("rayons"), path: "/rayons" },
-    { icon: Users, label: t("customers"), path: "/customers" },
-    { icon: Truck, label: t("suppliers"), path: "/suppliers" },
+    ...(patientsPolicy.canView()
+      ? [{ icon: Users, label: t("patients"), path: "/patients" }]
+      : []),
+    ...(consultationsPolicy.canView()
+      ? [{ icon: CalendarCheck, label: t("consultations"), path: "/consultations" }]
+      : []),
+    ...(queuePolicy.canView()
+      ? [{ icon: CircleX, label: t("queueTitle"), path: "/file-attente" }]
+      : []),
     // Only show staff menu if user can view staff
     ...(staffPolicy.canView()
       ? [{ icon: UserCheck, label: t("staff"), path: "/staff" }]
       : []),
-    ...(salesPolicy.canView()
-      ? [{ icon: ShoppingCart, label: t("sales"), path: "/sales" }]
-      : []),
-    { icon: FileText, label: t("reports"), path: "/reports" },
     // Only show settings menu if user can view settings
     ...(settingsPolicy.canView()
       ? [{ icon: Settings, label: t("settings"), path: "/settings" }]
@@ -94,7 +90,7 @@ export const Sidebar: React.FC = () => {
           <BrandMark className="w-10 h-10 flex-shrink-0 drop-shadow-[0_4px_10px_rgba(29,78,216,0.35)]" />
           <div className="hidden lg:block">
             <h1 className="text-lg font-display font-bold text-foreground">
-              Business Connect
+              Medical Connect
             </h1>
           </div>
         </div>

@@ -56,7 +56,7 @@ export const TenantProvider: React.FC<TenantProviderProps> = ({ children }) => {
         const accessibleTenants = auth.tenants.length
           ? auth.tenants
           : [auth.tenant];
-        const savedTenantId = localStorage.getItem("businessconnect_current_tenant");
+        const savedTenantId = localStorage.getItem("medicalconnect_current_tenant");
         const savedTenant = accessibleTenants.find(
           (tenant) => tenant.id === savedTenantId
         );
@@ -101,9 +101,9 @@ export const TenantProvider: React.FC<TenantProviderProps> = ({ children }) => {
     queryClient.clear();
     setCurrentTenant(tenant);
     if (tenant) {
-      localStorage.setItem("businessconnect_current_tenant", tenant.id);
+      localStorage.setItem("medicalconnect_current_tenant", tenant.id);
     } else {
-      localStorage.removeItem("businessconnect_current_tenant");
+      localStorage.removeItem("medicalconnect_current_tenant");
     }
   };
 

@@ -30,13 +30,13 @@ function couchHarness() {
 }
 
 describe("identity repositories", () => {
-  it("creates and reads tenants from businessconnect_identity", async () => {
+  it("creates and reads tenants from medicalconnect_identity", async () => {
     const { couchDBService } = couchHarness();
     const repository = new TenantsRepository(couchDBService as any);
 
     const { tenant } = await repository.create({ name: "Store" } as any);
 
-    expect(couchDBService.getDatabase).toHaveBeenCalledWith("businessconnect_identity");
+    expect(couchDBService.getDatabase).toHaveBeenCalledWith("medicalconnect_identity");
     await expect(repository.findById(tenant.id)).resolves.toEqual(
       expect.objectContaining({ id: tenant.id, name: "Store" })
     );

@@ -58,7 +58,7 @@ interface AuthProviderProps {
   children: ReactNode;
 }
 
-const LOCAL_SESSION_KEY = "businessconnect_local_session";
+const LOCAL_SESSION_KEY = "medicalconnect_local_session";
 const LOCAL_SESSION_TTL_MS = 7 * 24 * 60 * 60 * 1000;
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {

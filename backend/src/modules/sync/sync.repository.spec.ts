@@ -17,7 +17,7 @@ describe("SyncRepository", () => {
       lastSync: new Date("2026-08-13T00:00:00Z"),
     } as any);
 
-    expect(couch.getDatabase).toHaveBeenCalledWith("businessconnect_tenant-1");
+    expect(couch.getDatabase).toHaveBeenCalledWith("medicalconnect_tenant-1");
     expect(db.insert).toHaveBeenCalledWith(
       expect.objectContaining({
         _id: "sync_status:device-1",

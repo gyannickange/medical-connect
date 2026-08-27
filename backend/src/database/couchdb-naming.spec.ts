@@ -7,8 +7,8 @@ import {
 
 describe("CouchDB database naming", () => {
   it("uses one identity database and one unified database per tenant", () => {
-    expect(identityDatabaseName()).toBe("businessconnect_identity");
-    expect(tenantDatabaseName("tenant-1")).toBe("businessconnect_tenant-1");
+    expect(identityDatabaseName()).toBe("medicalconnect_identity");
+    expect(tenantDatabaseName("tenant-1")).toBe("medicalconnect_tenant-1");
   });
 
   it("maps public UUIDs to typed CouchDB ids and back", () => {

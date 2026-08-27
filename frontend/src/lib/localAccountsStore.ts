@@ -9,7 +9,7 @@ import {
   type LocalUserDoc,
 } from "./localAuth";
 
-export const LOCAL_ACCOUNTS_DB_NAME = "businessconnect_local_accounts";
+export const LOCAL_ACCOUNTS_DB_NAME = "medicalconnect_local_accounts";
 
 export class LocalStorageUnavailableError extends Error {
   constructor() {

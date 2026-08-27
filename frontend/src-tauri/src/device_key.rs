@@ -2,7 +2,7 @@ use base64::{engine::general_purpose::URL_SAFE_NO_PAD, Engine as _};
 use keyring::Entry;
 use rand_core::{OsRng, RngCore};
 
-const SERVICE_NAME: &str = "business-connect-device-master-key";
+const SERVICE_NAME: &str = "medical-connect-device-master-key";
 const KEY_LENGTH: usize = 32;
 
 fn entry_for(device_id: &str) -> Result<Entry, String> {

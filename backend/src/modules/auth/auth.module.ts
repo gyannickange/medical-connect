@@ -7,7 +7,6 @@ import { JwtStrategy } from "./jwt.strategy";
 import { JwtAuthGuard } from "./jwt-auth.guard";
 import { PolicyGuard } from "./guards/policy.guard";
 import { PolicyService } from "./policies/policy.service";
-import { RoleDataFilterInterceptor } from "./interceptors/role-data-filter.interceptor";
 import { CouchProxyAuthService } from "./couch-proxy-auth.service";
 import { IdentityModule } from "../identity/identity.module";
 
@@ -29,7 +28,6 @@ import { IdentityModule } from "../identity/identity.module";
     JwtAuthGuard,
     PolicyGuard,
     PolicyService,
-    RoleDataFilterInterceptor,
     CouchProxyAuthService,
   ],
   exports: [
@@ -37,7 +35,6 @@ import { IdentityModule } from "../identity/identity.module";
     JwtAuthGuard,
     PolicyGuard,
     PolicyService,
-    RoleDataFilterInterceptor,
     CouchProxyAuthService,
   ],
 })

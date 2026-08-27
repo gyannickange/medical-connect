@@ -423,25 +423,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "72f5acc6cb2ba439de613abc23857ec3d78374d8ed5ac84e9d11336e87da8649"
 
 [[package]]
-name = "business-connect-desktop"
-version = "0.1.0"
-dependencies = [
- "base64 0.22.1",
- "ed25519-dalek",
- "if-addrs",
- "keyring",
- "mdns-sd",
- "rand_core",
- "serde",
- "serde_json",
- "tauri",
- "tauri-build",
- "tauri-plugin-opener",
- "tiny_http",
- "ureq",
-]
-
-[[package]]
 name = "bytemuck"
 version = "1.25.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2350,6 +2331,25 @@ dependencies = [
  "mio",
  "socket-pktinfo",
  "socket2 0.6.5",
+]
+
+[[package]]
+name = "medical-connect-desktop"
+version = "0.1.0"
+dependencies = [
+ "base64 0.22.1",
+ "ed25519-dalek",
+ "if-addrs",
+ "keyring",
+ "mdns-sd",
+ "rand_core",
+ "serde",
+ "serde_json",
+ "tauri",
+ "tauri-build",
+ "tauri-plugin-opener",
+ "tiny_http",
+ "ureq",
 ]
 
 [[package]]

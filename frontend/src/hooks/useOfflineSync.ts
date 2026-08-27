@@ -41,7 +41,7 @@ const useOfflineSyncEngine = () => {
     allDocs,
     dbFind,
     startSync,
-  } = usePouchDB(`businessconnect_${currentTenant?.id || "default"}`);
+  } = usePouchDB(`medicalconnect_${currentTenant?.id || "default"}`);
 
   useEffect(() => {
     const handleOnline = () => {
@@ -178,15 +178,10 @@ const useOfflineSyncEngine = () => {
         );
 
         for (const resource of [
-          "products",
-          "sales",
-          "customers",
-          "stock",
+          "patients",
+          "consultations",
+          "queue",
           "staff",
-          "categories",
-          "rayons",
-          "suppliers",
-          "dashboard",
         ]) {
           queryClient.invalidateQueries({
             queryKey: [`/api/${resource}`, currentTenant.id],

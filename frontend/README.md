@@ -1,6 +1,6 @@
-# Business Connect Client
+# Medical Connect Client
 
-A modern React-based client application for Business Connect inventory management system. This client connects to the Business Connect NestJS backend for API operations.
+A modern React-based client application for Medical Connect inventory management system. This client connects to the Medical Connect NestJS backend for API operations.
 
 ## 🚀 Features
 
@@ -16,7 +16,7 @@ A modern React-based client application for Business Connect inventory managemen
 ## 📋 Prerequisites
 
 - Node.js 18+ and npm
-- Business Connect Backend running on `http://localhost:5000`
+- Medical Connect Backend running on `http://localhost:5000`
 
 ## 🛠️ Installation
 
@@ -83,10 +83,10 @@ server: {
 
 ### Backend Connection
 
-Ensure the Business Connect backend is running before starting the client:
+Ensure the Medical Connect backend is running before starting the client:
 
 ```bash
-cd ../Business Connect/backend
+cd ../Medical Connect/backend
 npm run dev
 ```
 
@@ -95,7 +95,7 @@ The backend should be accessible at `http://localhost:5000`.
 ## 📁 Project Structure
 
 ```
-Business-Connect-Client/
+Medical-Connect-Client/
 ├── src/
 │   ├── components/       # Reusable UI components
 │   │   ├── ui/          # Base UI components (Radix)
@@ -263,8 +263,8 @@ MIT
 
 ## 🔗 Related Projects
 
-- [Business Connect Backend](../Business Connect/backend) - NestJS backend API
-- [Business Connect 2](../Business%20Connect%202) - Original full-stack application
+- [Medical Connect Backend](../Medical Connect/backend) - NestJS backend API
+- [Medical Connect 2](../Medical%20Connect%202) - Original full-stack application
 
 ## 📞 Support
 
@@ -277,4 +277,4 @@ For issues or questions:
 
 ---
 
-**Note**: This client requires the Business Connect NestJS backend to be running. Make sure to start the backend before launching the client application.
+**Note**: This client requires the Medical Connect NestJS backend to be running. Make sure to start the backend before launching the client application.

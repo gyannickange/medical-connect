@@ -36,21 +36,6 @@ export const messages: TranslationSection = {
     confirmDeleteStaff: "Are you sure you want to delete",
     staffDeleteQueuedOffline:
       "Staff member deletion queued offline and will sync when online",
-    customerDeleteQueuedOffline:
-      "Customer deletion queued offline and will sync when online",
-    categorySavedOffline: "Category saved offline and will sync when online",
-    categoryDeleteQueuedOffline:
-      "Category deletion queued offline and will sync when online",
-    supplierDeleteQueuedOffline:
-      "Supplier deletion queued offline and will sync when online",
-    productDeleteQueuedOffline:
-      "Product deletion queued offline and will sync when online",
-    productArchiveQueuedOffline:
-      "Product archive queued offline and will sync when online",
-    productSavedOfflineWillSync:
-      "Product saved offline and will sync when online",
-    stockTransactionSavedOfflineWillSync:
-      "Stock transaction saved offline and will sync when online",
     workingOffline: "Working Offline",
     changesSyncWhenOnline: "changes will sync when you're back online.",
     allChangesSynchronized: "All changes have been synchronized.",
@@ -82,6 +67,16 @@ export const messages: TranslationSection = {
     item: "Item",
     companyNameRequired: "Company name is required",
     defaultCurrencyRequired: "Default currency is required",
+    actions: "Actions",
+    active: "Active",
+    inactive: "Inactive",
+    joined: "Joined",
+    status: "Status",
+    user: "User",
+    allStatuses: "All Statuses",
+    available: "Available",
+    localInstallMode: "Local installation",
+    conflictWarning: "Conflict warning",
   },
   fr: {
     // Time
@@ -122,22 +117,6 @@ export const messages: TranslationSection = {
     confirmDeleteStaff: "Voulez-vous vraiment supprimer",
     staffDeleteQueuedOffline:
       "Suppression du membre du personnel mise en attente hors ligne et sera synchronisée en ligne",
-    customerDeleteQueuedOffline:
-      "Suppression du client mise en attente hors ligne et sera synchronisée en ligne",
-    categorySavedOffline:
-      "Catégorie enregistrée hors ligne et sera synchronisée en ligne",
-    categoryDeleteQueuedOffline:
-      "Suppression de la catégorie mise en attente hors ligne et sera synchronisée en ligne",
-    supplierDeleteQueuedOffline:
-      "Suppression du fournisseur mise en attente hors ligne et sera synchronisée en ligne",
-    productDeleteQueuedOffline:
-      "Suppression du produit mise en attente hors ligne et sera synchronisée en ligne",
-    productArchiveQueuedOffline:
-      "Archivage du produit mis en attente hors ligne et sera synchronisé en ligne",
-    productSavedOfflineWillSync:
-      "Produit enregistré hors ligne et sera synchronisé en ligne",
-    stockTransactionSavedOfflineWillSync:
-      "Transaction de stock enregistrée hors ligne et sera synchronisée en ligne",
     workingOffline: "Travail Hors Ligne",
     changesSyncWhenOnline:
       "modifications seront synchronisées lorsque vous serez de nouveau en ligne.",
@@ -173,5 +152,15 @@ export const messages: TranslationSection = {
     item: "Article",
     companyNameRequired: "Le nom de l'entreprise est requis",
     defaultCurrencyRequired: "La devise par défaut est requise",
+    actions: "Actions",
+    active: "Actif",
+    inactive: "Inactif",
+    joined: "Membre depuis",
+    status: "Statut",
+    user: "Utilisateur",
+    allStatuses: "Tous les statuts",
+    available: "Disponible",
+    localInstallMode: "Installation locale",
+    conflictWarning: "Avertissement de conflit",
   },
 };

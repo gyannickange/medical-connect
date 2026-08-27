@@ -25,7 +25,7 @@ export function decideKeyBootstrap(params: {
   return "create-new";
 }
 
-const LOCAL_DB_NAMES = ["businessconnect_local_accounts", "businessconnect_cache"] as const;
+const LOCAL_DB_NAMES = ["medicalconnect_local_accounts", "medicalconnect_cache"] as const;
 
 async function hasExistingLocalData(): Promise<boolean> {
   for (const name of LOCAL_DB_NAMES) {
@@ -110,7 +110,7 @@ let cachedLocalDataKey: Promise<CryptoKey> | null = null;
 export function getLocalDataKey(): Promise<CryptoKey> {
   if (!cachedLocalDataKey) {
     cachedLocalDataKey = deriveKey(
-      "business-connect-local-data-key-v1",
+      "medical-connect-local-data-key-v1",
       { name: "AES-GCM", length: 256 },
       ["encrypt", "decrypt"]
     );
@@ -123,7 +123,7 @@ let cachedSessionSigningKey: Promise<CryptoKey> | null = null;
 export function getSessionSigningKey(): Promise<CryptoKey> {
   if (!cachedSessionSigningKey) {
     cachedSessionSigningKey = deriveKey(
-      "business-connect-session-signing-key-v1",
+      "medical-connect-session-signing-key-v1",
       { name: "HMAC", hash: "SHA-256", length: 256 } as HmacKeyGenParams,
       ["sign", "verify"]
     );

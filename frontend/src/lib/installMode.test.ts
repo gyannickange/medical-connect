@@ -25,7 +25,7 @@ describe("installMode", () => {
 
   it("returns null for a corrupted/unknown stored value", () => {
     const store = stubLocalStorage();
-    store.set("businessconnect_install_mode", "garbage");
+    store.set("medicalconnect_install_mode", "garbage");
     expect(getInstallMode()).toBeNull();
   });
 

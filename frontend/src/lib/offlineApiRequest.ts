@@ -18,13 +18,6 @@ import {
   type OfflineOperationDraft,
   type OfflineMethod,
 } from "./offlineOperationQueue";
-import { getLocalDashboardMetrics } from "./localDashboardMetrics";
-import {
-  getLocalProductAnalytics,
-  getLocalSalesAnalytics,
-  getLocalSalesByProduct,
-  getLocalSalesReport,
-} from "./localSalesAnalytics";
 
 // Store reference to save function
 let saveToOfflineStorage:
@@ -68,7 +61,7 @@ interface SavedResponse {
   text: () => Promise<string>;
 }
 
-export const OFFLINE_MUTATION_SAVED_EVENT = "businessconnect:offline-mutation-saved";
+export const OFFLINE_MUTATION_SAVED_EVENT = "medicalconnect:offline-mutation-saved";
 const API_REACHABILITY_TIMEOUT_MS = 3000;
 
 // Create a synthetic Response object from saved data (for POST/PUT offline)
@@ -459,82 +452,6 @@ export async function offlineApiRequest(
 
       if (getInstallMode() === "local" && collection === "settings") {
         return createCachedResponse([]);
-      }
-
-      // Unlike a plain list, there's no raw "dashboard" data to ever have
-      // queued/cached - it's a computed aggregate. Derive it from the
-      // products/sales lists that are already correctly cached instead of
-      // always reporting empty.
-      if (getInstallMode() === "local" && collection === "dashboard") {
-        const tenantId = new URL(url, "http://offline.local").pathname.replace(
-          /^\/api\/dashboard\/?/,
-          ""
-        );
-        if (tenantId) {
-          const metrics = await getLocalDashboardMetrics(tenantId);
-          return createCachedResponse(metrics);
-        }
-      }
-
-      // ProductSales.tsx's per-product analytics tab - same computed-
-      // aggregate story as dashboard/sales analytics above, just filtered
-      // to one product's sale items. Tagged "products" (not "sales") by
-      // its caller, and carries tenantId as a query param, not a path
-      // segment - a third URL shape distinct from both.
-      if (getInstallMode() === "local" && collection === "products") {
-        const parsedUrl = new URL(url, "http://offline.local");
-        const segments = parsedUrl.pathname
-          .replace(/^\/api\/products\/?/, "")
-          .split("/")
-          .filter(Boolean);
-
-        if (segments[0] === "analytics" && segments.length === 2) {
-          const tenantId = parsedUrl.searchParams.get("tenantId");
-          const dateRange = parsedUrl.searchParams.get("dateRange") ?? "7d";
-          if (tenantId) {
-            const analytics = await getLocalProductAnalytics(
-              tenantId,
-              segments[1],
-              dateRange
-            );
-            return createCachedResponse(analytics);
-          }
-        }
-      }
-
-      // Same idea for the two computed sales views (day-grouped analytics,
-      // date-ranged report) - both tagged "sales" like the plain sales list
-      // itself, so they're distinguished by URL shape, not by collection.
-      if (getInstallMode() === "local" && collection === "sales") {
-        const parsedUrl = new URL(url, "http://offline.local");
-        const segments = parsedUrl.pathname
-          .replace(/^\/api\/sales\/?/, "")
-          .split("/")
-          .filter(Boolean);
-
-        if (segments[0] === "analytics" && segments.length === 2) {
-          const dateRange = parsedUrl.searchParams.get("dateRange") ?? "7d";
-          const analytics = await getLocalSalesAnalytics(segments[1], dateRange);
-          return createCachedResponse(analytics);
-        }
-
-        if (segments.length === 4 && segments[1] === "report") {
-          const [tenantId, , startDate, endDate] = segments;
-          const report = await getLocalSalesReport(
-            tenantId,
-            new Date(startDate),
-            new Date(endDate)
-          );
-          return createCachedResponse(report);
-        }
-
-        if (segments[0] === "product" && segments.length === 2) {
-          const tenantId = parsedUrl.searchParams.get("tenantId");
-          if (tenantId) {
-            const sales = await getLocalSalesByProduct(tenantId, segments[1]);
-            return createCachedResponse(sales);
-          }
-        }
       }
 
       // No cache available - re-throw error

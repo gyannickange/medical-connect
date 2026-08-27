@@ -17,7 +17,7 @@ use std::{
 };
 use tauri::{AppHandle, Emitter, Manager, State};
 
-const LAN_IDENTITY_KEY_SERVICE: &str = "business-connect-lan-identity-key";
+const LAN_IDENTITY_KEY_SERVICE: &str = "medical-connect-lan-identity-key";
 
 fn lan_identity_key_entry(device_id: &str) -> Result<keyring::Entry, String> {
     keyring::Entry::new(LAN_IDENTITY_KEY_SERVICE, device_id).map_err(|error| error.to_string())
@@ -30,7 +30,7 @@ fn save_lan_signing_key(device_id: &str, key: &SigningKey) -> Result<(), String>
         .map_err(|error| error.to_string())
 }
 
-const SERVICE_TYPE: &str = "_businessconnect._tcp.local.";
+const SERVICE_TYPE: &str = "_medicalconnect._tcp.local.";
 const PROTOCOL_VERSION: &str = "1";
 const DEFAULT_AGENT_PORT: u16 = 45_838;
 const IDENTITY_FILENAME: &str = "lan-identity.json";
@@ -158,7 +158,7 @@ pub fn lan_agent_start(
     daemon
         .register(service.clone())
         .map_err(|error| error.to_string())?;
-    eprintln!("[Business Connect LAN] agent started: {device_id}");
+    eprintln!("[Medical Connect LAN] agent started: {device_id}");
 
     let peers = Arc::clone(&state.peers);
     let expected_tenant = tenant_fingerprint.clone();
@@ -437,7 +437,7 @@ fn validate_device_id(device_id: &str) -> Result<(), String> {
 
 fn effective_device_id(app_identifier: &str, requested_device_id: &str) -> String {
     app_identifier
-        .strip_prefix("com.businessconnect.desktop.")
+        .strip_prefix("com.medicalconnect.desktop.")
         .filter(|profile| profile.starts_with("caisse"))
         .map(|profile| format!("device-sim-{profile}"))
         .unwrap_or_else(|| requested_device_id.to_owned())
@@ -445,7 +445,7 @@ fn effective_device_id(app_identifier: &str, requested_device_id: &str) -> Strin
 
 fn effective_agent_port(app_identifier: &str) -> u16 {
     app_identifier
-        .strip_prefix("com.businessconnect.desktop.caisse")
+        .strip_prefix("com.medicalconnect.desktop.caisse")
         .and_then(|suffix| suffix.parse::<u16>().ok())
         .map(|index| DEFAULT_AGENT_PORT + index)
         .unwrap_or(DEFAULT_AGENT_PORT)
@@ -874,7 +874,7 @@ fn process_discovery_event(
                     let is_new = !current.contains_key(&peer.service_name);
                     if is_new {
                         eprintln!(
-                            "[Business Connect LAN] same-tenant peer discovered: {}",
+                            "[Medical Connect LAN] same-tenant peer discovered: {}",
                             peer.device_id
                         );
                     }
@@ -944,15 +944,15 @@ mod tests {
     #[test]
     fn simulator_profiles_have_distinct_native_device_ids() {
         assert_eq!(
-            effective_device_id("com.businessconnect.desktop.caisse1", "browser-device"),
+            effective_device_id("com.medicalconnect.desktop.caisse1", "browser-device"),
             "device-sim-caisse1"
         );
         assert_eq!(
-            effective_device_id("com.businessconnect.desktop.caisse2", "browser-device"),
+            effective_device_id("com.medicalconnect.desktop.caisse2", "browser-device"),
             "device-sim-caisse2"
         );
         assert_eq!(
-            effective_device_id("com.businessconnect.desktop", "browser-device"),
+            effective_device_id("com.medicalconnect.desktop", "browser-device"),
             "browser-device"
         );
     }
@@ -960,15 +960,15 @@ mod tests {
     #[test]
     fn simulator_profiles_have_distinct_agent_ports() {
         assert_eq!(
-            effective_agent_port("com.businessconnect.desktop.caisse1"),
+            effective_agent_port("com.medicalconnect.desktop.caisse1"),
             DEFAULT_AGENT_PORT + 1
         );
         assert_eq!(
-            effective_agent_port("com.businessconnect.desktop.caisse2"),
+            effective_agent_port("com.medicalconnect.desktop.caisse2"),
             DEFAULT_AGENT_PORT + 2
         );
         assert_eq!(
-            effective_agent_port("com.businessconnect.desktop"),
+            effective_agent_port("com.medicalconnect.desktop"),
             DEFAULT_AGENT_PORT
         );
     }
@@ -981,10 +981,10 @@ mod tests {
     #[test]
     fn peer_reconciliation_clears_everything_when_the_lan_disappears() {
         let mut peers = HashMap::from([(
-            "peer._businessconnect._tcp.local.".into(),
+            "peer._medicalconnect._tcp.local.".into(),
             LanPeer {
                 device_id: "peer".into(),
-                service_name: "peer._businessconnect._tcp.local.".into(),
+                service_name: "peer._medicalconnect._tcp.local.".into(),
                 addresses: vec!["192.168.1.20".into()],
                 port: DEFAULT_AGENT_PORT,
                 protocol_version: PROTOCOL_VERSION.into(),

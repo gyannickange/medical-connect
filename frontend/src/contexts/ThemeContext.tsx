@@ -25,7 +25,7 @@ interface ThemeProviderProps {
 export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
   const [theme, setThemeState] = useState<Theme>(() => {
     // Check localStorage first
-    const stored = localStorage.getItem('businessconnect_theme') as Theme;
+    const stored = localStorage.getItem('medicalconnect_theme') as Theme;
     if (stored) return stored;
     
     // Default to dark theme for crypto trading interface
@@ -42,7 +42,7 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
     root.classList.add(theme);
     
     // Store in localStorage
-    localStorage.setItem('businessconnect_theme', theme);
+    localStorage.setItem('medicalconnect_theme', theme);
   }, [theme]);
 
   const setTheme = (newTheme: Theme) => {

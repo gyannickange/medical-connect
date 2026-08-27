@@ -9,8 +9,8 @@ pub struct InitialAdminCredentials {
 
 #[tauri::command]
 pub fn get_initial_admin_credentials() -> Result<Option<InitialAdminCredentials>, String> {
-    let username = env::var("BUSINESSCONNECT_INITIAL_ADMIN_USERNAME").ok();
-    let password = env::var("BUSINESSCONNECT_INITIAL_ADMIN_PASSWORD").ok();
+    let username = env::var("MEDICALCONNECT_INITIAL_ADMIN_USERNAME").ok();
+    let password = env::var("MEDICALCONNECT_INITIAL_ADMIN_PASSWORD").ok();
 
     match (username, password) {
         (Some(username), Some(password))
@@ -21,7 +21,7 @@ pub fn get_initial_admin_credentials() -> Result<Option<InitialAdminCredentials>
         _ if cfg!(debug_assertions) => {
             let generated = generate_dev_password();
             println!(
-                "[businessconnect] BUSINESSCONNECT_INITIAL_ADMIN_USERNAME/PASSWORD not set - using a one-time dev admin: admin / {generated}"
+                "[medicalconnect] MEDICALCONNECT_INITIAL_ADMIN_USERNAME/PASSWORD not set - using a one-time dev admin: admin / {generated}"
             );
             Ok(Some(InitialAdminCredentials {
                 username: "admin".into(),
@@ -53,9 +53,9 @@ mod tests {
     #[test]
     fn returns_configured_credentials_when_both_vars_are_set() {
         let _guard = ENV_LOCK.lock().unwrap();
-        env::set_var("BUSINESSCONNECT_INITIAL_ADMIN_USERNAME", "owner");
+        env::set_var("MEDICALCONNECT_INITIAL_ADMIN_USERNAME", "owner");
         env::set_var(
-            "BUSINESSCONNECT_INITIAL_ADMIN_PASSWORD",
+            "MEDICALCONNECT_INITIAL_ADMIN_PASSWORD",
             "correct-horse-battery-staple",
         );
 
@@ -71,15 +71,15 @@ mod tests {
             }
         );
 
-        env::remove_var("BUSINESSCONNECT_INITIAL_ADMIN_USERNAME");
-        env::remove_var("BUSINESSCONNECT_INITIAL_ADMIN_PASSWORD");
+        env::remove_var("MEDICALCONNECT_INITIAL_ADMIN_USERNAME");
+        env::remove_var("MEDICALCONNECT_INITIAL_ADMIN_PASSWORD");
     }
 
     #[test]
     fn never_returns_the_old_hardcoded_default() {
         let _guard = ENV_LOCK.lock().unwrap();
-        env::set_var("BUSINESSCONNECT_INITIAL_ADMIN_USERNAME", "admin");
-        env::set_var("BUSINESSCONNECT_INITIAL_ADMIN_PASSWORD", "admin123");
+        env::set_var("MEDICALCONNECT_INITIAL_ADMIN_USERNAME", "admin");
+        env::set_var("MEDICALCONNECT_INITIAL_ADMIN_PASSWORD", "admin123");
 
         let result = get_initial_admin_credentials()
             .expect("command succeeds")
@@ -91,15 +91,15 @@ mod tests {
         // "admin123" is a separate, out-of-scope operational choice.
         assert_eq!(result.password, "admin123");
 
-        env::remove_var("BUSINESSCONNECT_INITIAL_ADMIN_USERNAME");
-        env::remove_var("BUSINESSCONNECT_INITIAL_ADMIN_PASSWORD");
+        env::remove_var("MEDICALCONNECT_INITIAL_ADMIN_USERNAME");
+        env::remove_var("MEDICALCONNECT_INITIAL_ADMIN_PASSWORD");
     }
 
     #[test]
     fn falls_back_based_on_build_profile_when_unset() {
         let _guard = ENV_LOCK.lock().unwrap();
-        env::remove_var("BUSINESSCONNECT_INITIAL_ADMIN_USERNAME");
-        env::remove_var("BUSINESSCONNECT_INITIAL_ADMIN_PASSWORD");
+        env::remove_var("MEDICALCONNECT_INITIAL_ADMIN_USERNAME");
+        env::remove_var("MEDICALCONNECT_INITIAL_ADMIN_PASSWORD");
 
         let result = get_initial_admin_credentials().expect("command succeeds");
 

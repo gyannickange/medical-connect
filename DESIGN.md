@@ -1,7 +1,7 @@
 ---
 version: alpha
-name: BusinessConnect-design-tokens
-description: "Business Connect's own dark-first glassmorphic system: a near-black canvas (#0A0B0D) layered with translucent charcoal glass panels (rgba(26, 29, 36, 0.6)), white text (#FFFFFF), and a single chromatic accent — Business Connect blue (#3B82F6) — used on the brand mark, primary CTAs, focus rings, active nav state, and chart highlights. The system reads as a dense operations console: glass cards with backdrop-blur, soft blue glows, and a subtle gradient background, rather than flat hairline panels. A first-class light theme exists (white canvas, slate-900 ink) toggled via a `.light` class. Display type runs Space Grotesk over an Inter body; JetBrains Mono covers code/barcode contexts. Semantic status colors (success green, warning amber, danger red) are reserved for stock alerts, badges, and chart series — never used decoratively."
+name: MedicalConnect-design-tokens
+description: "Medical Connect's own dark-first glassmorphic system: a near-black canvas (#0A0B0D) layered with translucent charcoal glass panels (rgba(26, 29, 36, 0.6)), white text (#FFFFFF), and a single chromatic accent — Medical Connect blue (#3B82F6) — used on the brand mark, primary CTAs, focus rings, active nav state, and chart highlights. The system reads as a dense operations console: glass cards with backdrop-blur, soft blue glows, and a subtle gradient background, rather than flat hairline panels. A first-class light theme exists (white canvas, slate-900 ink) toggled via a `.light` class. Display type runs Space Grotesk over an Inter body; JetBrains Mono covers code/barcode contexts. Semantic status colors (success green, warning amber, danger red) are reserved for stock alerts, badges, and chart series — never used decoratively."
 
 colors:
   primary: "#3B82F6"
@@ -263,9 +263,9 @@ components:
 
 ## Overview
 
-Business Connect's canvas is near-black — `{colors.canvas}` is #0A0B0D, rendered under a subtle body gradient rather than a flat fill. On top sits a surface ladder (`{colors.surface-1}`, `{colors.surface-2}` as opaque steps, `{colors.surface-3}`/`{colors.surface-4}` as translucent glass for cards and popovers) with soft borders running from `{colors.hairline}` up through `{colors.hairline-strong}`. White text (`{colors.ink}` #FFFFFF) carries the body and headlines in dark mode.
+Medical Connect's canvas is near-black — `{colors.canvas}` is #0A0B0D, rendered under a subtle body gradient rather than a flat fill. On top sits a surface ladder (`{colors.surface-1}`, `{colors.surface-2}` as opaque steps, `{colors.surface-3}`/`{colors.surface-4}` as translucent glass for cards and popovers) with soft borders running from `{colors.hairline}` up through `{colors.hairline-strong}`. White text (`{colors.ink}` #FFFFFF) carries the body and headlines in dark mode.
 
-The single chromatic accent is **Business Connect blue** `{colors.primary}` (#3B82F6) — used on the brand mark, focus rings, active nav state, and the primary CTA button. A lighter hover tint (`{colors.primary-hover}` #60A5FA) and a darker pressed/focus tone (`{colors.primary-focus}` #1D4ED8, the far stop of the primary gradient) extend the same hue. Status colors are reserved for meaning, not decoration: `{colors.semantic-success}` (#10B981) for in-stock/healthy states, `{colors.semantic-warning}` (#F59E0B) for low-stock alerts, `{colors.semantic-danger}` (#EF4444) for out-of-stock/errors, and the `{colors.chart-*}` tokens for stock-value and sales charts.
+The single chromatic accent is **Medical Connect blue** `{colors.primary}` (#3B82F6) — used on the brand mark, focus rings, active nav state, and the primary CTA button. A lighter hover tint (`{colors.primary-hover}` #60A5FA) and a darker pressed/focus tone (`{colors.primary-focus}` #1D4ED8, the far stop of the primary gradient) extend the same hue. Status colors are reserved for meaning, not decoration: `{colors.semantic-success}` (#10B981) for in-stock/healthy states, `{colors.semantic-warning}` (#F59E0B) for low-stock alerts, `{colors.semantic-danger}` (#EF4444) for out-of-stock/errors, and the `{colors.chart-*}` tokens for stock-value and sales charts.
 
 Display type runs Space Grotesk at weight 300–700, with Inter carrying body copy and JetBrains Mono covering barcode/code contexts — real, freely-licensed families, not proprietary cuts requiring substitutes.
 
@@ -283,10 +283,10 @@ The page rhythm is **glassmorphic**: cards (`{colors.surface-3}`) and popovers (
 
 ## Colors
 
-> Source: `frontend/tailwind.config.ts`, `frontend/src/index.css` (Business Connect's actual design tokens, dark theme = `:root` default, light theme = `.light` override).
+> Source: `frontend/tailwind.config.ts`, `frontend/src/index.css` (Medical Connect's actual design tokens, dark theme = `:root` default, light theme = `.light` override).
 
 ### Brand & Accent
-- **Business Connect Blue** ({colors.primary}): The signature accent — primary CTA, brand mark, active nav, link emphasis, focus rings.
+- **Medical Connect Blue** ({colors.primary}): The signature accent — primary CTA, brand mark, active nav, link emphasis, focus rings.
 - **Blue Hover** ({colors.primary-hover}): Lighter blue (#60A5FA) — hovered state of the primary CTA.
 - **Blue Focus/Pressed** ({colors.primary-focus}): Deeper blue (#1D4ED8) — the far stop of the primary gradient; pressed buttons, focus emphasis.
 - **Brand Secure** ({colors.brand-secure}): Muted indigo (#818CF8) — `accent.secondary` in the Tailwind config; sparing secondary highlight, not a second brand color.
@@ -391,13 +391,13 @@ The dark canvas IS the whitespace. Sections separate by lift onto surface-1 pane
 | 3 (glow hover) | Glass lift + `{colors.primary}` border tint + soft blue shadow (`glow-accent` / `glow-sm`) | Hovered cards, hovered buttons |
 | 4 (focus ring) | 3px `{colors.primary}` ring at ~20% opacity (`--ring`) | Focused input, focused button |
 
-Business Connect's depth is carried by translucency + blur + soft glow, not the hairline-only ladder of a flat marketing site — shadows and gradients are a deliberate part of the brand, not avoided.
+Medical Connect's depth is carried by translucency + blur + soft glow, not the hairline-only ladder of a flat marketing site — shadows and gradients are a deliberate part of the brand, not avoided.
 
 ### Decorative Depth
 
 - **Glass + glow dominates** as decorative depth — blurred, translucent cards over a gradient canvas.
 - **Gradients are core, not avoided**: `{colors.primary}` → `{colors.primary-focus}` powers `gradient-primary` on primary buttons; a radial `gradient-accent`/`gradient-glow` washes the canvas.
-- **Soft blue glow** (`box-shadow` in low-opacity `{colors.primary}`) on hover/focus states — the signature Business Connect "lift", in place of Linear's hairline-only elevation.
+- **Soft blue glow** (`box-shadow` in low-opacity `{colors.primary}`) on hover/focus states — the signature Medical Connect "lift", in place of Linear's hairline-only elevation.
 
 ## Shapes
 
@@ -500,17 +500,17 @@ Business Connect's depth is carried by translucency + blur + soft glow, not the 
 - Use the surface ladder (opaque canvas/surface-1/surface-2, translucent glass surface-3/surface-4) for hierarchy.
 - Reserve semantic colors for meaning: `{colors.semantic-success}` (in-stock), `{colors.semantic-warning}` (low-stock), `{colors.semantic-danger}` (out-of-stock/errors) — never decoratively.
 - Use `backdrop-filter: blur(...)` glass panels + soft `{colors.primary}` glow for lift, matching `.glass-card`/`.glass-input` conventions in `frontend/src/index.css`.
-- Respect the light-theme mirror (`{colors.inverse-canvas}`/`{colors.inverse-ink}`) via the `.light` class — Business Connect ships both themes.
+- Respect the light-theme mirror (`{colors.inverse-canvas}`/`{colors.inverse-ink}`) via the `.light` class — Medical Connect ships both themes.
 - Compose CTAs as `{rounded.md}`-equivalent to the app's actual radius scale (`--radius` 16px stepping to 14px/12px).
 
 ### Don't
 
-- Don't drop the light theme — Business Connect is theme-aware (`darkMode: ["class"]`, `.light` overrides), unlike a dark-only marketing page.
+- Don't drop the light theme — Medical Connect is theme-aware (`darkMode: ["class"]`, `.light` overrides), unlike a dark-only marketing page.
 - Don't use `{colors.primary}` blue as a full section background or large card fill — it's an accent, not a surface.
 - Don't introduce a second chromatic brand color — `{colors.brand-secure}` (indigo) is a sparing secondary highlight, not a co-equal accent.
 - Don't strip glow/gradient effects when reskinning a component — they're core to this system, not decoration to avoid.
 - Don't use hard-edged flat shadows in place of the app's blur + low-opacity glow pattern.
-- Don't use `#000000` true black as the canvas — Business Connect's canvas carries a deliberate near-black, not pure black.
+- Don't use `#000000` true black as the canvas — Medical Connect's canvas carries a deliberate near-black, not pure black.
 - Don't mix semantic colors (success/warning/danger) into non-status UI — keep them scoped to stock/alert states.
 
 ## Responsive Behavior
@@ -555,8 +555,8 @@ Business Connect's depth is carried by translucency + blur + soft glow, not the 
 
 ## Known Gaps
 
-- Color values are extracted directly from `frontend/tailwind.config.ts` and the `:root`/`.light` blocks in `frontend/src/index.css` — they are Business Connect's actual, shipped tokens, not an approximation.
+- Color values are extracted directly from `frontend/tailwind.config.ts` and the `:root`/`.light` blocks in `frontend/src/index.css` — they are Medical Connect's actual, shipped tokens, not an approximation.
 - Form-field error/validation styling beyond `{colors.semantic-danger}` is not fully catalogued here — check `frontend/src/components/ui/` for the live component before inventing a new treatment.
-- The light theme (`.light` class) is captured via the `inverse-*` tokens, but Business Connect's toggle mechanism (class-based, not `prefers-color-scheme`) should be respected when implementing theme-aware components.
+- The light theme (`.light` class) is captured via the `inverse-*` tokens, but Medical Connect's toggle mechanism (class-based, not `prefers-color-scheme`) should be respected when implementing theme-aware components.
 - Chart color usage (`{colors.chart-*}`) reflects the tokens defined in `tailwind.config.ts`; actual per-chart series assignment lives in the charting components themselves.
-- The typography scale (Linear Display/Text/Mono naming, negative letter-spacing, xs–xxl rounded/spacing scales) below is still Linear's structural system, Business Connect's — only color tokens were reconciled with the app. Business Connect's real type stack is Space Grotesk (display) / Inter (body) / JetBrains Mono, and its actual radius scale is the 3-step `--radius`-based one in `tailwind.config.ts`, not the xs–xxl scale documented here.
+- The typography scale (Linear Display/Text/Mono naming, negative letter-spacing, xs–xxl rounded/spacing scales) below is still Linear's structural system, Medical Connect's — only color tokens were reconciled with the app. Medical Connect's real type stack is Space Grotesk (display) / Inter (body) / JetBrains Mono, and its actual radius scale is the 3-step `--radius`-based one in `tailwind.config.ts`, not the xs–xxl scale documented here.

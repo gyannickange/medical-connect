@@ -65,7 +65,7 @@ describe("SettingsRepository", () => {
       "tenant-1"
     );
 
-    expect(couchDBService.getDatabase).toHaveBeenCalledWith("businessconnect_tenant-1");
+    expect(couchDBService.getDatabase).toHaveBeenCalledWith("medicalconnect_tenant-1");
     expect(db.insert).toHaveBeenCalledWith(
       expect.objectContaining({
         _id: expect.stringMatching(/^setting:/),

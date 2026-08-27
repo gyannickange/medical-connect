@@ -165,7 +165,7 @@ describe("CouchDBService", () => {
       },
     };
 
-    await service.ensureDesignDocument("businessconnect_tenant-1", "stock", views);
+    await service.ensureDesignDocument("medicalconnect_tenant-1", "stock", views);
 
     expect(dbHandle.insert).toHaveBeenCalledWith({
       _id: "_design/stock",
@@ -198,7 +198,7 @@ describe("CouchDBService", () => {
     (Nano as unknown as jest.Mock).mockReturnValue(client);
     const service = new CouchDBService();
 
-    await service.ensureDesignDocument("businessconnect_tenant-1", "stock", views);
+    await service.ensureDesignDocument("medicalconnect_tenant-1", "stock", views);
 
     expect(dbHandle.insert).not.toHaveBeenCalled();
   });

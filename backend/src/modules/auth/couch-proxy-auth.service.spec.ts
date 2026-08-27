@@ -20,7 +20,7 @@ describe("CouchProxyAuthService", () => {
       await expect(
         service.authorize({
           method,
-          url: "/api/couch-proxy/businessconnect_tenant-1/_bulk_docs",
+          url: "/api/couch-proxy/medicalconnect_tenant-1/_bulk_docs",
           cookies: { access_token: "good-token" },
         })
       ).rejects.toThrow(ForbiddenException);
@@ -36,7 +36,7 @@ describe("CouchProxyAuthService", () => {
     await expect(
       service.authorize({
         method: "GET",
-        url: "/api/couch-proxy/businessconnect_tenant-1/_all_docs",
+        url: "/api/couch-proxy/medicalconnect_tenant-1/_all_docs",
         cookies: {},
       })
     ).rejects.toThrow(UnauthorizedException);
@@ -55,7 +55,7 @@ describe("CouchProxyAuthService", () => {
     await expect(
       service.authorize({
         method: "GET",
-        url: "/api/couch-proxy/businessconnect_tenant-1/_all_docs",
+        url: "/api/couch-proxy/medicalconnect_tenant-1/_all_docs",
         cookies: { access_token: "bad-token" },
       })
     ).rejects.toThrow(UnauthorizedException);
@@ -70,7 +70,7 @@ describe("CouchProxyAuthService", () => {
     await expect(
       service.authorize({
         method: "GET",
-        url: "/api/couch-proxy/businessconnect_tenant-1/_all_docs",
+        url: "/api/couch-proxy/medicalconnect_tenant-1/_all_docs",
         cookies: { access_token: "good-token" },
       })
     ).rejects.toThrow(UnauthorizedException);
@@ -86,7 +86,7 @@ describe("CouchProxyAuthService", () => {
     await expect(
       service.authorize({
         method: "GET",
-        url: "/api/couch-proxy/businessconnect_tenant-2/_all_docs",
+        url: "/api/couch-proxy/medicalconnect_tenant-2/_all_docs",
         cookies: { access_token: "good-token" },
       })
     ).rejects.toThrow(ForbiddenException);
@@ -102,74 +102,10 @@ describe("CouchProxyAuthService", () => {
     await expect(
       service.authorize({
         method: "GET",
-        url: "/api/couch-proxy/businessconnect_tenant-1/_all_docs?limit=5",
+        url: "/api/couch-proxy/medicalconnect_tenant-1/_all_docs?limit=5",
         cookies: { access_token: "good-token" },
       })
     ).resolves.toBeUndefined();
-  });
-
-  it("allows GET access to the caller's own tenant stock database", async () => {
-    const jwtService = { verify: jest.fn().mockReturnValue({ sub: "user-1" }) };
-    const authService = {
-      validateUser: jest.fn().mockResolvedValue(sanitizedUser({ tenantId: "tenant-1" })),
-    };
-    const service = new CouchProxyAuthService(jwtService as any, authService as any);
-
-    await expect(
-      service.authorize({
-        method: "GET",
-        url: "/api/couch-proxy/businessconnect_tenant-1/_all_docs?limit=5",
-        cookies: { access_token: "good-token" },
-      })
-    ).resolves.toBeUndefined();
-  });
-
-  it("rejects access to another tenant's stock database", async () => {
-    const jwtService = { verify: jest.fn().mockReturnValue({ sub: "user-1" }) };
-    const authService = {
-      validateUser: jest.fn().mockResolvedValue(sanitizedUser({ tenantId: "tenant-1" })),
-    };
-    const service = new CouchProxyAuthService(jwtService as any, authService as any);
-
-    await expect(
-      service.authorize({
-        method: "GET",
-        url: "/api/couch-proxy/businessconnect_tenant-2/_all_docs",
-        cookies: { access_token: "good-token" },
-      })
-    ).rejects.toThrow(ForbiddenException);
-  });
-
-  it("allows GET access to the caller's own tenant categories database", async () => {
-    const jwtService = { verify: jest.fn().mockReturnValue({ sub: "user-1" }) };
-    const authService = {
-      validateUser: jest.fn().mockResolvedValue(sanitizedUser({ tenantId: "tenant-1" })),
-    };
-    const service = new CouchProxyAuthService(jwtService as any, authService as any);
-
-    await expect(
-      service.authorize({
-        method: "GET",
-        url: "/api/couch-proxy/businessconnect_tenant-1/_all_docs?limit=5",
-        cookies: { access_token: "good-token" },
-      })
-    ).resolves.toBeUndefined();
-  });
-
-  it("rejects access to another tenant's categories database", async () => {
-    const jwtService = { verify: jest.fn().mockReturnValue({ sub: "user-1" }) };
-    const authService = {
-      validateUser: jest.fn().mockResolvedValue(sanitizedUser({ tenantId: "tenant-1" })),
-    };
-    const service = new CouchProxyAuthService(jwtService as any, authService as any);
-
-    await expect(
-      service.authorize({
-        method: "GET",
-        url: "/api/couch-proxy/businessconnect_tenant-2/_all_docs",
-        cookies: { access_token: "good-token" },
-      })
-    ).rejects.toThrow(ForbiddenException);
   });
 
   it("rejects a database name that doesn't match any known entity prefix", async () => {
@@ -198,7 +134,7 @@ describe("CouchProxyAuthService", () => {
     await expect(
       service.authorize({
         method: "HEAD",
-        url: "/api/couch-proxy/businessconnect_tenant-1",
+        url: "/api/couch-proxy/medicalconnect_tenant-1",
         cookies: { access_token: "good-token" },
       })
     ).resolves.toBeUndefined();

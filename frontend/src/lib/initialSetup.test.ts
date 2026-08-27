@@ -140,7 +140,7 @@ describe("initial setup", () => {
 
     expect(calls.at(-1)).toBe("initialSetupCompleted");
     expect(calls).toContain("companyName");
-    expect(calls).toContain("receiptFormat");
+    expect(calls).toContain("defaultTaxRate");
   });
 
   it("does not write completion when a setting fails", async () => {

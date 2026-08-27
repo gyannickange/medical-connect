@@ -36,7 +36,7 @@ describe("TenantDataKeyRepository", () => {
     const key = await repository.getOrCreate("tenant-1");
 
     expect(key).toHaveLength(32);
-    expect(couchDBService.getDatabase).toHaveBeenCalledWith("businessconnect_identity");
+    expect(couchDBService.getDatabase).toHaveBeenCalledWith("medicalconnect_identity");
     expect(db.insert).toHaveBeenCalledTimes(1);
     const stored = db.insert.mock.calls[0][0];
     expect(stored._id).toBe("tenant-data-key:tenant-1");

@@ -1,7 +1,7 @@
 {
   "$schema": "../gen/schemas/desktop-schema.json",
   "identifier": "default",
-  "description": "Minimal permissions for the Business Connect desktop window",
+  "description": "Minimal permissions for the Medical Connect desktop window",
   "windows": ["main"],
   "permissions": ["core:default", "opener:default"]
 }

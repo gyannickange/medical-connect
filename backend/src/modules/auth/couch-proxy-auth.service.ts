@@ -45,7 +45,7 @@ export class CouchProxyAuthService {
     }
 
     const requestedDatabase = this.extractDatabaseName(request.url);
-    const isOwnedByCaller = requestedDatabase === `businessconnect_${user.tenantId}`;
+    const isOwnedByCaller = requestedDatabase === `medicalconnect_${user.tenantId}`;
     if (!isOwnedByCaller) {
       throw new ForbiddenException("Tenant does not own this database");
     }

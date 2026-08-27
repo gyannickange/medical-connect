@@ -18,10 +18,10 @@ use tauri::WebviewWindowBuilder;
 /// genuinely isolated. Returns None for the normal, non-simulator build.
 fn simulator_data_store_identifier(identifier: &str) -> Option<[u8; 16]> {
     match identifier {
-        "com.businessconnect.desktop.caisse1" => Some([
+        "com.medicalconnect.desktop.caisse1" => Some([
             170, 190, 82, 22, 223, 164, 69, 212, 147, 82, 116, 13, 188, 153, 61, 77,
         ]),
-        "com.businessconnect.desktop.caisse2" => Some([
+        "com.medicalconnect.desktop.caisse2" => Some([
             31, 94, 13, 64, 230, 31, 70, 45, 151, 80, 77, 50, 86, 64, 138, 198,
         ]),
         _ => None,
@@ -66,5 +66,5 @@ pub fn run() {
             Ok(())
         })
         .run(tauri::generate_context!())
-        .expect("error while running Business Connect desktop");
+        .expect("error while running Medical Connect desktop");
 }

@@ -2,10 +2,6 @@ import type { TranslationSection } from "./types";
 
 export const validation: TranslationSection = {
   en: {
-    // Validation messages
-    productIsRequired: "Product is required",
-    quantityMustBeAtLeast1: "Quantity must be at least 1",
-
     // Generic Zod validation messages (see lib/i18n/zodErrorMap.ts) - these
     // replace Zod's own built-in English-only messages so every form field
     // error respects the current language, without every schema in
@@ -28,10 +24,6 @@ export const validation: TranslationSection = {
     french: "French",
   },
   fr: {
-    // Validation messages
-    productIsRequired: "Le produit est requis",
-    quantityMustBeAtLeast1: "La quantité doit être au moins 1",
-
     // Generic Zod validation messages (see lib/i18n/zodErrorMap.ts)
     zodFieldRequired: "Ce champ est requis",
     zodInvalidEmail: "Adresse email invalide",

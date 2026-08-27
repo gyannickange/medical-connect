@@ -1,7 +1,7 @@
 import { test, expect } from "@playwright/test";
 
 /**
- * Business Connect — Full Application Smoke Test
+ * Medical Connect — Full Application Smoke Test
  *
  * Covers: login, dashboard, navigation, products, LAN discovery,
  * customers, categories, suppliers, staff, reports, settings.
@@ -39,8 +39,8 @@ test.describe("Initial setup", () => {
     const submittedSettingKeys: string[] = [];
 
     await page.addInitScript(() => {
-      localStorage.setItem("businessconnect_install_mode", "connected");
-      localStorage.setItem("businessconnect_language", "fr");
+      localStorage.setItem("medicalconnect_install_mode", "connected");
+      localStorage.setItem("medicalconnect_language", "fr");
     });
     await page.route("**/api/**", async (route) => {
       const request = route.request();
@@ -82,7 +82,7 @@ test.describe("Initial setup", () => {
       invoiceFrame.evaluate((element) => element.scrollWidth <= element.clientWidth),
     ).toBe(true);
     await page
-      .getByRole("button", { name: "Configurer Business Connect" })
+      .getByRole("button", { name: "Configurer Medical Connect" })
       .click();
     await expect(page).toHaveURL(/\/$/);
     expect(submittedSettingKeys.at(-1)).toBe("initialSetupCompleted");
@@ -111,8 +111,8 @@ test.describe("Initial setup", () => {
     };
 
     await page.addInitScript(() => {
-      localStorage.setItem("businessconnect_install_mode", "connected");
-      localStorage.setItem("businessconnect_language", "fr");
+      localStorage.setItem("medicalconnect_install_mode", "connected");
+      localStorage.setItem("medicalconnect_language", "fr");
     });
     await page.route("**/api/**", async (route) => {
       const request = route.request();

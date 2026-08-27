@@ -1,6 +1,6 @@
 import { getDeviceId, getDeviceName } from "./deviceIdentity";
 
-const STORAGE_KEY = "businessconnect_error_logs";
+const STORAGE_KEY = "medicalconnect_error_logs";
 const MAX_ENTRIES = 200;
 const MAX_STACK_LENGTH = 4000;
 

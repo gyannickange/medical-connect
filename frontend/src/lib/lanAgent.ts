@@ -52,7 +52,7 @@ export const lanAgent = {
 
   async prepareIdentity(deviceId: string) {
     const invoke = nativeInvoke();
-    if (!invoke) throw new Error("Business Connect LAN Agent is not available in this browser");
+    if (!invoke) throw new Error("Medical Connect LAN Agent is not available in this browser");
     return invoke<PreparedLanIdentity>("lan_agent_prepare_identity", {
       deviceId,
     });
@@ -60,7 +60,7 @@ export const lanAgent = {
 
   async installCertificate(certificate: string, caPublicKey: string) {
     const invoke = nativeInvoke();
-    if (!invoke) throw new Error("Business Connect LAN Agent is not available in this browser");
+    if (!invoke) throw new Error("Medical Connect LAN Agent is not available in this browser");
     await invoke<void>("lan_agent_install_certificate", {
       certificate,
       caPublicKey,
@@ -103,7 +103,7 @@ export const lanAgent = {
 
   async start() {
     const invoke = nativeInvoke();
-    if (!invoke) throw new Error("Business Connect LAN Agent is not available in this browser");
+    if (!invoke) throw new Error("Medical Connect LAN Agent is not available in this browser");
     return invoke<NativeLanAgentStatus>("lan_agent_start");
   },
 
@@ -139,7 +139,7 @@ export const lanAgent = {
     payload: unknown
   ): Promise<void> {
     const invoke = nativeInvoke();
-    if (!invoke) throw new Error("Business Connect LAN Agent is not available in this browser");
+    if (!invoke) throw new Error("Medical Connect LAN Agent is not available in this browser");
     await invoke<void>("lan_agent_send_lock_message", { address, port, path, payload });
   },
 
@@ -159,7 +159,7 @@ export const lanAgent = {
     payload: unknown
   ): Promise<void> {
     const invoke = nativeInvoke();
-    if (!invoke) throw new Error("Business Connect LAN Agent is not available in this browser");
+    if (!invoke) throw new Error("Medical Connect LAN Agent is not available in this browser");
     await invoke<void>("lan_agent_send_lock_message", { address, port, path, payload });
   },
 

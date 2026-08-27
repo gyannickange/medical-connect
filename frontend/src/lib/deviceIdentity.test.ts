@@ -30,8 +30,8 @@ describe("getDeviceName", () => {
 
   it("reuses a name already stored in localStorage", () => {
     const store = stubLocalStorage();
-    store.set("businessconnect_device_id", "device-fixed");
-    store.set("businessconnect_device_name", "Caisse Accueil");
+    store.set("medicalconnect_device_id", "device-fixed");
+    store.set("medicalconnect_device_name", "Caisse Accueil");
 
     expect(getDeviceName()).toBe("Caisse Accueil");
   });

@@ -13,8 +13,6 @@ export const initialSetupSchema = z.object({
   decimalPlaces: z.number().int().min(0).max(4),
   symbolPosition: z.enum(["before", "after"]),
   defaultTaxRate: z.number().min(0).max(100),
-  autoPrintReceipt: z.boolean(),
-  receiptFormat: z.enum(["retail", "invoice"]),
 });
 
 export type InitialSetupValues = z.infer<typeof initialSetupSchema>;
@@ -35,8 +33,6 @@ export const initialSetupDefaults: InitialSetupValues = {
   defaultCurrency: "XOF",
   ...defaultCurrencyFormat,
   defaultTaxRate: 20,
-  autoPrintReceipt: true,
-  receiptFormat: "retail",
 };
 
 export function initialSetupCompleted(value: unknown): boolean {
@@ -97,8 +93,6 @@ export async function persistInitialSetup(
     ["currencyDecimalPlaces", values.decimalPlaces, "system"],
     ["currencySymbolPosition", values.symbolPosition, "system"],
     ["defaultTaxRate", values.defaultTaxRate, "system"],
-    ["autoPrintReceipt", values.autoPrintReceipt, "system"],
-    ["receiptFormat", values.receiptFormat, "system"],
   ];
 
   // Sequential, not Promise.all: on a fresh local install there is no

@@ -8,7 +8,7 @@ export const setup: TranslationSection = {
     stepOf: "Step {current} of {total}",
     back: "Back",
     continue: "Continue",
-    configureBusinessConnect: "Configure Business Connect",
+    configureMedicalConnect: "Configure Medical Connect",
     setupSaved: "Setup saved",
     setupSaveError: "Failed to save setup",
     optionalInvoiceDetails:
@@ -26,7 +26,7 @@ export const setup: TranslationSection = {
     stepOf: "Étape {current} sur {total}",
     back: "Retour",
     continue: "Continuer",
-    configureBusinessConnect: "Configurer Business Connect",
+    configureMedicalConnect: "Configurer Medical Connect",
     setupSaved: "Configuration enregistrée",
     setupSaveError: "Échec de l'enregistrement de la configuration",
     optionalInvoiceDetails:

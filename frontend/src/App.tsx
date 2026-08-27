@@ -13,27 +13,24 @@ import { Layout } from "./components/Layout";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { GlobalOfflineSync } from "./components/GlobalOfflineSync";
 import { GlobalNativeLANAgent } from "./components/GlobalNativeLANAgent";
-import { ProductsReplicaProvider } from "./components/ProductsReplicaProvider";
-import { StockReplicaProvider } from "./components/StockReplicaProvider";
-import { CategoriesReplicaProvider } from "./components/CategoriesReplicaProvider";
-import { GlobalProductLockRequests } from "./components/GlobalProductLockRequests";
 import { OfflineSyncProvider } from "./hooks/useOfflineSync";
 import { useTranslation } from "./lib/i18n";
 import { InstallModeGate } from "./components/InstallModeGate";
 import { InitialSetupGate } from "./components/InitialSetupGate";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 
-const Dashboard = lazy(() => import("./pages/Dashboard"));
-const Products = lazy(() => import("./pages/Products"));
-const Categories = lazy(() => import("./pages/Categories"));
-const Rayons = lazy(() => import("./pages/Rayons"));
-const Customers = lazy(() => import("./pages/Customers"));
-const Suppliers = lazy(() => import("./pages/Suppliers"));
+const Patients = lazy(() => import("./pages/patients"));
+const NewPatient = lazy(() => import("./pages/patients/new"));
+const EditPatient = lazy(() => import("./pages/patients/edit"));
+const PatientDetails = lazy(() => import("./pages/patients/show"));
+const Consultations = lazy(() => import("./pages/consultations"));
+const NewConsultation = lazy(() => import("./pages/consultations/new"));
+const EditConsultation = lazy(() => import("./pages/consultations/edit"));
+const ConsultationDetails = lazy(() => import("./pages/consultations/show"));
+const FileAttente = lazy(() => import("./pages/FileAttente"));
+const QueueRegister = lazy(() => import("./pages/QueueRegister"));
+const QueueEntryDetails = lazy(() => import("./pages/QueueEntryDetails"));
 const Staff = lazy(() => import("./pages/Staff"));
-const Reports = lazy(() => import("./pages/Reports"));
-const Sales = lazy(() =>
-  import("./pages/Sales").then((m) => ({ default: m.Sales })),
-);
 const Settings = lazy(() => import("./pages/Settings"));
 const AuditLogs = lazy(() => import("./pages/AuditLogs"));
 const Login = lazy(() => import("./pages/Login"));
@@ -85,42 +82,84 @@ function Router() {
         <Route path="/">
           <ProtectedRoute>
             <Layout>
-              <Dashboard />
+              <Patients />
             </Layout>
           </ProtectedRoute>
         </Route>
-        <Route path="/products">
+        <Route path="/patients">
           <ProtectedRoute>
             <Layout>
-              <Products />
+              <Patients />
             </Layout>
           </ProtectedRoute>
         </Route>
-        <Route path="/categories">
+        <Route path="/patients/new">
           <ProtectedRoute>
             <Layout>
-              <Categories />
+              <NewPatient />
             </Layout>
           </ProtectedRoute>
         </Route>
-        <Route path="/rayons">
+        <Route path="/patients/:id/edit">
           <ProtectedRoute>
             <Layout>
-              <Rayons />
+              <EditPatient />
             </Layout>
           </ProtectedRoute>
         </Route>
-        <Route path="/customers">
+        <Route path="/patients/:id">
           <ProtectedRoute>
             <Layout>
-              <Customers />
+              <PatientDetails />
             </Layout>
           </ProtectedRoute>
         </Route>
-        <Route path="/suppliers">
+        <Route path="/consultations">
           <ProtectedRoute>
             <Layout>
-              <Suppliers />
+              <Consultations />
+            </Layout>
+          </ProtectedRoute>
+        </Route>
+        <Route path="/consultations/new">
+          <ProtectedRoute>
+            <Layout>
+              <NewConsultation />
+            </Layout>
+          </ProtectedRoute>
+        </Route>
+        <Route path="/consultations/:id/edit">
+          <ProtectedRoute>
+            <Layout>
+              <EditConsultation />
+            </Layout>
+          </ProtectedRoute>
+        </Route>
+        <Route path="/consultations/:id">
+          <ProtectedRoute>
+            <Layout>
+              <ConsultationDetails />
+            </Layout>
+          </ProtectedRoute>
+        </Route>
+        <Route path="/file-attente">
+          <ProtectedRoute>
+            <Layout>
+              <FileAttente />
+            </Layout>
+          </ProtectedRoute>
+        </Route>
+        <Route path="/file-attente/new">
+          <ProtectedRoute>
+            <Layout>
+              <QueueRegister />
+            </Layout>
+          </ProtectedRoute>
+        </Route>
+        <Route path="/file-attente/:consultationId">
+          <ProtectedRoute>
+            <Layout>
+              <QueueEntryDetails />
             </Layout>
           </ProtectedRoute>
         </Route>
@@ -128,20 +167,6 @@ function Router() {
           <ProtectedRoute>
             <Layout>
               <Staff />
-            </Layout>
-          </ProtectedRoute>
-        </Route>
-        <Route path="/reports">
-          <ProtectedRoute>
-            <Layout>
-              <Reports />
-            </Layout>
-          </ProtectedRoute>
-        </Route>
-        <Route path="/sales">
-          <ProtectedRoute>
-            <Layout>
-              <Sales />
             </Layout>
           </ProtectedRoute>
         </Route>
@@ -180,10 +205,6 @@ function App() {
                     <Toaster />
                     <GlobalOfflineSync />
                     <GlobalNativeLANAgent />
-                    <ProductsReplicaProvider />
-                    <StockReplicaProvider />
-                    <CategoriesReplicaProvider />
-                    <GlobalProductLockRequests />
                     <InstallModeGate>
                       <InitialSetupGate>
                         <Router />
