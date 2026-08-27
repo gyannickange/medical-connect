@@ -7,7 +7,7 @@ describe("PatientsRepository", () => {
       const db = { insert: jest.fn().mockResolvedValue({ ok: true, rev: "1-a" }) };
       const couchDBService = { getDatabase: jest.fn().mockResolvedValue(db) };
       const sequenceCounterService = { next: jest.fn().mockResolvedValue(98) };
-      const repository = new PatientsRepository(couchDBService as any, sequenceCounterService as any);
+      const repository = new PatientsRepository(couchDBService as any, sequenceCounterService as any, { uploadObject: jest.fn(), getPresignedUrl: jest.fn() } as any);
 
       const result = await repository.create({
         id: "123e4567-e89b-42d3-a456-426614174000",
@@ -63,7 +63,7 @@ describe("PatientsRepository", () => {
         insert: jest.fn().mockResolvedValue({ ok: true }),
       };
       const couchDBService = { getDatabase: jest.fn().mockResolvedValue(db) };
-      const repository = new PatientsRepository(couchDBService as any, { next: jest.fn() } as any);
+      const repository = new PatientsRepository(couchDBService as any, { next: jest.fn() } as any, { uploadObject: jest.fn(), getPresignedUrl: jest.fn() } as any);
 
       const result = await repository.update("patient-1", "tenant-1", { firstName: "Aissatou" });
 
@@ -77,7 +77,8 @@ describe("PatientsRepository", () => {
       const db = { get: jest.fn().mockRejectedValue({ statusCode: 404 }) };
       const repository = new PatientsRepository(
         { getDatabase: jest.fn().mockResolvedValue(db) } as any,
-        { next: jest.fn() } as any
+        { next: jest.fn() } as any,
+        { uploadObject: jest.fn(), getPresignedUrl: jest.fn() } as any
       );
 
       await expect(repository.update("missing", "tenant-1", { firstName: "X" })).rejects.toThrow(NotFoundException);
@@ -92,7 +93,7 @@ describe("PatientsRepository", () => {
         getDatabase: jest.fn().mockResolvedValue(db),
         ensureIndex: jest.fn().mockResolvedValue(undefined),
       };
-      const repository = new PatientsRepository(couchDBService as any, { next: jest.fn() } as any);
+      const repository = new PatientsRepository(couchDBService as any, { next: jest.fn() } as any, { uploadObject: jest.fn(), getPresignedUrl: jest.fn() } as any);
 
       const result = await repository.search("Diallo", "tenant-1");
 
@@ -108,6 +109,77 @@ describe("PatientsRepository", () => {
       expect(call.selector.$or).toHaveLength(3);
       expect(call.selector.$or[0]).toEqual({ searchName: { $regex: "diallo" } });
       expect(result).toEqual([{ _id: "patient:patient-1", type: "patient", firstName: "Aïssatou", id: "patient-1" }]);
+    });
+  });
+
+  describe("attachPhoto", () => {
+    it("uploads to S3 with a tenant/patient-scoped key and patches photoS3Key", async () => {
+      const existing = {
+        _id: "patient:patient-1",
+        _rev: "2-a",
+        id: "patient-1",
+        type: "patient",
+        tenantId: "tenant-1",
+        photoS3Key: null,
+      };
+      const db = {
+        get: jest.fn().mockResolvedValue(existing),
+        insert: jest.fn().mockResolvedValue({ ok: true }),
+      };
+      const couchDBService = { getDatabase: jest.fn().mockResolvedValue(db) };
+      const s3Service = { uploadObject: jest.fn().mockResolvedValue(undefined) };
+      const repository = new PatientsRepository(couchDBService as any, { next: jest.fn() } as any, s3Service as any);
+
+      const result = await repository.attachPhoto("patient-1", "tenant-1", Buffer.from("img").toString("base64"), "image/jpeg");
+
+      expect(s3Service.uploadObject).toHaveBeenCalledWith(
+        expect.stringMatching(/^tenants\/tenant-1\/patients\/patient-1\/photo-\d+\.jpg$/),
+        Buffer.from("img"),
+        "image/jpeg"
+      );
+      expect(db.insert).toHaveBeenCalledWith(expect.objectContaining({ photoS3Key: expect.stringMatching(/^tenants\//) }));
+      expect(result.photoS3Key).toMatch(/^tenants\//);
+    });
+
+    it("throws NotFoundException when the patient does not exist", async () => {
+      const db = { get: jest.fn().mockRejectedValue({ statusCode: 404 }) };
+      const repository = new PatientsRepository(
+        { getDatabase: jest.fn().mockResolvedValue(db) } as any,
+        { next: jest.fn() } as any,
+        { uploadObject: jest.fn() } as any
+      );
+
+      await expect(
+        repository.attachPhoto("missing", "tenant-1", "aW1n", "image/jpeg")
+      ).rejects.toThrow(NotFoundException);
+    });
+  });
+
+  describe("getPhotoUrl", () => {
+    it("returns a presigned URL when photoS3Key is set", async () => {
+      const db = { get: jest.fn().mockResolvedValue({ type: "patient", tenantId: "tenant-1", photoS3Key: "tenants/tenant-1/patients/patient-1/photo-1.jpg" }) };
+      const s3Service = { getPresignedUrl: jest.fn().mockResolvedValue("https://signed.example/photo.jpg") };
+      const repository = new PatientsRepository(
+        { getDatabase: jest.fn().mockResolvedValue(db) } as any,
+        { next: jest.fn() } as any,
+        s3Service as any
+      );
+
+      const url = await repository.getPhotoUrl("patient-1", "tenant-1");
+
+      expect(s3Service.getPresignedUrl).toHaveBeenCalledWith("tenants/tenant-1/patients/patient-1/photo-1.jpg", 300);
+      expect(url).toBe("https://signed.example/photo.jpg");
+    });
+
+    it("throws NotFoundException when no photo has been uploaded yet", async () => {
+      const db = { get: jest.fn().mockResolvedValue({ type: "patient", tenantId: "tenant-1", photoS3Key: null }) };
+      const repository = new PatientsRepository(
+        { getDatabase: jest.fn().mockResolvedValue(db) } as any,
+        { next: jest.fn() } as any,
+        { getPresignedUrl: jest.fn() } as any
+      );
+
+      await expect(repository.getPhotoUrl("patient-1", "tenant-1")).rejects.toThrow(NotFoundException);
     });
   });
 });

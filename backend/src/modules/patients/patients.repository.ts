@@ -3,6 +3,7 @@ import { randomUUID } from "crypto";
 import type { DocumentScope } from "nano";
 import { CouchDBService } from "../../database/couchdb.service";
 import { SequenceCounterService } from "../../lib/sequence-counter.service";
+import { S3Service } from "../../lib/s3.service";
 import type { InsertPatient, Patient } from "@shared/schema";
 import type { PaginationOptions } from "../../lib/pagination";
 import { couchDocumentId, publicDocumentId, tenantDatabaseName } from "../../database/couchdb-naming";
@@ -11,7 +12,8 @@ import { couchDocumentId, publicDocumentId, tenantDatabaseName } from "../../dat
 export class PatientsRepository {
   constructor(
     private readonly couchDBService: CouchDBService,
-    private readonly sequenceCounterService: SequenceCounterService
+    private readonly sequenceCounterService: SequenceCounterService,
+    private readonly s3Service: S3Service
   ) {}
 
   async create(data: InsertPatient): Promise<Patient> {
@@ -156,6 +158,38 @@ export class PatientsRepository {
 
   async findExistingForCascade(db: DocumentScope<unknown>, id: string): Promise<Record<string, any> | null> {
     return this.findExisting(db, id);
+  }
+
+  async attachPhoto(id: string, tenantId: string, base64Body: string, contentType: string): Promise<Patient> {
+    const db = await this.database(tenantId);
+    const current = await this.findExisting(db, id);
+    if (!current || current.type !== "patient" || current.tenantId !== tenantId) {
+      throw new NotFoundException("Patient not found");
+    }
+
+    const extension = contentType === "image/png" ? "png" : "jpg";
+    const key = `tenants/${tenantId}/patients/${id}/photo-${Date.now()}.${extension}`;
+    await this.s3Service.uploadObject(key, Buffer.from(base64Body, "base64"), contentType);
+
+    const updated = { ...current, photoS3Key: key, updatedAt: new Date().toISOString() };
+    try {
+      await db.insert(updated as any);
+    } catch (error) {
+      throw this.unavailable(error);
+    }
+    return this.hydrate(updated);
+  }
+
+  async getPhotoUrl(id: string, tenantId: string): Promise<string> {
+    const db = await this.database(tenantId);
+    const current = await this.findExisting(db, id);
+    if (!current || current.type !== "patient" || current.tenantId !== tenantId) {
+      throw new NotFoundException("Patient not found");
+    }
+    if (!current.photoS3Key) {
+      throw new NotFoundException("Patient has no photo");
+    }
+    return this.s3Service.getPresignedUrl(current.photoS3Key, 300);
   }
 
   private mapDocs(docs: any[]): any[] {
