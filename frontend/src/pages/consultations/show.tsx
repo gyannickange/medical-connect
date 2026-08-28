@@ -140,6 +140,20 @@ export default function ConsultationHub() {
             <ArrowRight className="w-4 h-4 ml-2" />
           </Button>
         );
+      case "carePlan":
+        return (
+          <Button className="btn-primary" onClick={() => setLocation(`/consultations/${consultationId}/plan-prise-en-charge`)} data-testid="button-hub-continue-care-plan">
+            {t("continueToStep")}
+            <ArrowRight className="w-4 h-4 ml-2" />
+          </Button>
+        );
+      case "closure":
+        return (
+          <Button className="btn-primary" onClick={() => setLocation(`/consultations/${consultationId}/resume-cloture`)} data-testid="button-hub-continue-closure">
+            {t("continueToStep")}
+            <ArrowRight className="w-4 h-4 ml-2" />
+          </Button>
+        );
       default:
         return <Badge variant="secondary">{t("availableInFuturePhase")}</Badge>;
     }
@@ -250,9 +264,18 @@ export default function ConsultationHub() {
               {prescriptions.length === 0 ? t("notStartedYet") : prescriptions.flatMap((p) => p.lines.map((l) => l.drugName)).join(", ")}
             </p>
           </Card>
-          <Card className="p-4 space-y-1 opacity-60" data-testid="card-hub-care-plan">
-            <span className="text-sm font-medium">{t("carePlanCardTitle")}</span>
-            <p className="text-sm text-muted-foreground">{t("notStartedYet")}</p>
+          <Card className="p-4 space-y-1" data-testid="card-hub-care-plan">
+            <div className="flex items-center justify-between">
+              <span className="text-sm font-medium">{t("carePlanCardTitle")}</span>
+              <PolicyGuard policy={ConsultationsPolicy} action="canUpdate">
+                <Button variant="link" size="sm" className="h-auto p-0" onClick={() => setLocation(`/consultations/${consultationId}/plan-prise-en-charge`)}>{t("modifyLabel")}</Button>
+              </PolicyGuard>
+            </div>
+            <p className="text-sm text-muted-foreground">
+              {consultation.carePlan
+                ? t(`carePlanOrientation${consultation.carePlan.orientation.replace(/(^|_)([a-z])/g, (_, __, c: string) => c.toUpperCase())}`)
+                : t("notStartedYet")}
+            </p>
           </Card>
 
           <Card className="p-6 flex items-center justify-between">
@@ -278,6 +301,9 @@ export default function ConsultationHub() {
           <Button variant="outline" onClick={() => setLocation(`/patients/${consultation.patientId}`)} data-testid="button-patient-history">
             <User className="w-4 h-4 mr-2" />
             {t("patientHistory")}
+          </Button>
+          <Button variant="outline" onClick={() => setLocation(`/patients/${consultation.patientId}/dossier-medical`)} data-testid="button-view-dossier-medical">
+            {t("viewDossierMedicalAction")}
           </Button>
         </div>
         <PolicyGuard policy={ConsultationsPolicy} action="canUpdate">

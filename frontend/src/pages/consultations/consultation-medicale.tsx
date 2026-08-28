@@ -434,11 +434,32 @@ export default function ConsultationMedicaleForm() {
         </PolicyGuard>
       </Card>
 
+      <Card className="p-6 space-y-2" data-testid="card-care-plan">
+        <div className="flex items-center justify-between">
+          <h2 className="font-semibold text-foreground">{t("carePlanCardTitle")}</h2>
+          <Button
+            variant="link"
+            size="sm"
+            className="h-auto p-0"
+            onClick={() => setLocation(`/consultations/${consultationId}/plan-prise-en-charge`)}
+            data-testid="button-edit-care-plan">
+            {consultation.carePlan ? t("modifyLabel") : t("defineCarePlanAction")}
+          </Button>
+        </div>
+        <p className="text-sm text-muted-foreground">
+          {consultation.carePlan
+            ? t(`carePlanOrientation${consultation.carePlan.orientation.replace(/(^|_)([a-z])/g, (_, __, c: string) => c.toUpperCase())}`)
+            : t("notStartedYet")}
+        </p>
+      </Card>
+
       <div className="fixed bottom-0 left-0 right-0 md:left-64 bg-background border-t border-border p-4 flex items-center justify-end gap-2">
         <Button variant="outline" onClick={() => saveDraftMutation.mutate()} disabled={isPending} data-testid="button-save-draft">
           {saveDraftMutation.isPending ? t("saving") : t("saveDraft")}
         </Button>
-        <Button variant="outline" disabled data-testid="button-close-consultation">{t("closeConsultationAction")}</Button>
+        <Button variant="outline" onClick={() => setLocation(`/consultations/${consultationId}/resume-cloture`)} data-testid="button-close-consultation">
+          {t("closeConsultationAction")}
+        </Button>
         <Button className="btn-primary" onClick={() => markCompletedMutation.mutate()} disabled={isPending} data-testid="button-mark-completed">
           {markCompletedMutation.isPending ? t("saving") : t("markCompleted")}
         </Button>

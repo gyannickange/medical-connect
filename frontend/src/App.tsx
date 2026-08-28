@@ -23,12 +23,17 @@ const Patients = lazy(() => import("./pages/patients"));
 const NewPatient = lazy(() => import("./pages/patients/new"));
 const EditPatient = lazy(() => import("./pages/patients/edit"));
 const PatientDetails = lazy(() => import("./pages/patients/show"));
+const DossierMedical = lazy(() => import("./pages/patients/dossier-medical"));
 const Consultations = lazy(() => import("./pages/consultations"));
 const NewConsultation = lazy(() => import("./pages/consultations/new"));
 const EditConsultation = lazy(() => import("./pages/consultations/edit"));
 const ConsultationDetails = lazy(() => import("./pages/consultations/show"));
 const PreConsultationForm = lazy(() => import("./pages/consultations/pre-consultation"));
 const ConsultationMedicaleForm = lazy(() => import("./pages/consultations/consultation-medicale"));
+const PlanPriseEnCharge = lazy(() => import("./pages/consultations/plan-prise-en-charge"));
+const ResumeCloture = lazy(() => import("./pages/consultations/resume-cloture"));
+const Suivi = lazy(() => import("./pages/consultations/suivi"));
+const SuiviResultat = lazy(() => import("./pages/consultations/suivi-resultat"));
 const LaboratoireIndex = lazy(() => import("./pages/laboratoire"));
 const NewLabOrder = lazy(() => import("./pages/laboratoire/new"));
 const LabOrderDetails = lazy(() => import("./pages/laboratoire/show"));
@@ -114,6 +119,13 @@ function Router() {
             </Layout>
           </ProtectedRoute>
         </Route>
+        <Route path="/patients/:id/dossier-medical">
+          <ProtectedRoute>
+            <Layout>
+              <DossierMedical />
+            </Layout>
+          </ProtectedRoute>
+        </Route>
         <Route path="/patients/:id">
           <ProtectedRoute>
             <Layout>
@@ -153,6 +165,34 @@ function Router() {
           <ProtectedRoute>
             <Layout>
               <ConsultationMedicaleForm />
+            </Layout>
+          </ProtectedRoute>
+        </Route>
+        <Route path="/consultations/:id/plan-prise-en-charge">
+          <ProtectedRoute>
+            <Layout>
+              <PlanPriseEnCharge />
+            </Layout>
+          </ProtectedRoute>
+        </Route>
+        <Route path="/consultations/:id/resume-cloture">
+          <ProtectedRoute>
+            <Layout>
+              <ResumeCloture />
+            </Layout>
+          </ProtectedRoute>
+        </Route>
+        <Route path="/consultations/:id/suivi">
+          <ProtectedRoute>
+            <Layout>
+              <Suivi />
+            </Layout>
+          </ProtectedRoute>
+        </Route>
+        <Route path="/consultations/:id/suivi/:labOrderId">
+          <ProtectedRoute>
+            <Layout>
+              <SuiviResultat />
             </Layout>
           </ProtectedRoute>
         </Route>
