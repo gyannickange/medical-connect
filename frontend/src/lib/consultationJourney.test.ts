@@ -7,7 +7,7 @@ function patient(overrides: Partial<Patient> = {}): Patient {
 }
 
 function consultation(overrides: Partial<Consultation> = {}): Consultation {
-  return { id: "c1", tenantId: "t1", number: "C-2026-0904", patientId: "p1", scheduledAt: "2026-08-27T08:05:00.000Z", specialty: "Cardiologie", assignedDoctorId: "doctor-1", roomId: null, priority: "normal", reason: "Suivi", nurseNotes: null, symptoms: null, vitals: null, vitalsRecordedAt: null, relevantHistory: [], presentIllnessHistory: null, physicalExam: null, diagnosisPrincipal: null, diagnosisSecondary: [], diagnosisHypothesis: null, medicalConsultationSavedAt: null, status: "en_cours", createdAt: "2026-08-27T08:05:00.000Z", updatedAt: "2026-08-27T08:05:00.000Z", ...overrides } as Consultation;
+  return { id: "c1", tenantId: "t1", number: "C-2026-0904", patientId: "p1", scheduledAt: "2026-08-27T08:05:00.000Z", specialty: "Cardiologie", assignedDoctorId: "doctor-1", roomId: null, priority: "normal", reason: "Suivi", nurseNotes: null, symptoms: null, vitals: null, vitalsRecordedAt: null, relevantHistory: [], presentIllnessHistory: null, physicalExam: null, diagnosisPrincipal: null, diagnosisSecondary: [], diagnosisHypothesis: null, medicalConsultationSavedAt: null, carePlan: null, carePlanSavedAt: null, closedAt: null, status: "en_cours", createdAt: "2026-08-27T08:05:00.000Z", updatedAt: "2026-08-27T08:05:00.000Z", ...overrides } as Consultation;
 }
 
 function arrivedQueueItem(): QueueItem {
@@ -114,5 +114,58 @@ describe("computeConsultationJourney", () => {
     const steps = computeConsultationJourney(patient(), c, undefined, [], prescriptions);
 
     expect(steps[6]).toMatchObject({ key: "prescription", state: "completed" });
+  });
+
+  it("marks step 8 completed once carePlan is set, occurredAt from carePlanSavedAt", () => {
+    const c = consultation({
+      vitalsRecordedAt: "2026-08-27T10:25:00.000Z",
+      medicalConsultationSavedAt: "2026-08-27T10:35:00.000Z",
+      status: "terminee",
+      carePlan: { orientation: "retour_domicile", medicalRecommendations: "Repos", patientInstructions: "RAS" },
+      carePlanSavedAt: "2026-08-27T11:00:00.000Z",
+    } as any);
+
+    const steps = computeConsultationJourney(patient(), c, undefined, [], []);
+
+    expect(steps[7]).toMatchObject({ key: "carePlan", state: "completed", occurredAt: new Date("2026-08-27T11:00:00.000Z") });
+  });
+
+  it("marks step 8 current while carePlan is still null", () => {
+    const c = consultation({ vitalsRecordedAt: "2026-08-27T10:25:00.000Z", medicalConsultationSavedAt: "2026-08-27T10:35:00.000Z", status: "terminee" });
+
+    const steps = computeConsultationJourney(patient(), c, arrivedQueueItem(), [], []);
+
+    expect(steps[7]).toMatchObject({ key: "carePlan", state: "current" });
+    expect(steps[8]).toMatchObject({ key: "closure", state: "not_started" });
+  });
+
+  it("marks step 9 completed only once status is terminee and closedAt is set", () => {
+    const c = consultation({
+      vitalsRecordedAt: "2026-08-27T10:25:00.000Z",
+      medicalConsultationSavedAt: "2026-08-27T10:35:00.000Z",
+      carePlan: { orientation: "autre", decisionType: "x", reevaluationFrequency: "1 semaine", description: "y", followUpNeeded: false, involvedParties: [] },
+      carePlanSavedAt: "2026-08-27T11:00:00.000Z",
+      status: "terminee",
+      closedAt: "2026-08-27T11:05:00.000Z",
+    } as any);
+
+    const steps = computeConsultationJourney(patient(), c, undefined, [], []);
+
+    expect(steps[8]).toMatchObject({ key: "closure", state: "completed", occurredAt: new Date("2026-08-27T11:05:00.000Z") });
+  });
+
+  it("does not mark step 9 completed when status is terminee but closedAt was never set (legacy Marquer terminée path)", () => {
+    const c = consultation({
+      vitalsRecordedAt: "2026-08-27T10:25:00.000Z",
+      medicalConsultationSavedAt: "2026-08-27T10:35:00.000Z",
+      carePlan: { orientation: "autre", decisionType: "x", reevaluationFrequency: "1 semaine", description: "y", followUpNeeded: false, involvedParties: [] },
+      carePlanSavedAt: "2026-08-27T11:00:00.000Z",
+      status: "terminee",
+      closedAt: null,
+    } as any);
+
+    const steps = computeConsultationJourney(patient(), c, arrivedQueueItem(), [], []);
+
+    expect(steps[8]).toMatchObject({ key: "closure", state: "current" });
   });
 });
