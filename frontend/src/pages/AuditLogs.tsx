@@ -38,11 +38,10 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useTranslation } from "../lib/i18n";
 import { useTenant } from "../contexts/TenantContext";
-import { useAuditLogs } from "@/hooks/useAuditLogs";
+import { useAuditLogs, type AuditLogWithPatient } from "@/hooks/useAuditLogs";
 import { usePolicy } from "@/hooks/usePolicy";
 import { AuditPolicy } from "@/lib/policies/audit.policy";
 import { PolicyGuard } from "@/components/PolicyGuard";
-import type { AuditLog } from "@shared/schema";
 
 export default function AuditLogs() {
   const { t } = useTranslation();
@@ -50,7 +49,7 @@ export default function AuditLogs() {
   const auditPolicy = usePolicy(AuditPolicy);
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
   const [showDetailModal, setShowDetailModal] = useState(false);
-  const [selectedLog, setSelectedLog] = useState<AuditLog | null>(null);
+  const [selectedLog, setSelectedLog] = useState<AuditLogWithPatient | null>(null);
 
   // Filters
   const [filters, setFilters] = useState({
@@ -86,12 +85,12 @@ export default function AuditLogs() {
     setExpandedRows(newExpanded);
   };
 
-  const handleViewDetails = (log: AuditLog) => {
+  const handleViewDetails = (log: AuditLogWithPatient) => {
     setSelectedLog(log);
     setShowDetailModal(true);
   };
 
-  const filteredLogs = (auditLogs as AuditLog[]).filter((log) => {
+  const filteredLogs = (auditLogs as AuditLogWithPatient[]).filter((log) => {
     if (!filters.search) return true;
     const searchLower = filters.search.toLowerCase();
     return (
@@ -142,6 +141,33 @@ export default function AuditLogs() {
               {t("auditLogs")}
             </h1>
           </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <Card>
+            <CardContent className="p-4">
+              <p className="text-xs font-medium text-muted-foreground uppercase">{t("auditActionsToday")}</p>
+              <p className="text-2xl font-bold text-foreground" data-testid="text-actions-today">
+                {filteredLogs.filter((log) => new Date(log.createdAt).toDateString() === new Date().toDateString()).length}
+              </p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-4">
+              <p className="text-xs font-medium text-muted-foreground uppercase">{t("auditActiveUsers")}</p>
+              <p className="text-2xl font-bold text-foreground" data-testid="text-active-users">
+                {new Set(filteredLogs.map((log) => log.userId)).size}
+              </p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-4">
+              <p className="text-xs font-medium text-muted-foreground uppercase">{t("auditSecurityAlerts")}</p>
+              <p className="text-2xl font-bold text-foreground" data-testid="text-security-alerts">
+                {filteredLogs.filter((log) => log.status === "FAILED").length}
+              </p>
+            </CardContent>
+          </Card>
         </div>
 
         {/* Filters */}
@@ -227,16 +253,23 @@ export default function AuditLogs() {
                 </Select>
               </div>
               <div>
-                <label className="text-sm font-medium mb-2 block">
-                  {t("entityType")}
-                </label>
-                <Input
-                  placeholder={t("searchEntityType")}
-                  value={filters.entityType}
-                  onChange={(e) =>
-                    setFilters({ ...filters, entityType: e.target.value })
-                  }
-                />
+                <label className="text-sm font-medium mb-2 block">{t("entityType")}</label>
+                <Select value={filters.entityType} onValueChange={(value) => setFilters({ ...filters, entityType: value })}>
+                  <SelectTrigger data-testid="select-audit-module">
+                    <SelectValue placeholder={t("allModules")} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">{t("allModules")}</SelectItem>
+                    <SelectItem value="patients">{t("patients")}</SelectItem>
+                    <SelectItem value="consultations">{t("consultations")}</SelectItem>
+                    <SelectItem value="queue">{t("queueTitle")}</SelectItem>
+                    <SelectItem value="lab-orders">{t("laboratoireTitle")}</SelectItem>
+                    <SelectItem value="prescriptions">{t("pharmacieTitle")}</SelectItem>
+                    <SelectItem value="staff">{t("staff")}</SelectItem>
+                    <SelectItem value="rooms">{t("salles")}</SelectItem>
+                    <SelectItem value="settings">{t("settings")}</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
               <div>
                 <label className="text-sm font-medium mb-2 block">
@@ -300,6 +333,7 @@ export default function AuditLogs() {
                     <TableHead>{t("action")}</TableHead>
                     <TableHead>{t("entityType")}</TableHead>
                     <TableHead>{t("entityId")}</TableHead>
+                    <TableHead>{t("patientConcerned")}</TableHead>
                     <TableHead>{t("status")}</TableHead>
                     <TableHead className="w-20"></TableHead>
                   </TableRow>
@@ -329,6 +363,7 @@ export default function AuditLogs() {
                         <TableCell className="font-mono text-xs">
                           {log.entityId || "-"}
                         </TableCell>
+                        <TableCell>{log.patientName ?? "-"}</TableCell>
                         <TableCell>{getStatusBadge(log.status)}</TableCell>
                         <TableCell>
                           <Button
@@ -341,7 +376,7 @@ export default function AuditLogs() {
                       </TableRow>
                       {expandedRows.has(log.id) && (
                         <TableRow>
-                          <TableCell colSpan={8} className="bg-muted/30">
+                          <TableCell colSpan={9} className="bg-muted/30">
                             <div className="p-4 space-y-2">
                               {log.errorMessage && (
                                 <div>

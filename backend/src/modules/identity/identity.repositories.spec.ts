@@ -44,7 +44,7 @@ describe("identity repositories", () => {
 
   it("reserves normalized usernames and rejects duplicates", async () => {
     const { couchDBService } = couchHarness();
-    const repository = new UsersRepository(couchDBService as any);
+    const repository = new UsersRepository(couchDBService as any, { uploadObject: jest.fn(), getPresignedUrl: jest.fn() } as any);
     const input = {
       username: "admin",
       password: "hash",

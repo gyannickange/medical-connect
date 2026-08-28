@@ -17,6 +17,7 @@ import { queue } from "./queue";
 import { labOrders } from "./labOrders";
 import { prescriptions } from "./prescriptions";
 import { carePlan } from "./carePlan";
+import { rooms } from "./rooms";
 
 export type { Language } from "./types";
 
@@ -37,6 +38,7 @@ const sections: TranslationSection[] = [
   labOrders,
   prescriptions,
   carePlan,
+  rooms,
 ];
 
 const en: Record<string, string> = {};

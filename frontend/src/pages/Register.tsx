@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLocation } from "wouter";
-import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -11,16 +10,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, Package } from "lucide-react";
-import type { Tenant } from "@shared/schema";
 import { useTranslation } from "@/lib/i18n";
 
 export default function Register() {
@@ -32,26 +23,17 @@ export default function Register() {
     lastName: "",
     email: "",
     tenantId: "",
-    role: "cashier" as "admin" | "manager" | "cashier",
   });
   const [isLoading, setIsLoading] = useState(false);
-  const { register } = useAuth();
+  const { register, user } = useAuth();
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const { t } = useTranslation();
 
-  // Fetch tenants for selection
-  const { data: tenants, isLoading: tenantsLoading } = useQuery<Tenant[]>({
-    queryKey: ["/api/tenants"],
-    queryFn: async () => {
-      const response = await fetch("/api/tenants");
-      if (!response.ok) {
-        // If 401, tenants endpoint is protected, we'll handle this gracefully
-        return [];
-      }
-      return response.json();
-    },
-  });
+  if (user) {
+    setLocation("/staff");
+    return null;
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -94,7 +76,7 @@ export default function Register() {
         lastName: formData.lastName,
         email: formData.email || undefined,
         tenantId: formData.tenantId,
-        role: formData.role,
+        role: "admin",
       });
 
       toast({
@@ -221,38 +203,14 @@ export default function Register() {
 
             <div className="space-y-2">
               <Label htmlFor="tenantId">{t("tenantShop")}</Label>
-              <Select
+              <Input
+                id="tenantId"
+                type="text"
                 value={formData.tenantId}
-                onValueChange={(value) => handleChange("tenantId", value)}
-                disabled={isLoading || tenantsLoading}>
-                <SelectTrigger>
-                  <SelectValue placeholder={t("selectTenant")} />
-                </SelectTrigger>
-                <SelectContent>
-                  {tenants?.map((tenant) => (
-                    <SelectItem key={tenant.id} value={tenant.id}>
-                      {tenant.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="role">{t("role")}</Label>
-              <Select
-                value={formData.role}
-                onValueChange={(value: any) => handleChange("role", value)}
-                disabled={isLoading}>
-                <SelectTrigger>
-                  <SelectValue placeholder={t("selectRole")} />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="cashier">{t("cashier")}</SelectItem>
-                  <SelectItem value="manager">{t("manager")}</SelectItem>
-                  <SelectItem value="admin">{t("admin")}</SelectItem>
-                </SelectContent>
-              </Select>
+                onChange={(e) => handleChange("tenantId", e.target.value)}
+                required
+                disabled={isLoading}
+              />
             </div>
 
             <Button type="submit" className="w-full" disabled={isLoading}>

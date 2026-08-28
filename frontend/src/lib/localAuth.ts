@@ -198,6 +198,11 @@ export function toPublicLocalUser(doc: LocalUserDoc): Omit<User, "password"> {
     role: doc.role,
     tenantId: LOCAL_TENANT_ID,
     isActive: doc.active,
+    service: null,
+    specialty: null,
+    matricule: null,
+    fonction: null,
+    photoS3Key: null,
     createdAt: doc.createdAt,
   };
 }

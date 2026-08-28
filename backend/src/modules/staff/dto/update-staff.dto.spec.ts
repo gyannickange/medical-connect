@@ -65,4 +65,15 @@ describe("UpdateStaffDto", () => {
     const errors = await validate(dto);
     expect(errors).toHaveLength(0);
   });
+
+  it("accepts the new optional service/specialty/matricule/fonction fields", async () => {
+    const dto = plainToInstance(UpdateStaffDto, {
+      service: "Cardiologie",
+      specialty: "Cardiologie interventionnelle",
+      matricule: "MED-99382",
+      fonction: "Médecin Chef Adjoint",
+    });
+    const errors = await validate(dto);
+    expect(errors).toHaveLength(0);
+  });
 });

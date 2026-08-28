@@ -127,4 +127,22 @@ describe("CreateStaffDto", () => {
     const errors = await validate(dto);
     expect(errors.some((e) => e.property === "email")).toBe(true);
   });
+
+  it("accepts the new optional service/specialty/matricule/fonction fields", async () => {
+    const dto = plainToInstance(CreateStaffDto, {
+      ...validBase,
+      service: "Cardiologie",
+      specialty: "Cardiologie interventionnelle",
+      matricule: "MED-99382",
+      fonction: "Médecin Chef Adjoint",
+    });
+    const errors = await validate(dto);
+    expect(errors).toHaveLength(0);
+  });
+
+  it("stays valid without service/specialty/matricule/fonction (backward compatibility)", async () => {
+    const dto = plainToInstance(CreateStaffDto, validBase);
+    const errors = await validate(dto);
+    expect(errors).toHaveLength(0);
+  });
 });

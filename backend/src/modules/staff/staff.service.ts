@@ -48,6 +48,14 @@ export class StaffService {
     await this.usersRepository.delete(id, tenantId);
   }
 
+  attachPhoto(id: string, tenantId: string, base64Body: string, contentType: string) {
+    return this.usersRepository.attachPhoto(id, tenantId, base64Body, contentType);
+  }
+
+  getPhotoUrl(id: string, tenantId: string) {
+    return this.usersRepository.getPhotoUrl(id, tenantId);
+  }
+
   private sanitizeUser(user: User): Omit<User, "password"> {
     const { password, ...sanitized } = user;
     return sanitized;
