@@ -142,5 +142,17 @@ describe("PrescriptionsRepository", () => {
         expect.objectContaining({ selector: expect.objectContaining({ type: "prescription", tenantId: "tenant-1", consultationId: "c1", status: "en_attente" }) })
       );
     });
+
+    it("filters by patientId when provided", async () => {
+      const db = { find: jest.fn().mockResolvedValue({ docs: [] }) };
+      const couchDBService = { getDatabase: jest.fn().mockResolvedValue(db), ensureIndex: jest.fn().mockResolvedValue(undefined) };
+      const repository = new PrescriptionsRepository(couchDBService as any, consultationsRepoStub() as any);
+
+      await repository.findByTenant("tenant-1", { patientId: "patient-1" });
+
+      expect(db.find).toHaveBeenCalledWith(
+        expect.objectContaining({ selector: expect.objectContaining({ type: "prescription", tenantId: "tenant-1", patientId: "patient-1" }) })
+      );
+    });
   });
 });

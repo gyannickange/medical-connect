@@ -12,4 +12,8 @@ export class LabOrdersPolicy extends BasePolicy {
   canUpdate(): boolean {
     return this.isAdmin() || this.isManager() || this.isLaboratoire();
   }
+
+  canRecordFollowUp(): boolean {
+    return this.isAdmin() || this.isManager() || this.isMedecin();
+  }
 }

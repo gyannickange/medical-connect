@@ -1,4 +1,4 @@
-import { IsString, IsOptional, IsIn, IsUUID, IsDateString, IsNumber, IsBoolean, IsArray, IsNotEmpty, ValidateNested } from "class-validator";
+import { IsString, IsOptional, IsIn, IsUUID, IsDateString, IsNumber, IsBoolean, IsArray, IsNotEmpty, ValidateNested, ValidateIf } from "class-validator";
 import { Type } from "class-transformer";
 
 class VitalSignsDto {
@@ -34,6 +34,48 @@ class DiagnosisPrincipalDto {
   @IsIn(["confirme", "suspecte"]) certainty: string;
 }
 
+class CarePlanDto {
+  @IsIn(["retour_domicile", "controle_suivi", "hospitalisation", "orientation_specialiste", "transfert_urgent", "autre"])
+  orientation: string;
+
+  @ValidateIf((o) => o.orientation === "retour_domicile" || o.orientation === "controle_suivi")
+  @IsString() @IsNotEmpty() medicalRecommendations?: string;
+  @ValidateIf((o) => o.orientation === "retour_domicile" || o.orientation === "controle_suivi")
+  @IsString() @IsNotEmpty() patientInstructions?: string;
+
+  @ValidateIf((o) => o.orientation === "controle_suivi") @IsString() @IsNotEmpty() appointmentDate?: string;
+  @ValidateIf((o) => o.orientation === "controle_suivi") @IsString() @IsNotEmpty() specialty?: string;
+  @ValidateIf((o) => o.orientation === "controle_suivi") @IsString() @IsNotEmpty() doctor?: string;
+  @ValidateIf((o) => o.orientation === "controle_suivi") @IsString() @IsNotEmpty() followUpReason?: string;
+
+  @ValidateIf((o) => o.orientation === "hospitalisation") @IsString() @IsNotEmpty() targetService?: string;
+  @ValidateIf((o) => o.orientation === "hospitalisation") @IsString() @IsNotEmpty() estimatedStayDuration?: string;
+  @ValidateIf((o) => o.orientation === "hospitalisation") @IsString() @IsNotEmpty() admissionReason?: string;
+  @ValidateIf((o) => o.orientation === "hospitalisation") @IsBoolean() bedUrgentlyRequired?: boolean;
+  @ValidateIf((o) => o.orientation === "hospitalisation") @IsBoolean() familyNotified?: boolean;
+  @ValidateIf((o) => o.orientation === "hospitalisation") @IsString() @IsNotEmpty() preAdmissionInstructions?: string;
+
+  @ValidateIf((o) => o.orientation === "orientation_specialiste") @IsString() @IsNotEmpty() recommendedSpecialty?: string;
+  @ValidateIf((o) => o.orientation === "orientation_specialiste") @IsString() @IsNotEmpty() recommendedDoctorOrFacility?: string;
+  @ValidateIf((o) => o.orientation === "orientation_specialiste") @IsString() @IsNotEmpty() clinicalReason?: string;
+  @ValidateIf((o) => o.orientation === "orientation_specialiste") @IsIn(["routine", "semi_urgent", "urgent"]) urgencyLevel?: string;
+  @ValidateIf((o) => o.orientation === "orientation_specialiste") @IsBoolean() generateReferralLetter?: boolean;
+  @ValidateIf((o) => o.orientation === "orientation_specialiste") @IsArray() @IsString({ each: true }) attachedDocuments?: string[];
+
+  @ValidateIf((o) => o.orientation === "transfert_urgent") @IsString() @IsNotEmpty() destinationFacility?: string;
+  @ValidateIf((o) => o.orientation === "transfert_urgent") @IsString() @IsNotEmpty() vitalUrgencyLevel?: string;
+  @ValidateIf((o) => o.orientation === "transfert_urgent") @IsString() @IsNotEmpty() medicalReason?: string;
+  @ValidateIf((o) => o.orientation === "transfert_urgent") @IsIn(["ambulance_simple", "ambulance_medicalisee", "samu_smur"]) transportType?: string;
+  @ValidateIf((o) => o.orientation === "transfert_urgent") @IsBoolean() onCallDoctorContacted?: boolean;
+  @ValidateIf((o) => o.orientation === "transfert_urgent") @IsString() @IsNotEmpty() estimatedDepartureTime?: string;
+
+  @ValidateIf((o) => o.orientation === "autre") @IsString() @IsNotEmpty() decisionType?: string;
+  @ValidateIf((o) => o.orientation === "autre") @IsString() @IsNotEmpty() reevaluationFrequency?: string;
+  @ValidateIf((o) => o.orientation === "autre") @IsString() @IsNotEmpty() description?: string;
+  @ValidateIf((o) => o.orientation === "autre") @IsBoolean() followUpNeeded?: boolean;
+  @ValidateIf((o) => o.orientation === "autre") @IsArray() @IsString({ each: true }) involvedParties?: string[];
+}
+
 export class UpdateConsultationDto {
   @IsDateString() @IsOptional() scheduledAt?: string;
   @IsString() @IsOptional() specialty?: string;
@@ -50,5 +92,6 @@ export class UpdateConsultationDto {
   @ValidateNested() @Type(() => DiagnosisPrincipalDto) @IsOptional() diagnosisPrincipal?: DiagnosisPrincipalDto;
   @IsArray() @IsString({ each: true }) @IsOptional() diagnosisSecondary?: string[];
   @IsString() @IsOptional() diagnosisHypothesis?: string;
+  @ValidateNested() @Type(() => CarePlanDto) @IsOptional() carePlan?: CarePlanDto;
   @IsIn(["planifiee", "en_attente", "en_cours", "terminee", "annulee"]) @IsOptional() status?: string;
 }

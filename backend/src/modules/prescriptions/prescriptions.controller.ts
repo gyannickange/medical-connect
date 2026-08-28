@@ -18,9 +18,10 @@ export class PrescriptionsController {
     @Param("tenantId") tenantId: string,
     @Query("consultationId") consultationId?: string,
     @Query("status") status?: string,
+    @Query("patientId") patientId?: string,
     @Request() req?: any
   ) {
-    return this.prescriptionsService.findByTenant(this.tenantId(req, tenantId), { consultationId, status });
+    return this.prescriptionsService.findByTenant(this.tenantId(req, tenantId), { consultationId, status, patientId });
   }
 
   @Get("detail/:id")

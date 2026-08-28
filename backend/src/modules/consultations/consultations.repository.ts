@@ -12,6 +12,7 @@ export interface ConsultationFilters {
   specialty?: string;
   assignedDoctorId?: string;
   scheduledOnOrAfter?: string;
+  patientId?: string;
 }
 
 @Injectable()
@@ -58,6 +59,9 @@ export class ConsultationsRepository {
       diagnosisSecondary: [],
       diagnosisHypothesis: null,
       medicalConsultationSavedAt: null,
+      carePlan: null,
+      carePlanSavedAt: null,
+      closedAt: null,
       status: "planifiee",
       createdAt: now,
       updatedAt: now,
@@ -79,6 +83,7 @@ export class ConsultationsRepository {
     }
 
     const now = new Date().toISOString();
+    const shouldStampClosedAt = data.status === "terminee" && !current.closedAt;
     const updated = {
       ...current,
       ...data,
@@ -93,6 +98,8 @@ export class ConsultationsRepository {
       vitalsRecordedAt: "vitals" in data ? now : (current.vitalsRecordedAt ?? null),
       medicalConsultationSavedAt:
         "physicalExam" in data || "diagnosisPrincipal" in data ? now : (current.medicalConsultationSavedAt ?? null),
+      carePlanSavedAt: "carePlan" in data ? now : (current.carePlanSavedAt ?? null),
+      closedAt: shouldStampClosedAt ? now : (current.closedAt ?? null),
     };
 
     try {
@@ -125,6 +132,7 @@ export class ConsultationsRepository {
     if (filters?.specialty) selector.specialty = filters.specialty;
     if (filters?.assignedDoctorId) selector.assignedDoctorId = filters.assignedDoctorId;
     if (filters?.scheduledOnOrAfter) selector.scheduledAt = { $gte: filters.scheduledOnOrAfter };
+    if (filters?.patientId) selector.patientId = filters.patientId;
 
     const result = await db.find({ selector, sort: [{ scheduledAt: "asc" }], limit, skip });
     return (result.docs as any[]).map((doc) => ({ ...doc, id: doc.id ?? publicDocumentId(doc._id, "consultation") }));
@@ -170,6 +178,8 @@ export class ConsultationsRepository {
       updatedAt: new Date(doc.updatedAt),
       vitalsRecordedAt: doc.vitalsRecordedAt ? new Date(doc.vitalsRecordedAt) : null,
       medicalConsultationSavedAt: doc.medicalConsultationSavedAt ? new Date(doc.medicalConsultationSavedAt) : null,
+      carePlanSavedAt: doc.carePlanSavedAt ? new Date(doc.carePlanSavedAt) : null,
+      closedAt: doc.closedAt ? new Date(doc.closedAt) : null,
     } as Consultation;
   }
 

@@ -3,13 +3,14 @@ import { randomUUID } from "crypto";
 import type { DocumentScope } from "nano";
 import { CouchDBService } from "../../database/couchdb.service";
 import { ConsultationsRepository } from "../consultations/consultations.repository";
-import type { InsertLabOrder, LabOrder, LabOrderExamLine, LabOrderStatus } from "@shared/schema";
+import type { InsertLabOrder, LabOrder, LabOrderExamLine, LabOrderFollowUpAction, LabOrderStatus } from "@shared/schema";
 import { couchDocumentId, publicDocumentId, tenantDatabaseName } from "../../database/couchdb-naming";
 
 export interface LabOrderFilters {
   consultationId?: string;
   status?: string;
   priority?: string;
+  patientId?: string;
 }
 
 export interface UpdateLabOrderData {
@@ -52,6 +53,9 @@ export class LabOrdersRepository {
       validatedByUserId: null,
       validatedAt: null,
       problemReport: null,
+      followUpAction: null,
+      followUpNote: null,
+      followUpRecordedAt: null,
       createdAt: now,
       updatedAt: now,
     };
@@ -105,6 +109,30 @@ export class LabOrdersRepository {
     return this.hydrate(updated);
   }
 
+  async recordFollowUp(id: string, tenantId: string, data: { followUpAction: LabOrderFollowUpAction; followUpNote?: string | null }): Promise<LabOrder> {
+    const db = await this.database(tenantId);
+    const current = await this.findExisting(db, id);
+    if (!current || current.type !== "lab_order" || current.tenantId !== tenantId) {
+      throw new NotFoundException("Lab order not found");
+    }
+
+    const now = new Date().toISOString();
+    const updated = {
+      ...current,
+      followUpAction: data.followUpAction,
+      followUpNote: data.followUpNote ?? null,
+      followUpRecordedAt: now,
+      updatedAt: now,
+    };
+
+    try {
+      await db.insert(updated as any);
+    } catch (error) {
+      throw this.unavailable(error);
+    }
+    return this.hydrate(updated);
+  }
+
   async findById(id: string, tenantId: string): Promise<LabOrder> {
     const db = await this.database(tenantId);
     const doc = await this.findExisting(db, id);
@@ -122,6 +150,7 @@ export class LabOrdersRepository {
     if (filters?.consultationId) selector.consultationId = filters.consultationId;
     if (filters?.status) selector.status = filters.status;
     if (filters?.priority) selector.priority = filters.priority;
+    if (filters?.patientId) selector.patientId = filters.patientId;
 
     const result = await db.find({ selector, sort: [{ requestedAt: "asc" }], limit: 200 });
     return (result.docs as any[]).map((doc) => this.hydrate(doc));
@@ -159,6 +188,7 @@ export class LabOrdersRepository {
       requestedAt: new Date(doc.requestedAt),
       takenInChargeAt: doc.takenInChargeAt ? new Date(doc.takenInChargeAt) : null,
       validatedAt: doc.validatedAt ? new Date(doc.validatedAt) : null,
+      followUpRecordedAt: doc.followUpRecordedAt ? new Date(doc.followUpRecordedAt) : null,
       createdAt: new Date(doc.createdAt),
       updatedAt: new Date(doc.updatedAt),
     } as LabOrder;

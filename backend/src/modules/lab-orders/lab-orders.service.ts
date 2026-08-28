@@ -21,4 +21,8 @@ export class LabOrdersService {
   update(id: string, tenantId: string, data: UpdateLabOrderData, actorUserId: string) {
     return this.labOrdersRepository.update(id, tenantId, data, actorUserId);
   }
+
+  recordFollowUp(id: string, tenantId: string, data: { followUpAction: string; followUpNote?: string }) {
+    return this.labOrdersRepository.recordFollowUp(id, tenantId, data as any);
+  }
 }

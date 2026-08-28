@@ -1,7 +1,8 @@
-import { Controller, Get, Post, Put, Body, Param, UseGuards, Query, Request, ForbiddenException } from "@nestjs/common";
+import { Controller, Get, Post, Put, Patch, Body, Param, UseGuards, Query, Request, ForbiddenException } from "@nestjs/common";
 import { LabOrdersService } from "./lab-orders.service";
 import { CreateLabOrderDto } from "./dto/create-lab-order.dto";
 import { UpdateLabOrderDto } from "./dto/update-lab-order.dto";
+import { RecordLabOrderFollowUpDto } from "./dto/record-lab-order-follow-up.dto";
 import { JwtAuthGuard } from "../auth/jwt-auth.guard";
 import { PolicyGuard } from "../auth/guards/policy.guard";
 import { CheckPolicy } from "../auth/decorators/check-policy.decorator";
@@ -19,9 +20,10 @@ export class LabOrdersController {
     @Query("consultationId") consultationId?: string,
     @Query("status") status?: string,
     @Query("priority") priority?: string,
+    @Query("patientId") patientId?: string,
     @Request() req?: any
   ) {
-    return this.labOrdersService.findByTenant(this.tenantId(req, tenantId), { consultationId, status, priority });
+    return this.labOrdersService.findByTenant(this.tenantId(req, tenantId), { consultationId, status, priority, patientId });
   }
 
   @Get("detail/:id")
@@ -40,6 +42,12 @@ export class LabOrdersController {
   @CheckPolicy(LabOrdersPolicy, "update")
   async update(@Param("id") id: string, @Body() dto: UpdateLabOrderDto, @Request() req: any) {
     return this.labOrdersService.update(id, this.tenantId(req), dto as any, req.user.id);
+  }
+
+  @Patch(":id/follow-up")
+  @CheckPolicy(LabOrdersPolicy, "recordFollowUp")
+  async recordFollowUp(@Param("id") id: string, @Body() dto: RecordLabOrderFollowUpDto, @Request() req: any) {
+    return this.labOrdersService.recordFollowUp(id, this.tenantId(req), dto as any);
   }
 
   private tenantId(req: any, legacyTenantId?: string): string {

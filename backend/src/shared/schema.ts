@@ -65,8 +65,75 @@ export interface DiagnosisPrincipal {
   certainty: DiagnosisCertainty;
 }
 
-export interface Consultation { id: string; tenantId: string; number: string | null; patientId: string; scheduledAt: Date; specialty: string; assignedDoctorId: string; roomId: string | null; priority: ConsultationPriority; reason: string; nurseNotes: string | null; symptoms: string | null; vitals: VitalSigns | null; vitalsRecordedAt: Date | null; relevantHistory: string[]; presentIllnessHistory: string | null; physicalExam: PhysicalExam | null; diagnosisPrincipal: DiagnosisPrincipal | null; diagnosisSecondary: string[]; diagnosisHypothesis: string | null; medicalConsultationSavedAt: Date | null; status: ConsultationStatus; createdAt: Date; updatedAt: Date }
+export interface Consultation { id: string; tenantId: string; number: string | null; patientId: string; scheduledAt: Date; specialty: string; assignedDoctorId: string; roomId: string | null; priority: ConsultationPriority; reason: string; nurseNotes: string | null; symptoms: string | null; vitals: VitalSigns | null; vitalsRecordedAt: Date | null; relevantHistory: string[]; presentIllnessHistory: string | null; physicalExam: PhysicalExam | null; diagnosisPrincipal: DiagnosisPrincipal | null; diagnosisSecondary: string[]; diagnosisHypothesis: string | null; medicalConsultationSavedAt: Date | null; carePlan: CarePlan | null; carePlanSavedAt: Date | null; closedAt: Date | null; status: ConsultationStatus; createdAt: Date; updatedAt: Date }
 export interface InsertConsultation { id?: string; patientId: string; scheduledAt: Date | string; specialty: string; assignedDoctorId: string; roomId?: string | null; priority?: ConsultationPriority; reason: string; nurseNotes?: string | null; tenantId: string }
+
+export type CarePlanOrientation = "retour_domicile" | "controle_suivi" | "hospitalisation" | "orientation_specialiste" | "transfert_urgent" | "autre";
+
+export interface CarePlanRetourDomicile {
+  orientation: "retour_domicile";
+  medicalRecommendations: string;
+  patientInstructions: string;
+}
+
+export interface CarePlanControleSuivi {
+  orientation: "controle_suivi";
+  medicalRecommendations: string;
+  patientInstructions: string;
+  appointmentDate: string;
+  specialty: string;
+  doctor: string;
+  followUpReason: string;
+}
+
+export interface CarePlanHospitalisation {
+  orientation: "hospitalisation";
+  targetService: string;
+  estimatedStayDuration: string;
+  admissionReason: string;
+  bedUrgentlyRequired: boolean;
+  familyNotified: boolean;
+  preAdmissionInstructions: string;
+}
+
+export interface CarePlanOrientationSpecialiste {
+  orientation: "orientation_specialiste";
+  recommendedSpecialty: string;
+  recommendedDoctorOrFacility: string;
+  clinicalReason: string;
+  urgencyLevel: "routine" | "semi_urgent" | "urgent";
+  generateReferralLetter: boolean;
+  attachedDocuments: string[];
+}
+
+export interface CarePlanTransfertUrgent {
+  orientation: "transfert_urgent";
+  destinationFacility: string;
+  vitalUrgencyLevel: string;
+  medicalReason: string;
+  transportType: "ambulance_simple" | "ambulance_medicalisee" | "samu_smur";
+  onCallDoctorContacted: boolean;
+  estimatedDepartureTime: string;
+}
+
+export interface CarePlanAutre {
+  orientation: "autre";
+  decisionType: string;
+  reevaluationFrequency: string;
+  description: string;
+  followUpNeeded: boolean;
+  involvedParties: string[];
+}
+
+export type CarePlan =
+  | CarePlanRetourDomicile
+  | CarePlanControleSuivi
+  | CarePlanHospitalisation
+  | CarePlanOrientationSpecialiste
+  | CarePlanTransfertUrgent
+  | CarePlanAutre;
+
+export type LabOrderFollowUpAction = "aucune_action" | "contacter_patient" | "modifier_traitement" | "programmer_rdv" | "nouvel_examen";
 
 export type LabOrderStatus = "demande" | "en_cours" | "a_valider" | "termine" | "probleme_signale" | "annule";
 
@@ -89,6 +156,9 @@ export interface LabOrder {
   validatedByUserId: string | null;
   validatedAt: Date | null;
   problemReport: string | null;
+  followUpAction: LabOrderFollowUpAction | null;
+  followUpNote: string | null;
+  followUpRecordedAt: Date | null;
   createdAt: Date;
   updatedAt: Date;
 }

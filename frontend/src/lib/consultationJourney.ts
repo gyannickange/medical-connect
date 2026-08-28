@@ -51,8 +51,8 @@ export function computeConsultationJourney(
     medicalConsultation: consultation.medicalConsultationSavedAt ? new Date(consultation.medicalConsultationSavedAt) : null,
     exams: examsResolved ? (examsOccurredAt ?? new Date(consultation.updatedAt)) : null,
     prescription: prescriptionResolved ? (prescriptionOccurredAt ?? new Date(consultation.updatedAt)) : null,
-    carePlan: null,
-    closure: null,
+    carePlan: consultation.carePlan ? new Date(consultation.carePlanSavedAt ?? consultation.updatedAt) : null,
+    closure: consultationClosed && consultation.closedAt ? new Date(consultation.closedAt) : null,
   };
 
   const steps: JourneyStep[] = [];
