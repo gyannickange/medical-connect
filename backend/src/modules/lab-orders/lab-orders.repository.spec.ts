@@ -117,6 +117,41 @@ describe("LabOrdersRepository", () => {
     });
   });
 
+  describe("recordFollowUp", () => {
+    it("sets followUpAction/Note/RecordedAt on the existing lab order", async () => {
+      const existing = {
+        _id: "lab_order:lo1",
+        _rev: "2-a",
+        id: "lo1",
+        type: "lab_order",
+        tenantId: "tenant-1",
+        consultationId: "c1",
+        patientId: "patient-1",
+        examLines: [{ examName: "Ionogramme", resultText: "Na+ 139 mmol/L" }],
+        status: "termine",
+        followUpAction: null,
+        followUpNote: null,
+        followUpRecordedAt: null,
+      };
+      const db = { get: jest.fn().mockResolvedValue(existing), insert: jest.fn().mockResolvedValue({ ok: true }) };
+      const repository = new LabOrdersRepository({ getDatabase: jest.fn().mockResolvedValue(db) } as any, consultationsRepoStub() as any);
+
+      const result = await repository.recordFollowUp("lo1", "tenant-1", { followUpAction: "contacter_patient", followUpNote: "Rappeler demain" });
+
+      expect(db.insert).toHaveBeenCalledWith(
+        expect.objectContaining({ followUpAction: "contacter_patient", followUpNote: "Rappeler demain", followUpRecordedAt: expect.any(String) })
+      );
+      expect(result.followUpRecordedAt).toBeInstanceOf(Date);
+    });
+
+    it("throws NotFoundException when the lab order does not exist in this tenant", async () => {
+      const db = { get: jest.fn().mockRejectedValue({ statusCode: 404 }) };
+      const repository = new LabOrdersRepository({ getDatabase: jest.fn().mockResolvedValue(db) } as any, consultationsRepoStub() as any);
+
+      await expect(repository.recordFollowUp("missing", "tenant-1", { followUpAction: "aucune_action" })).rejects.toThrow(NotFoundException);
+    });
+  });
+
   describe("findByTenant", () => {
     it("filters by consultationId, status, and priority when provided", async () => {
       const db = { find: jest.fn().mockResolvedValue({ docs: [] }) };
@@ -129,6 +164,18 @@ describe("LabOrdersRepository", () => {
         expect.objectContaining({
           selector: expect.objectContaining({ type: "lab_order", tenantId: "tenant-1", consultationId: "c1", status: "demande", priority: "urgent" }),
         })
+      );
+    });
+
+    it("filters by patientId when provided", async () => {
+      const db = { find: jest.fn().mockResolvedValue({ docs: [] }) };
+      const couchDBService = { getDatabase: jest.fn().mockResolvedValue(db), ensureIndex: jest.fn().mockResolvedValue(undefined) };
+      const repository = new LabOrdersRepository(couchDBService as any, consultationsRepoStub() as any);
+
+      await repository.findByTenant("tenant-1", { patientId: "patient-1" });
+
+      expect(db.find).toHaveBeenCalledWith(
+        expect.objectContaining({ selector: expect.objectContaining({ type: "lab_order", tenantId: "tenant-1", patientId: "patient-1" }) })
       );
     });
   });

@@ -9,6 +9,7 @@ import { couchDocumentId, publicDocumentId, tenantDatabaseName } from "../../dat
 export interface PrescriptionFilters {
   consultationId?: string;
   status?: string;
+  patientId?: string;
 }
 
 export interface UpdatePrescriptionData {
@@ -119,6 +120,7 @@ export class PrescriptionsRepository {
     const selector: Record<string, any> = { type: "prescription", tenantId };
     if (filters?.consultationId) selector.consultationId = filters.consultationId;
     if (filters?.status) selector.status = filters.status;
+    if (filters?.patientId) selector.patientId = filters.patientId;
 
     const result = await db.find({ selector, sort: [{ prescribedAt: "asc" }], limit: 200 });
     return (result.docs as any[]).map((doc) => this.hydrate(doc));

@@ -30,4 +30,12 @@ describe("LabOrdersPolicy", () => {
   it.each(["medecin", "infirmier", "cashier"])("%s cannot update", (role) => {
     expect(policyFor(role).update()).toBe(false);
   });
+
+  it.each(["admin", "manager", "medecin"])("%s can recordFollowUp", (role) => {
+    expect(policyFor(role).recordFollowUp()).toBe(true);
+  });
+
+  it.each(["laboratoire", "infirmier", "pharmacien"])("%s cannot recordFollowUp", (role) => {
+    expect(policyFor(role).recordFollowUp()).toBe(false);
+  });
 });
