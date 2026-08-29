@@ -77,6 +77,10 @@ export class UsersRepository {
       role: input.role ?? "cashier",
       tenantId: input.tenantId,
       isActive: input.isActive !== false,
+      service: input.service ?? null,
+      specialty: input.specialty ?? null,
+      matricule: input.matricule ?? null,
+      fonction: input.fonction ?? null,
       createdAt: new Date().toISOString(),
     };
     try {

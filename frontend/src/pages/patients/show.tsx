@@ -1,21 +1,22 @@
-import React, { useRef, useState } from "react";
-import { ArrowLeft, Edit, Upload } from "lucide-react";
+import React, { useState } from "react";
+import { ArrowLeft, Edit } from "lucide-react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useLocation, useParams } from "wouter";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Input } from "@/components/ui/input";
 import { useTranslation } from "../../lib/i18n";
 import { useTenant } from "../../contexts/TenantContext";
 import { useToast } from "@/hooks/use-toast";
 import { offlineApiRequest } from "@/lib/offlineApiRequest";
 import { showApiErrorToast } from "@/lib/errorHandler";
-import { calculateAge } from "@/lib/patientAge";
-import { buildPatientTimeline } from "@/lib/patientTimeline";
-import type { Consultation, LabOrder, Patient, Prescription } from "@shared/schema";
+import PatientHeader from "./PatientHeader";
+import PatientProfileCard from "./PatientProfileCard";
+import ConsultationsTab from "./tabs/ConsultationsTab";
+import PrescriptionsTab from "./tabs/PrescriptionsTab";
+import ResultatsLaboTab from "./tabs/ResultatsLaboTab";
+import HistoriqueTab from "./tabs/HistoriqueTab";
+import ProfilTab from "./tabs/ProfilTab";
+import type { Consultation, LabOrder, Patient, Prescription, User } from "@shared/schema";
 
 function fileToBase64(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -32,13 +33,8 @@ export default function PatientDetails() {
   const queryClient = useQueryClient();
   const [, setLocation] = useLocation();
   const { id: patientId } = useParams<{ id: string }>();
-  const fileInputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
   const { currentTenant } = useTenant();
-  const [historyStartDate, setHistoryStartDate] = useState("");
-  const [historyEndDate, setHistoryEndDate] = useState("");
-  const [appliedStartDate, setAppliedStartDate] = useState("");
-  const [appliedEndDate, setAppliedEndDate] = useState("");
 
   const { data: patient, isLoading } = useQuery<Patient>({
     queryKey: ["/api/patients/detail", patientId],
@@ -75,6 +71,12 @@ export default function PatientDetails() {
     enabled: !!currentTenant?.id && !!patientId,
   });
 
+  const { data: staffList = [] } = useQuery<User[]>({
+    queryKey: ["/api/staff", currentTenant?.id],
+    enabled: !!currentTenant?.id,
+  });
+  const staffNameById = Object.fromEntries(staffList.map((member) => [member.id, `${member.firstName} ${member.lastName}`]));
+
   async function handlePhotoSelected(file: File) {
     setUploading(true);
     try {
@@ -109,102 +111,47 @@ export default function PatientDetails() {
           <ArrowLeft className="w-4 h-4 mr-2" />
           {t("patients")}
         </Button>
-        <Button onClick={() => setLocation(`/patients/${patientId}/edit`)} data-testid="button-edit-patient">
+        <Button variant="outline" onClick={() => setLocation(`/patients/${patientId}/edit`)} data-testid="button-edit-patient">
           <Edit className="w-4 h-4 mr-2" />
           {t("editPatient")}
         </Button>
       </div>
 
-      <Tabs defaultValue="informations">
-        <TabsList>
-          <TabsTrigger value="informations" data-testid="tab-informations">{t("informationsTab")}</TabsTrigger>
-          <TabsTrigger value="historique" data-testid="tab-historique">{t("historiqueTab")}</TabsTrigger>
-        </TabsList>
+      <PatientHeader patient={patient} />
 
-        <TabsContent value="informations">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <Card className="p-6 flex flex-col items-center text-center gap-3">
-              <Avatar className="h-24 w-24">
-                <AvatarImage src={photoUrl ?? undefined} />
-                <AvatarFallback>{patient.firstName[0]}{patient.lastName[0]}</AvatarFallback>
-              </Avatar>
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/jpeg,image/png"
-                className="hidden"
-                onChange={(e) => e.target.files?.[0] && handlePhotoSelected(e.target.files[0])}
-              />
-              <Button variant="outline" size="sm" disabled={uploading} onClick={() => fileInputRef.current?.click()}>
-                <Upload className="w-4 h-4 mr-2" />
-                {patient.photoS3Key ? t("changePhoto") : t("uploadPhoto")}
-              </Button>
-              <h2 className="text-lg font-semibold">{patient.firstName} {patient.lastName}</h2>
-              <p className="text-sm text-muted-foreground">
-                {calculateAge(patient.dateOfBirth)} {t("age").toLowerCase()} · {patient.sex}
-              </p>
-              <p className="font-mono text-sm">{patient.dossierNumber ?? t("pendingSync")}</p>
-              <Badge>{t(`patientStatus${patient.status[0].toUpperCase()}${patient.status.slice(1)}`)}</Badge>
-            </Card>
+      <div className="grid grid-cols-1 lg:grid-cols-[320px_1fr] gap-6 items-start">
+        <PatientProfileCard patient={patient} photoUrl={photoUrl} uploading={uploading} onPhotoSelected={handlePhotoSelected} />
 
-            <Card className="p-6 md:col-span-2 space-y-2">
-              <h3 className="font-semibold text-primary">{t("sectionIdentification")}</h3>
-              <p>{t("dateOfBirth")}: {patient.dateOfBirth}</p>
-              <p>{t("primaryPhone")}: {patient.primaryPhone}</p>
-              <p>{t("residenceAddress")}: {patient.residenceAddress}</p>
-              {patient.bloodGroup && <p>{t("bloodGroup")}: {patient.bloodGroup}</p>}
-              {patient.allergyDetails && <p>{t("allergyDetails")}: {patient.allergyDetails}</p>}
-            </Card>
-          </div>
-        </TabsContent>
+        <Tabs defaultValue="consultations">
+          <TabsList>
+            <TabsTrigger value="consultations" data-testid="tab-consultations">{t("consultations")}</TabsTrigger>
+            <TabsTrigger value="prescriptions" data-testid="tab-prescriptions">{t("prescriptionsTab")}</TabsTrigger>
+            <TabsTrigger value="resultats-labo" data-testid="tab-resultats-labo">{t("resultatsLaboTab")}</TabsTrigger>
+            <TabsTrigger value="historique" data-testid="tab-historique">{t("historiqueTab")}</TabsTrigger>
+            <TabsTrigger value="profil" data-testid="tab-profil">{t("profilTab")}</TabsTrigger>
+          </TabsList>
 
-        <TabsContent value="historique" className="space-y-4">
-          <Card className="p-4 flex flex-wrap items-end gap-4">
-            <div>
-              <label className="text-sm text-muted-foreground block mb-1">{t("startDateLabel")}</label>
-              <Input type="date" value={historyStartDate} onChange={(e) => setHistoryStartDate(e.target.value)} data-testid="input-history-start-date" />
-            </div>
-            <div>
-              <label className="text-sm text-muted-foreground block mb-1">{t("endDateLabel")}</label>
-              <Input type="date" value={historyEndDate} onChange={(e) => setHistoryEndDate(e.target.value)} data-testid="input-history-end-date" />
-            </div>
-            <Button variant="outline" onClick={() => { setAppliedStartDate(historyStartDate); setAppliedEndDate(historyEndDate); }} data-testid="button-apply-history-filter">
-              {t("applyFilterAction")}
-            </Button>
-            <Button
-              variant="ghost"
-              onClick={() => { setHistoryStartDate(""); setHistoryEndDate(""); setAppliedStartDate(""); setAppliedEndDate(""); }}
-              data-testid="button-reset-history-filter">
-              {t("resetFilterAction")}
-            </Button>
-          </Card>
+          <TabsContent value="consultations">
+            <ConsultationsTab consultations={patientConsultations} staffNameById={staffNameById} />
+          </TabsContent>
 
-          <Card className="p-6 space-y-3">
-            {(() => {
-              const entries = buildPatientTimeline(patientConsultations, patientLabOrders, patientPrescriptions).filter((entry) => {
-                if (appliedStartDate && entry.occurredAt < new Date(appliedStartDate)) return false;
-                if (appliedEndDate && entry.occurredAt > new Date(`${appliedEndDate}T23:59:59`)) return false;
-                return true;
-              });
-              if (entries.length === 0) return <p className="text-sm text-muted-foreground">{t("noHistoryEvents")}</p>;
-              const labelKeyByType: Record<string, string> = {
-                consultation_created: "patientTimelineConsultationCreated",
-                consultation_closed: "patientTimelineConsultationClosed",
-                lab_result: "patientTimelineLabResult",
-                prescription_delivered: "patientTimelinePrescriptionDelivered",
-              };
-              return entries.map((entry, index) => (
-                <div key={index} className="flex items-start gap-3 border-b border-border pb-3 last:border-0" data-testid={`history-entry-${index}`}>
-                  <Badge variant="secondary">{new Date(entry.occurredAt).toLocaleDateString()}</Badge>
-                  <p className="text-sm">
-                    {t(labelKeyByType[entry.type])} — {entry.detail}
-                  </p>
-                </div>
-              ));
-            })()}
-          </Card>
-        </TabsContent>
-      </Tabs>
+          <TabsContent value="prescriptions">
+            <PrescriptionsTab prescriptions={patientPrescriptions} staffNameById={staffNameById} />
+          </TabsContent>
+
+          <TabsContent value="resultats-labo">
+            <ResultatsLaboTab labOrders={patientLabOrders} />
+          </TabsContent>
+
+          <TabsContent value="historique">
+            <HistoriqueTab consultations={patientConsultations} labOrders={patientLabOrders} prescriptions={patientPrescriptions} />
+          </TabsContent>
+
+          <TabsContent value="profil">
+            <ProfilTab patient={patient} />
+          </TabsContent>
+        </Tabs>
+      </div>
     </div>
   );
 }

@@ -6,7 +6,7 @@ import React, {
   ReactNode,
 } from "react";
 import type { User, Tenant } from "@shared/schema";
-import { getInstallMode } from "@/lib/installMode";
+import { getInstallMode, resolveInstallMode } from "@/lib/installMode";
 import { getLocalAccountById, verifyLocalLogin } from "@/lib/localAccountsStore";
 import {
   buildLocalTenant,
@@ -143,7 +143,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const checkAuth = async () => {
     setIsLoading(true);
-    const mode = getInstallMode();
+    // resolveInstallMode(), not the raw getInstallMode(): the browser build
+    // never persists "connected" to localStorage (it's the implicit default
+    // for a non-desktop build - see installMode.ts), so reading raw storage
+    // here always found nothing on reload and cleared a perfectly valid
+    // session instead of checking it against the server.
+    const mode = resolveInstallMode();
     if (mode === "local") {
       await checkAuthLocal();
     } else if (mode === "connected") {

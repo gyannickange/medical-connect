@@ -4,12 +4,14 @@ import { CouchDBService } from "../src/database/couchdb.service";
 import { TenantsRepository } from "../src/modules/identity/tenants.repository";
 import { UsersRepository } from "../src/modules/identity/users.repository";
 import { SettingsRepository } from "../src/modules/settings/settings.repository";
+import { S3Service } from "../src/lib/s3.service";
 
 async function main() {
   if (!process.env.COUCHDB_URL) throw new Error("COUCHDB_URL is required");
   const couch = new CouchDBService();
+  const s3 = new S3Service();
   const tenants = new TenantsRepository(couch);
-  const users = new UsersRepository(couch);
+  const users = new UsersRepository(couch, s3);
   const settings = new SettingsRepository(couch);
 
   const { tenant } = await tenants.create({

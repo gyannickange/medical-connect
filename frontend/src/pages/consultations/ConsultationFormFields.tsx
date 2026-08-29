@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useLocation } from "wouter";
+import { useLocation, useSearchParams } from "wouter";
 import { CalendarDays, ChevronDown, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -54,6 +54,8 @@ export default function ConsultationFormFields({ consultationId: editingId }: Co
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [, setLocation] = useLocation();
+  const [searchParams] = useSearchParams();
+  const prefillPatientId = searchParams.get("patientId") ?? "";
   const [patientQuery, setPatientQuery] = useState("");
   const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null);
 
@@ -84,6 +86,15 @@ export default function ConsultationFormFields({ consultationId: editingId }: Co
     enabled: !editingId && !!currentTenant?.id && patientQuery.length > 1 && !selectedPatient,
   });
 
+  const { data: prefillPatient } = useQuery<Patient>({
+    queryKey: ["/api/patients/detail", prefillPatientId],
+    queryFn: async () => {
+      const response = await fetch(`/api/patients/detail/${prefillPatientId}`, { credentials: "include" });
+      return response.json();
+    },
+    enabled: !editingId && !!prefillPatientId,
+  });
+
   const { data: rooms = [] } = useQuery<Room[]>({
     queryKey: ["/api/rooms", currentTenant?.id],
     queryFn: async () => {
@@ -102,6 +113,14 @@ export default function ConsultationFormFields({ consultationId: editingId }: Co
     if (existingConsultation) form.reset(defaultValuesFor(existingConsultation, currentTenant?.id ?? ""));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [existingConsultation, currentTenant?.id]);
+
+  useEffect(() => {
+    if (prefillPatient && !editingId) {
+      setSelectedPatient(prefillPatient);
+      form.setValue("patientId", prefillPatient.id, { shouldValidate: true });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [prefillPatient, editingId]);
 
   const errors = form.formState.errors;
 

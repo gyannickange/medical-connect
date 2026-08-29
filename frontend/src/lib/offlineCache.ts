@@ -1,9 +1,21 @@
 // Offline cache management - permanent storage (no expiration)
 import { createEncryptedLocalPouchDB } from "./encryptedPouchDB";
+import { DeviceMasterKeyUnavailableError } from "./deviceMasterKey";
 import {
   removeEntityFromValue,
   upsertEntityInValue,
 } from "./offlineCacheTransforms";
+
+// The browser/"connected" build has no OS keyring-backed device master key
+// (see installMode.ts), so every attempt to open the encrypted cache DB
+// throws this - expected there on every read/write, not a real failure.
+// Logging it as console.error would spam the console on every successful
+// API call; anything else is a genuine, unexpected cache failure worth
+// surfacing.
+function logCacheError(action: string, error: unknown): void {
+  if (error instanceof DeviceMasterKeyUnavailableError) return;
+  console.error(action, error);
+}
 
 let cacheDb: any = null;
 
@@ -88,7 +100,7 @@ export async function cacheGetResponse(
       type: "cache",
     }));
   } catch (error) {
-    console.error("Failed to cache response:", error);
+    logCacheError("Failed to cache response:", error);
   }
 }
 
@@ -131,7 +143,7 @@ export async function removeCachedEntity(
       });
     }
   } catch (error) {
-    console.error("Failed to apply offline delete to cache:", error);
+    logCacheError("Failed to apply offline delete to cache:", error);
   }
 }
 
@@ -196,7 +208,7 @@ export async function upsertCachedEntity(
       await cacheGetResponse(expectedSeedKey, [entity], collection);
     }
   } catch (error) {
-    console.error("Failed to apply offline save to cache:", error);
+    logCacheError("Failed to apply offline save to cache:", error);
   }
 }
 
@@ -222,7 +234,7 @@ export async function getCacheInfo(): Promise<{ docCount: number } | null> {
     const info = await db.info();
     return { docCount: info.doc_count };
   } catch (error) {
-    console.error("Failed to get cache info:", error);
+    logCacheError("Failed to get cache info:", error);
     return null;
   }
 }

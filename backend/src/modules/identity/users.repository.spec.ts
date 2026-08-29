@@ -1,6 +1,62 @@
 import { NotFoundException } from "@nestjs/common";
 import { UsersRepository } from "./users.repository";
 
+describe("UsersRepository.create", () => {
+  function repositoryWithDb() {
+    const db = { insert: jest.fn().mockResolvedValue({ ok: true }) };
+    const repository = new UsersRepository({ getDatabase: jest.fn().mockResolvedValue(db) } as any, {} as any);
+    return { db, repository };
+  }
+
+  it("persists service/specialty/matricule/fonction when provided", async () => {
+    const { db, repository } = repositoryWithDb();
+
+    const user = await repository.create({
+      username: "dr.test",
+      password: "hashed",
+      firstName: "Test",
+      lastName: "Doctor",
+      tenantId: "tenant-1",
+      role: "medecin",
+      service: "Cardiologie",
+      specialty: "Cardiologie interventionnelle",
+      matricule: "MED-99382",
+      fonction: "Médecin Chef Adjoint",
+    });
+
+    expect(db.insert).toHaveBeenCalledWith(
+      expect.objectContaining({
+        service: "Cardiologie",
+        specialty: "Cardiologie interventionnelle",
+        matricule: "MED-99382",
+        fonction: "Médecin Chef Adjoint",
+      })
+    );
+    expect(user).toMatchObject({
+      service: "Cardiologie",
+      specialty: "Cardiologie interventionnelle",
+      matricule: "MED-99382",
+      fonction: "Médecin Chef Adjoint",
+    });
+  });
+
+  it("defaults service/specialty/matricule/fonction to null when omitted", async () => {
+    const { db, repository } = repositoryWithDb();
+
+    await repository.create({
+      username: "cashier.test",
+      password: "hashed",
+      firstName: "Test",
+      lastName: "Cashier",
+      tenantId: "tenant-1",
+    });
+
+    expect(db.insert).toHaveBeenCalledWith(
+      expect.objectContaining({ service: null, specialty: null, matricule: null, fonction: null })
+    );
+  });
+});
+
 describe("UsersRepository.attachPhoto / getPhotoUrl", () => {
   function existingUser(overrides: Record<string, unknown> = {}) {
     return {
