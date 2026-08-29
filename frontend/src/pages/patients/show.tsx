@@ -122,14 +122,18 @@ export default function PatientDetails() {
       <div className="grid grid-cols-1 lg:grid-cols-[320px_1fr] gap-6 items-start">
         <PatientProfileCard patient={patient} photoUrl={photoUrl} uploading={uploading} onPhotoSelected={handlePhotoSelected} />
 
-        <Tabs defaultValue="consultations">
+        <Tabs defaultValue="profil">
           <TabsList>
+            <TabsTrigger value="profil" data-testid="tab-profil">{t("profilTab")}</TabsTrigger>
             <TabsTrigger value="consultations" data-testid="tab-consultations">{t("consultations")}</TabsTrigger>
             <TabsTrigger value="prescriptions" data-testid="tab-prescriptions">{t("prescriptionsTab")}</TabsTrigger>
             <TabsTrigger value="resultats-labo" data-testid="tab-resultats-labo">{t("resultatsLaboTab")}</TabsTrigger>
             <TabsTrigger value="historique" data-testid="tab-historique">{t("historiqueTab")}</TabsTrigger>
-            <TabsTrigger value="profil" data-testid="tab-profil">{t("profilTab")}</TabsTrigger>
           </TabsList>
+
+          <TabsContent value="profil">
+            <ProfilTab patient={patient} />
+          </TabsContent>
 
           <TabsContent value="consultations">
             <ConsultationsTab consultations={patientConsultations} staffNameById={staffNameById} />
@@ -145,10 +149,6 @@ export default function PatientDetails() {
 
           <TabsContent value="historique">
             <HistoriqueTab consultations={patientConsultations} labOrders={patientLabOrders} prescriptions={patientPrescriptions} />
-          </TabsContent>
-
-          <TabsContent value="profil">
-            <ProfilTab patient={patient} />
           </TabsContent>
         </Tabs>
       </div>

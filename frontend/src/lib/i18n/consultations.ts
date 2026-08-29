@@ -136,6 +136,10 @@ export const consultations: TranslationSection = {
     cancelConsultationAction: "Cancel Consultation",
     consultationCancelledSuccessfully: "Consultation cancelled",
     failedToCancelConsultation: "Failed to cancel the consultation",
+    specialtyLabel: "Specialty:",
+    visitReasonSectionLabel: "Reason for visit",
+    doctorLabel: "Doctor:",
+    openConsultationAction: "Open consultation",
   },
   fr: {
     consultations: "Consultations",
@@ -272,5 +276,9 @@ export const consultations: TranslationSection = {
     cancelConsultationAction: "Annuler la consultation",
     consultationCancelledSuccessfully: "Consultation annulée",
     failedToCancelConsultation: "Échec de l'annulation de la consultation",
+    specialtyLabel: "Spécialité :",
+    visitReasonSectionLabel: "Motif de visite",
+    doctorLabel: "Médecin :",
+    openConsultationAction: "Ouvrir consultation",
   },
 };

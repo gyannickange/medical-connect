@@ -159,7 +159,6 @@ export default function LabOrderDetails() {
             <DialogTitle>{t("reportProblem")}</DialogTitle>
           </DialogHeader>
           <Textarea
-            className="glass-input"
             placeholder={t("problemReportPlaceholder")}
             value={problemReport}
             onChange={(e) => setProblemReport(e.target.value)}

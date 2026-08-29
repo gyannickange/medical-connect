@@ -78,14 +78,14 @@ export default {
       },
       fontFamily: {
         sans: [
-          "Inter",
+          "DM Sans",
           "-apple-system",
           "BlinkMacSystemFont",
           "'Segoe UI'",
           "sans-serif",
         ],
         mono: ["'JetBrains Mono'", "'SF Mono'", "Monaco", "monospace"],
-        display: ["'Space Grotesk'", "Inter", "sans-serif"],
+        display: ["'DM Sans'", "-apple-system", "BlinkMacSystemFont", "sans-serif"],
       },
       fontSize: {
         xs: "0.75rem",

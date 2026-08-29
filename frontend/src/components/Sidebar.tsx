@@ -34,6 +34,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
 
 export const Sidebar: React.FC = () => {
   const [location] = useLocation();
@@ -95,28 +96,24 @@ export const Sidebar: React.FC = () => {
 
   return (
     <aside
-      className="fixed left-0 top-0 h-screen w-20 lg:w-64 flex flex-col z-40"
-      style={{
-        background: "var(--glass-background)",
-        backdropFilter: "var(--glass-backdrop)",
-        borderRight: "1px solid var(--border)",
-      }}
+      className="fixed left-0 top-0 z-40 flex h-screen w-20 flex-col border-r border-border bg-card lg:w-[260px]"
       data-testid="sidebar">
       {/* Logo */}
-      <div className="p-4 border-b border-border flex-shrink-0">
-        <div className="flex items-center space-x-3">
-          <BrandMark className="w-10 h-10 flex-shrink-0 drop-shadow-[0_4px_10px_rgba(29,78,216,0.35)]" />
+      <div className="flex shrink-0 items-center border-b border-border px-4 py-8">
+        <div className="flex items-center gap-3">
+          <BrandMark className="h-9 w-9 shrink-0" />
           <div className="hidden lg:block">
-            <h1 className="text-lg font-display font-bold text-foreground">
+            <h1 className="text-base font-bold leading-5 text-foreground">
               Medical Connect
             </h1>
+            <p className="text-xs text-muted-foreground">Hospital OS</p>
           </div>
         </div>
       </div>
 
       {/* Navigation Menu */}
       <nav
-        className="flex-1 p-3 lg:p-4 overflow-y-auto"
+        className="flex-1 overflow-y-auto px-3 py-5 lg:px-4"
         data-testid="navigation-menu">
         <div className="space-y-1">
           {menuItems.map((item) => {
@@ -127,7 +124,7 @@ export const Sidebar: React.FC = () => {
               <Link
                 key={item.path}
                 href={item.path}
-                className={`nav-item min-h-10 flex items-center space-x-2.5 text-sm transition-all duration-300 ${
+                className={`nav-item min-h-[42px] flex items-center gap-3 text-sm ${
                   active ? "active" : ""
                 }`}
                 data-testid={`nav-${item.path.slice(1) || "dashboard"}`}>
@@ -142,14 +139,15 @@ export const Sidebar: React.FC = () => {
       </nav>
 
       {/* Account switcher */}
-      <div className="p-3 lg:p-4 border-t border-border flex-shrink-0">
+      <div className="shrink-0 border-t border-border p-3 lg:p-4">
         {currentTenant && (
           tenants.length > 1 ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <button
+                <Button
                   type="button"
-                  className="glass-card flex min-h-12 w-full items-center gap-2 rounded-lg p-2 text-left outline-none transition-colors duration-200 hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring lg:p-3"
+                  variant="ghost"
+                  className="flex h-auto min-h-12 w-full items-center gap-2 rounded-lg border border-transparent p-2 text-left hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring lg:p-3"
                   aria-label={t("switchAccount")}
                   data-testid="account-switcher">
                   <Store className="h-5 w-5 shrink-0 text-accent-primary" />
@@ -162,7 +160,7 @@ export const Sidebar: React.FC = () => {
                     </span>
                   </span>
                   <ChevronsUpDown className="hidden h-4 w-4 shrink-0 text-muted-foreground lg:block" />
-                </button>
+                </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent
                 side="right"
@@ -188,7 +186,7 @@ export const Sidebar: React.FC = () => {
             </DropdownMenu>
           ) : (
             <div
-              className="glass-card flex min-h-12 items-center gap-2 rounded-lg p-2 lg:p-3"
+              className="flex min-h-12 items-center gap-2 rounded-lg p-2 lg:p-3"
               data-testid="current-account">
               <Store className="h-5 w-5 shrink-0 text-accent-primary" />
               <div className="hidden min-w-0 lg:block">

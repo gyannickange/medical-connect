@@ -28,8 +28,7 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
     const stored = localStorage.getItem('medicalconnect_theme') as Theme;
     if (stored) return stored;
     
-    // Default to dark theme for crypto trading interface
-    return 'dark';
+    return 'light';
   });
 
   useEffect(() => {
