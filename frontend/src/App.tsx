@@ -39,6 +39,9 @@ const NewLabOrder = lazy(() => import("./pages/laboratoire/new"));
 const LabOrderDetails = lazy(() => import("./pages/laboratoire/show"));
 const PharmacieIndex = lazy(() => import("./pages/pharmacie"));
 const PrescriptionDetails = lazy(() => import("./pages/pharmacie/show"));
+const SallesIndex = lazy(() => import("./pages/salles"));
+const NewSalle = lazy(() => import("./pages/salles/new"));
+const SalleDetails = lazy(() => import("./pages/salles/show"));
 const FileAttente = lazy(() => import("./pages/FileAttente"));
 const QueueRegister = lazy(() => import("./pages/QueueRegister"));
 const QueueEntryDetails = lazy(() => import("./pages/QueueEntryDetails"));
@@ -256,6 +259,27 @@ function Router() {
           <ProtectedRoute>
             <Layout>
               <PrescriptionDetails />
+            </Layout>
+          </ProtectedRoute>
+        </Route>
+        <Route path="/salles">
+          <ProtectedRoute>
+            <Layout>
+              <SallesIndex />
+            </Layout>
+          </ProtectedRoute>
+        </Route>
+        <Route path="/salles/new">
+          <ProtectedRoute>
+            <Layout>
+              <NewSalle />
+            </Layout>
+          </ProtectedRoute>
+        </Route>
+        <Route path="/salles/:id">
+          <ProtectedRoute>
+            <Layout>
+              <SalleDetails />
             </Layout>
           </ProtectedRoute>
         </Route>

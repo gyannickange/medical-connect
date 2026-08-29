@@ -27,6 +27,11 @@ export const audit: TranslationSection = {
     auditDelete: "Delete",
     auditSuccess: "Success",
     auditFailed: "Failed",
+    auditActionsToday: "Actions today",
+    auditActiveUsers: "Active users",
+    auditSecurityAlerts: "Security alerts",
+    allModules: "All modules",
+    patientConcerned: "Patient concerned",
   },
   fr: {
     auditLogs: "Journaux d'audit",
@@ -54,5 +59,10 @@ export const audit: TranslationSection = {
     auditDelete: "Suppression",
     auditSuccess: "Réussite",
     auditFailed: "Échec",
+    auditActionsToday: "Actions aujourd'hui",
+    auditActiveUsers: "Utilisateurs actifs",
+    auditSecurityAlerts: "Alertes sécurité",
+    allModules: "Tous les modules",
+    patientConcerned: "Patient concerné",
   },
 };

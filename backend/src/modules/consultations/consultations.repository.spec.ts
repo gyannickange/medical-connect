@@ -280,5 +280,28 @@ describe("ConsultationsRepository", () => {
         expect.objectContaining({ selector: expect.objectContaining({ type: "consultation", tenantId: "tenant-1", patientId: "patient-1" }) })
       );
     });
+
+    it("filters by roomId when provided", async () => {
+      const db = { find: jest.fn().mockResolvedValue({ docs: [] }) };
+      const couchDBService = { getDatabase: jest.fn().mockResolvedValue(db), ensureIndex: jest.fn().mockResolvedValue(undefined) };
+      const repository = new ConsultationsRepository(couchDBService as any, { next: jest.fn() } as any, patientsRepoStub() as any);
+
+      await repository.findByTenant("tenant-1", { roomId: "room-1" });
+
+      expect(db.find).toHaveBeenCalledWith(
+        expect.objectContaining({ selector: expect.objectContaining({ roomId: "room-1" }) })
+      );
+    });
+
+    it("omits the roomId selector when not provided", async () => {
+      const db = { find: jest.fn().mockResolvedValue({ docs: [] }) };
+      const couchDBService = { getDatabase: jest.fn().mockResolvedValue(db), ensureIndex: jest.fn().mockResolvedValue(undefined) };
+      const repository = new ConsultationsRepository(couchDBService as any, { next: jest.fn() } as any, patientsRepoStub() as any);
+
+      await repository.findByTenant("tenant-1", {});
+
+      const call = db.find.mock.calls[0][0];
+      expect(call.selector.roomId).toBeUndefined();
+    });
   });
 });

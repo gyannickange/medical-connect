@@ -45,4 +45,20 @@ export class CreateStaffDto {
   @IsBoolean()
   @IsOptional()
   isActive?: boolean;
+
+  @IsString()
+  @IsOptional()
+  service?: string;
+
+  @IsString()
+  @IsOptional()
+  specialty?: string;
+
+  @IsString()
+  @IsOptional()
+  matricule?: string;
+
+  @IsString()
+  @IsOptional()
+  fonction?: string;
 }

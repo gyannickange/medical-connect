@@ -36,6 +36,52 @@ describe("QueueRepository", () => {
     });
   });
 
+  describe("findById", () => {
+    it("returns a tenant-owned event by its stable id", async () => {
+      const db = {
+        get: jest.fn().mockResolvedValue({
+          _id: "queue_event:event-1",
+          id: "event-1",
+          type: "queue_event",
+          tenantId: "tenant-1",
+          consultationId: "c1",
+          patientId: "p1",
+          eventType: "waiting",
+          payload: null,
+          actorUserId: "u1",
+          actorDeviceId: null,
+          occurredAt: "2026-08-27T08:00:00.000Z",
+        }),
+      };
+      const repository = new QueueRepository(
+        { getDatabase: jest.fn().mockResolvedValue(db) } as any,
+        consultationsRepoStub() as any
+      );
+
+      const result = await repository.findById("event-1", "tenant-1");
+
+      expect(db.get).toHaveBeenCalledWith("queue_event:event-1");
+      expect(result).toEqual(expect.objectContaining({ id: "event-1", eventType: "waiting" }));
+      expect(result.occurredAt).toEqual(new Date("2026-08-27T08:00:00.000Z"));
+    });
+
+    it("returns undefined when the event is absent or belongs to another tenant", async () => {
+      const db = {
+        get: jest
+          .fn()
+          .mockRejectedValueOnce({ statusCode: 404 })
+          .mockResolvedValueOnce({ type: "queue_event", tenantId: "tenant-2" }),
+      };
+      const repository = new QueueRepository(
+        { getDatabase: jest.fn().mockResolvedValue(db) } as any,
+        consultationsRepoStub() as any
+      );
+
+      await expect(repository.findById("missing", "tenant-1")).resolves.toBeUndefined();
+      await expect(repository.findById("other-tenant", "tenant-1")).resolves.toBeUndefined();
+    });
+  });
+
   describe("getEventsSince", () => {
     it("folds events per consultation into the latest status and a timeline", async () => {
       const docs = [

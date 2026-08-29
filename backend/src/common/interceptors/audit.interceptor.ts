@@ -165,6 +165,9 @@ export class AuditInterceptor implements NestInterceptor {
       staff: "staff",
       settings: "settings",
       tenants: "tenants",
+      "lab-orders": "lab-orders",
+      prescriptions: "prescriptions",
+      rooms: "rooms",
     };
 
     for (const [key, value] of Object.entries(entityMap)) {

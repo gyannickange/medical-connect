@@ -5,10 +5,14 @@ import { CouchDBService } from "../../database/couchdb.service";
 import { identityDatabaseName } from "../../database/couchdb-naming";
 import { normalizeUsername } from "../../lib/exceptions";
 import type { PaginationOptions } from "../../lib/pagination";
+import { S3Service } from "../../lib/s3.service";
 
 @Injectable()
 export class UsersRepository {
-  constructor(private readonly couchDBService: CouchDBService) {}
+  constructor(
+    private readonly couchDBService: CouchDBService,
+    private readonly s3Service: S3Service
+  ) {}
 
   async findById(id: string): Promise<User | undefined> {
     try {
@@ -73,6 +77,10 @@ export class UsersRepository {
       role: input.role ?? "cashier",
       tenantId: input.tenantId,
       isActive: input.isActive !== false,
+      service: input.service ?? null,
+      specialty: input.specialty ?? null,
+      matricule: input.matricule ?? null,
+      fonction: input.fonction ?? null,
       createdAt: new Date().toISOString(),
     };
     try {
@@ -143,6 +151,40 @@ export class UsersRepository {
     await db.destroy(current._id, current._rev);
     const reservation: any = await db.get(this.usernameId(current.username)).catch(() => null);
     if (reservation) await db.destroy(reservation._id, reservation._rev);
+  }
+
+  async attachPhoto(id: string, tenantId: string, base64Body: string, contentType: string): Promise<User> {
+    const db = await this.db();
+    const current: any = await db.get(`user:${id}`).catch((error: any) => {
+      if (error?.statusCode === 404) throw new NotFoundException("Staff member not found");
+      throw error;
+    });
+    if (current.tenantId !== tenantId) {
+      throw new NotFoundException("Staff member not found");
+    }
+
+    const extension = contentType === "image/png" ? "png" : "jpg";
+    const key = `tenants/${tenantId}/staff/${id}/photo-${Date.now()}.${extension}`;
+    await this.s3Service.uploadObject(key, Buffer.from(base64Body, "base64"), contentType);
+
+    const updated = { ...current, photoS3Key: key };
+    await db.insert(updated);
+    return this.hydrate(updated);
+  }
+
+  async getPhotoUrl(id: string, tenantId: string): Promise<string> {
+    const db = await this.db();
+    const current: any = await db.get(`user:${id}`).catch((error: any) => {
+      if (error?.statusCode === 404) throw new NotFoundException("Staff member not found");
+      throw error;
+    });
+    if (current.tenantId !== tenantId) {
+      throw new NotFoundException("Staff member not found");
+    }
+    if (!current.photoS3Key) {
+      throw new NotFoundException("Staff member has no photo");
+    }
+    return this.s3Service.getPresignedUrl(current.photoS3Key, 300);
   }
 
   private usernameId(username: string): string {

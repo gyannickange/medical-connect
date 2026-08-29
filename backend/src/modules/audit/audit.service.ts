@@ -23,8 +23,14 @@ export class AuditService {
       entityType?: string;
       userId?: string;
     }
-  ): Promise<AuditLog[]> {
-    return this.auditRepository.find(tenantId, options);
+  ): Promise<Array<AuditLog & { patientName: string | null }>> {
+    const logs = await this.auditRepository.find(tenantId, options);
+    return Promise.all(
+      logs.map(async (log) => ({
+        ...log,
+        patientName: await this.auditRepository.resolvePatientName(tenantId, log.entityType, log.entityId, log.changes),
+      }))
+    );
   }
 
   async getAuditLogsByEntity(

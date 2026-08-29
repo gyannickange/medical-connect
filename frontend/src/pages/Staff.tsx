@@ -57,6 +57,15 @@ import {
 import { toPublicLocalUser } from "@/lib/localAuth";
 import { RecoveryCodeDisplay } from "@/components/RecoveryCodeDisplay";
 
+function fileToBase64(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result).split(",")[1] ?? "");
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
 export default function Staff() {
   const { t } = useTranslation();
   const { currentTenant } = useTenant();
@@ -71,6 +80,8 @@ export default function Staff() {
   const [editingStaff, setEditingStaff] = useState<any>(null);
   const [searchQuery, setSearchQuery] = useState("");
 
+  const [pendingPhoto, setPendingPhoto] = useState<File | null>(null);
+
   const form = useForm<InsertUser>({
     resolver: zodResolver(insertUserSchema),
     defaultValues: {
@@ -82,6 +93,10 @@ export default function Staff() {
       role: "cashier",
       tenantId: currentTenant?.id || "",
       isActive: true,
+      service: "",
+      specialty: "",
+      matricule: "",
+      fonction: "",
     },
   });
 
@@ -131,7 +146,18 @@ export default function Staff() {
         { collection: "staff" }
       );
 
-      return response.json();
+      const saved = await response.json();
+      if (pendingPhoto && saved?.id) {
+        const photoBase64 = await fileToBase64(pendingPhoto);
+        await offlineApiRequest(
+          "PUT",
+          `/api/staff/${saved.id}/photo`,
+          { photoBase64, contentType: pendingPhoto.type === "image/png" ? "image/png" : "image/jpeg" },
+          { collection: "staff", entityId: saved.id }
+        );
+        setPendingPhoto(null);
+      }
+      return saved;
     },
     onSuccess: (result) => {
       const isOffline = result?._savedOffline === true;
@@ -228,6 +254,7 @@ export default function Staff() {
   const handleCloseModal = () => {
     setShowStaffModal(false);
     setEditingStaff(null);
+    setPendingPhoto(null);
     form.reset({
       username: "",
       password: "",
@@ -237,6 +264,10 @@ export default function Staff() {
       role: "cashier",
       tenantId: currentTenant?.id || "",
       isActive: true,
+      service: "",
+      specialty: "",
+      matricule: "",
+      fonction: "",
     });
   };
 
@@ -251,6 +282,10 @@ export default function Staff() {
       role: member.role,
       tenantId: member.tenantId || currentTenant?.id || "", // Ensure tenantId is always set
       isActive: member.isActive,
+      service: member.service || "",
+      specialty: member.specialty || "",
+      matricule: member.matricule || "",
+      fonction: member.fonction || "",
     });
     setShowStaffModal(true);
   };
@@ -617,6 +652,49 @@ export default function Staff() {
                   {form.formState.errors.email.message}
                 </p>
               )}
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="service" className="text-sm font-medium text-foreground">
+                  {t("staffService")}
+                </Label>
+                <Input id="service" {...form.register("service")} className="glass-input rounded-xl" data-testid="input-service" />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="specialty" className="text-sm font-medium text-foreground">
+                  {t("staffSpecialty")}
+                </Label>
+                <Input id="specialty" {...form.register("specialty")} className="glass-input rounded-xl" data-testid="input-specialty" />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="matricule" className="text-sm font-medium text-foreground">
+                  {t("staffMatricule")}
+                </Label>
+                <Input id="matricule" {...form.register("matricule")} className="glass-input rounded-xl" data-testid="input-matricule" />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="fonction" className="text-sm font-medium text-foreground">
+                  {t("staffFonction")}
+                </Label>
+                <Input id="fonction" {...form.register("fonction")} className="glass-input rounded-xl" data-testid="input-fonction" />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label className="text-sm font-medium text-foreground">{t("uploadPhoto")}</Label>
+              <label className="glass-input rounded-xl h-24 flex flex-col items-center justify-center gap-1 cursor-pointer text-sm text-muted-foreground">
+                <input
+                  type="file"
+                  accept="image/jpeg,image/png"
+                  className="hidden"
+                  onChange={(e) => e.target.files?.[0] && setPendingPhoto(e.target.files[0])}
+                />
+                <span>{pendingPhoto ? pendingPhoto.name : t("dragDropPhoto")}</span>
+              </label>
             </div>
               </>
             )}

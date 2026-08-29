@@ -14,11 +14,13 @@ export interface AuditLogsFilters {
   userId?: string;
 }
 
+export type AuditLogWithPatient = AuditLog & { patientName: string | null };
+
 export function useAuditLogs(
   tenantId: string | undefined,
   filters?: AuditLogsFilters
 ) {
-  return useQuery<AuditLog[]>({
+  return useQuery<AuditLogWithPatient[]>({
     queryKey: ["/api/audit-logs", tenantId, filters],
     enabled: !!tenantId,
     queryFn: async () => {

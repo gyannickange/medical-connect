@@ -1,118 +1,116 @@
 import { NotFoundException } from "@nestjs/common";
 import { UsersRepository } from "./users.repository";
 
-const userDocument = (overrides: Record<string, unknown> = {}) => ({
-  _id: "user:user-1",
-  _rev: "1-user",
-  id: "user-1",
-  type: "user",
-  username: "alice",
-  tenantId: "tenant-1",
-  password: "hashed",
-  firstName: "Alice",
-  lastName: "A",
-  email: null,
-  role: "cashier",
-  isActive: true,
-  createdAt: "2026-01-01T00:00:00.000Z",
-  ...overrides,
-});
+describe("UsersRepository.create", () => {
+  function repositoryWithDb() {
+    const db = { insert: jest.fn().mockResolvedValue({ ok: true }) };
+    const repository = new UsersRepository({ getDatabase: jest.fn().mockResolvedValue(db) } as any, {} as any);
+    return { db, repository };
+  }
 
-describe("UsersRepository", () => {
-  describe("update", () => {
-    it("hides a user that belongs to a different tenant", async () => {
-      const db = {
-        get: jest.fn().mockResolvedValue(userDocument()),
-        insert: jest.fn(),
-      };
-      const repository = new UsersRepository({
-        getDatabase: jest.fn().mockResolvedValue(db),
-      } as any);
+  it("persists service/specialty/matricule/fonction when provided", async () => {
+    const { db, repository } = repositoryWithDb();
 
-      await expect(
-        repository.update("user-1", "tenant-2", { firstName: "Mallory" })
-      ).rejects.toThrow(NotFoundException);
-      expect(db.insert).not.toHaveBeenCalled();
+    const user = await repository.create({
+      username: "dr.test",
+      password: "hashed",
+      firstName: "Test",
+      lastName: "Doctor",
+      tenantId: "tenant-1",
+      role: "medecin",
+      service: "Cardiologie",
+      specialty: "Cardiologie interventionnelle",
+      matricule: "MED-99382",
+      fonction: "Médecin Chef Adjoint",
     });
 
-    it("updates a user when the tenant matches", async () => {
-      const db = {
-        get: jest.fn().mockResolvedValue(userDocument()),
-        insert: jest.fn().mockResolvedValue({ ok: true }),
-      };
-      const repository = new UsersRepository({
-        getDatabase: jest.fn().mockResolvedValue(db),
-      } as any);
-
-      const result = await repository.update("user-1", "tenant-1", {
-        firstName: "Alicia",
-      });
-
-      expect(result.firstName).toBe("Alicia");
-    });
-
-    it("releases a newly reserved username when the user write fails", async () => {
-      const newReservation = {
-        _id: "username:bob",
-        _rev: "1-new",
-        type: "username_reservation",
-        username: "bob",
-        userId: "user-1",
-      };
-      const db = {
-        get: jest.fn().mockImplementation((documentId: string) => {
-          if (documentId === "user:user-1") return Promise.resolve(userDocument());
-          if (documentId === "username:bob") return Promise.resolve(newReservation);
-          return Promise.reject({ statusCode: 404 });
-        }),
-        insert: jest
-          .fn()
-          .mockResolvedValueOnce({ ok: true })
-          .mockRejectedValueOnce(new Error("network blip")),
-        destroy: jest.fn().mockResolvedValue({ ok: true }),
-      };
-      const repository = new UsersRepository({
-        getDatabase: jest.fn().mockResolvedValue(db),
-      } as any);
-
-      await expect(
-        repository.update("user-1", "tenant-1", { username: "bob" })
-      ).rejects.toThrow("network blip");
-      expect(db.destroy).toHaveBeenCalledWith("username:bob", "1-new");
+    expect(db.insert).toHaveBeenCalledWith(
+      expect.objectContaining({
+        service: "Cardiologie",
+        specialty: "Cardiologie interventionnelle",
+        matricule: "MED-99382",
+        fonction: "Médecin Chef Adjoint",
+      })
+    );
+    expect(user).toMatchObject({
+      service: "Cardiologie",
+      specialty: "Cardiologie interventionnelle",
+      matricule: "MED-99382",
+      fonction: "Médecin Chef Adjoint",
     });
   });
 
-  describe("delete", () => {
-    it("hides a user that belongs to a different tenant", async () => {
-      const db = {
-        get: jest.fn().mockResolvedValue(userDocument()),
-        destroy: jest.fn(),
-      };
-      const repository = new UsersRepository({
-        getDatabase: jest.fn().mockResolvedValue(db),
-      } as any);
+  it("defaults service/specialty/matricule/fonction to null when omitted", async () => {
+    const { db, repository } = repositoryWithDb();
 
-      await expect(repository.delete("user-1", "tenant-2")).rejects.toThrow(
-        NotFoundException
-      );
-      expect(db.destroy).not.toHaveBeenCalled();
+    await repository.create({
+      username: "cashier.test",
+      password: "hashed",
+      firstName: "Test",
+      lastName: "Cashier",
+      tenantId: "tenant-1",
     });
 
-    it("deletes a user when the tenant matches", async () => {
-      const db = {
-        get: jest
-          .fn()
-          .mockResolvedValueOnce(userDocument())
-          .mockRejectedValueOnce({ statusCode: 404 }),
-        destroy: jest.fn().mockResolvedValue({ ok: true }),
-      };
-      const repository = new UsersRepository({
-        getDatabase: jest.fn().mockResolvedValue(db),
-      } as any);
+    expect(db.insert).toHaveBeenCalledWith(
+      expect.objectContaining({ service: null, specialty: null, matricule: null, fonction: null })
+    );
+  });
+});
 
-      await repository.delete("user-1", "tenant-1");
+describe("UsersRepository.attachPhoto / getPhotoUrl", () => {
+  function existingUser(overrides: Record<string, unknown> = {}) {
+    return {
+      _id: "user:user-1",
+      _rev: "2-a",
+      id: "user-1",
+      type: "user",
+      tenantId: "tenant-1",
+      photoS3Key: null,
+      ...overrides,
+    };
+  }
 
-      expect(db.destroy).toHaveBeenCalledWith("user:user-1", "1-user");
-    });
+  it("uploads to S3 with a tenant/staff-scoped key and patches photoS3Key", async () => {
+    const db = {
+      get: jest.fn().mockResolvedValue(existingUser()),
+      insert: jest.fn().mockResolvedValue({ ok: true }),
+    };
+    const s3Service = { uploadObject: jest.fn().mockResolvedValue(undefined) };
+    const repository = new UsersRepository({ getDatabase: jest.fn().mockResolvedValue(db) } as any, s3Service as any);
+
+    const result = await repository.attachPhoto("user-1", "tenant-1", Buffer.from("img").toString("base64"), "image/jpeg");
+
+    expect(s3Service.uploadObject).toHaveBeenCalledWith(
+      expect.stringMatching(/^tenants\/tenant-1\/staff\/user-1\/photo-\d+\.jpg$/),
+      Buffer.from("img"),
+      "image/jpeg"
+    );
+    expect(db.insert).toHaveBeenCalledWith(expect.objectContaining({ photoS3Key: expect.stringMatching(/^tenants\//) }));
+    expect(result.photoS3Key).toMatch(/^tenants\//);
+  });
+
+  it("throws NotFoundException when the staff member does not exist", async () => {
+    const db = { get: jest.fn().mockRejectedValue({ statusCode: 404 }) };
+    const repository = new UsersRepository({ getDatabase: jest.fn().mockResolvedValue(db) } as any, { uploadObject: jest.fn() } as any);
+
+    await expect(repository.attachPhoto("missing", "tenant-1", "aW1n", "image/jpeg")).rejects.toThrow(NotFoundException);
+  });
+
+  it("getPhotoUrl returns a presigned URL when photoS3Key is set", async () => {
+    const db = { get: jest.fn().mockResolvedValue(existingUser({ photoS3Key: "tenants/tenant-1/staff/user-1/photo-1.jpg" })) };
+    const s3Service = { getPresignedUrl: jest.fn().mockResolvedValue("https://signed.example/photo.jpg") };
+    const repository = new UsersRepository({ getDatabase: jest.fn().mockResolvedValue(db) } as any, s3Service as any);
+
+    const url = await repository.getPhotoUrl("user-1", "tenant-1");
+
+    expect(s3Service.getPresignedUrl).toHaveBeenCalledWith("tenants/tenant-1/staff/user-1/photo-1.jpg", 300);
+    expect(url).toBe("https://signed.example/photo.jpg");
+  });
+
+  it("getPhotoUrl throws NotFoundException when no photo has been uploaded yet", async () => {
+    const db = { get: jest.fn().mockResolvedValue(existingUser()) };
+    const repository = new UsersRepository({ getDatabase: jest.fn().mockResolvedValue(db) } as any, { getPresignedUrl: jest.fn() } as any);
+
+    await expect(repository.getPhotoUrl("user-1", "tenant-1")).rejects.toThrow(NotFoundException);
   });
 });

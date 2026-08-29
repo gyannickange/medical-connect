@@ -2,19 +2,26 @@ import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useLocation } from "wouter";
+import { useLocation, useSearchParams } from "wouter";
 import { CalendarDays, ChevronDown, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useTranslation } from "../../lib/i18n";
 import { useTenant } from "../../contexts/TenantContext";
 import { useToast } from "@/hooks/use-toast";
 import { offlineApiRequest } from "@/lib/offlineApiRequest";
 import { showApiErrorToast } from "@/lib/errorHandler";
-import { insertConsultationSchema, type InsertConsultation, type Consultation, type Patient } from "@shared/schema";
+import { insertConsultationSchema, type InsertConsultation, type Consultation, type Patient, type Room } from "@shared/schema";
 
 const inputClass = "bg-white border border-[#e2e8f0] rounded-[8px] px-3 py-3 text-[14px] text-[#0f172a] placeholder:text-[#94a3b8] h-auto";
 const disabledFieldClass = "bg-[#f8fafc] border border-[#e2e8f0] rounded-[8px] px-3 py-3 flex items-center";
@@ -47,6 +54,8 @@ export default function ConsultationFormFields({ consultationId: editingId }: Co
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [, setLocation] = useLocation();
+  const [searchParams] = useSearchParams();
+  const prefillPatientId = searchParams.get("patientId") ?? "";
   const [patientQuery, setPatientQuery] = useState("");
   const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null);
 
@@ -77,6 +86,24 @@ export default function ConsultationFormFields({ consultationId: editingId }: Co
     enabled: !editingId && !!currentTenant?.id && patientQuery.length > 1 && !selectedPatient,
   });
 
+  const { data: prefillPatient } = useQuery<Patient>({
+    queryKey: ["/api/patients/detail", prefillPatientId],
+    queryFn: async () => {
+      const response = await fetch(`/api/patients/detail/${prefillPatientId}`, { credentials: "include" });
+      return response.json();
+    },
+    enabled: !editingId && !!prefillPatientId,
+  });
+
+  const { data: rooms = [] } = useQuery<Room[]>({
+    queryKey: ["/api/rooms", currentTenant?.id],
+    queryFn: async () => {
+      const response = await fetch(`/api/rooms/${currentTenant?.id}`, { credentials: "include" });
+      return response.json();
+    },
+    enabled: !!currentTenant?.id,
+  });
+
   const form = useForm<InsertConsultation>({
     resolver: zodResolver(insertConsultationSchema),
     defaultValues: defaultValuesFor(null, currentTenant?.id ?? ""),
@@ -86,6 +113,14 @@ export default function ConsultationFormFields({ consultationId: editingId }: Co
     if (existingConsultation) form.reset(defaultValuesFor(existingConsultation, currentTenant?.id ?? ""));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [existingConsultation, currentTenant?.id]);
+
+  useEffect(() => {
+    if (prefillPatient && !editingId) {
+      setSelectedPatient(prefillPatient);
+      form.setValue("patientId", prefillPatient.id, { shouldValidate: true });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [prefillPatient, editingId]);
 
   const errors = form.formState.errors;
 
@@ -201,10 +236,23 @@ export default function ConsultationFormFields({ consultationId: editingId }: Co
         <div className="flex gap-6 items-start w-full">
           <div className="flex-1 flex flex-col gap-2">
             <Label className={labelClass}>{t("assignedRoom")}</Label>
-            <div className="relative">
-              <Input className={`${inputClass} pr-9`} placeholder="Salle de cardiologie 104" {...form.register("roomId")} />
-              <ChevronDown className="w-3.5 h-3.5 text-[#64748b] absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
-            </div>
+            <Select value={form.watch("roomId") ?? ""} onValueChange={(value) => form.setValue("roomId", value)}>
+              <SelectTrigger className={inputClass} data-testid="select-consultation-room">
+                <SelectValue placeholder={t("noRoomAssigned")} />
+              </SelectTrigger>
+              <SelectContent>
+                {rooms.map((room) => (
+                  <SelectItem key={room.id} value={room.id}>
+                    {room.number} — {room.type}
+                  </SelectItem>
+                ))}
+                {form.watch("roomId") && !rooms.some((r) => r.id === form.watch("roomId")) && (
+                  <SelectItem value={form.watch("roomId") as string} disabled>
+                    {form.watch("roomId")}
+                  </SelectItem>
+                )}
+              </SelectContent>
+            </Select>
           </div>
           <div className="flex-1 flex flex-col gap-2">
             <Label className={labelClass}>{t("priority")}</Label>

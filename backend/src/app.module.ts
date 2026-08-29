@@ -8,6 +8,7 @@ import { LabOrdersModule } from "./modules/lab-orders/lab-orders.module";
 import { PrescriptionsModule } from "./modules/prescriptions/prescriptions.module";
 import { QueueModule } from "./modules/queue/queue.module";
 import { StaffModule } from "./modules/staff/staff.module";
+import { RoomsModule } from "./modules/rooms/rooms.module";
 import { SettingsModule } from "./modules/settings/settings.module";
 import { SyncModule } from "./modules/sync/sync.module";
 import { PeersModule } from "./modules/peers/peers.module";
@@ -31,6 +32,7 @@ import { AuditInterceptor } from "./common/interceptors/audit.interceptor";
     PrescriptionsModule,
     QueueModule,
     StaffModule,
+    RoomsModule,
     SettingsModule,
     SyncModule,
     PeersModule,

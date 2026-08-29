@@ -3,6 +3,7 @@ import {
   UnauthorizedException,
   ConflictException,
   BadRequestException,
+  ForbiddenException,
 } from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
 import type { User, Tenant } from "@shared/schema";
@@ -38,7 +39,8 @@ export class AuthService {
     lastName: string,
     tenantId: string,
     email?: string,
-    role: "admin" | "manager" | "cashier" = "cashier"
+    role: "admin" | "manager" | "cashier" = "cashier",
+    requester?: { userId: string; tenantId: string; role: string } | null
   ): Promise<RegisterResponse> {
     username = normalizeUsername(username);
     // Check if username already exists
@@ -51,6 +53,19 @@ export class AuthService {
     const tenant = await this.tenantsRepository.findById(tenantId);
     if (!tenant) {
       throw new BadRequestException("Invalid tenant ID");
+    }
+
+    const existingTenantUsers = await this.usersRepository.findByTenant(tenantId, { limit: 1 });
+    if (existingTenantUsers.length > 0) {
+      const isAuthorizedRequester =
+        !!requester &&
+        requester.tenantId === tenantId &&
+        (requester.role === "admin" || requester.role === "manager");
+      if (!isAuthorizedRequester) {
+        throw new ForbiddenException(
+          "Registration for an existing tenant requires an authenticated admin or manager of that tenant"
+        );
+      }
     }
 
     // Hash password

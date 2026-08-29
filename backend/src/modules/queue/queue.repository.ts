@@ -51,6 +51,28 @@ export class QueueRepository {
     }
   }
 
+  async findById(id: string, tenantId: string): Promise<QueueEvent | undefined> {
+    const db = await this.database(tenantId);
+    try {
+      const doc: any = await db.get(couchDocumentId("queue_event", id));
+      if (doc.type !== "queue_event" || doc.tenantId !== tenantId) return undefined;
+      return {
+        id: doc.id,
+        tenantId: doc.tenantId,
+        consultationId: doc.consultationId,
+        patientId: doc.patientId,
+        eventType: doc.eventType,
+        payload: doc.payload ?? null,
+        actorUserId: doc.actorUserId,
+        actorDeviceId: doc.actorDeviceId ?? null,
+        occurredAt: new Date(doc.occurredAt),
+      };
+    } catch (error: any) {
+      if (error?.statusCode === 404) return undefined;
+      throw this.unavailable(error);
+    }
+  }
+
   async getEventsSince(tenantId: string, since: Date): Promise<FoldedQueueEntry[]> {
     const dbName = this.databaseName(tenantId);
     const db = await this.database(tenantId);

@@ -15,6 +15,7 @@ import {
 import { StaffService } from "./staff.service";
 import { CreateStaffDto } from "./dto/create-staff.dto";
 import { UpdateStaffDto } from "./dto/update-staff.dto";
+import { AttachStaffPhotoDto } from "./dto/attach-staff-photo.dto";
 import { JwtAuthGuard } from "../auth/jwt-auth.guard";
 import { PolicyGuard } from "../auth/guards/policy.guard";
 import { CheckPolicy } from "../auth/decorators/check-policy.decorator";
@@ -54,6 +55,18 @@ export class StaffController {
     @Request() req: any
   ) {
     return this.staffService.update(id, req.user.tenantId, updateStaffDto);
+  }
+
+  @Put(":id/photo")
+  @CheckPolicy(StaffPolicy, "update")
+  async attachPhoto(@Param("id") id: string, @Body() dto: AttachStaffPhotoDto, @Request() req: any) {
+    return this.staffService.attachPhoto(id, req.user.tenantId, dto.photoBase64, dto.contentType);
+  }
+
+  @Get(":id/photo-url")
+  @CheckPolicy(StaffPolicy, "view")
+  async getPhotoUrl(@Param("id") id: string, @Request() req: any) {
+    return { url: await this.staffService.getPhotoUrl(id, req.user.tenantId) };
   }
 
   @Delete(":id")

@@ -33,6 +33,10 @@ export const messages: TranslationSection = {
     noStaffMembersFound: "No staff members found",
     addFirstStaffMember: "Add your first staff member",
     leaveBlankToKeepCurrent: "leave blank to keep current",
+    staffService: "Service",
+    staffSpecialty: "Specialty",
+    staffMatricule: "Employee ID",
+    staffFonction: "Job title",
     confirmDeleteStaff: "Are you sure you want to delete",
     staffDeleteQueuedOffline:
       "Staff member deletion queued offline and will sync when online",
@@ -114,6 +118,10 @@ export const messages: TranslationSection = {
     noStaffMembersFound: "Aucun membre du personnel trouvé",
     addFirstStaffMember: "Ajouter votre premier membre du personnel",
     leaveBlankToKeepCurrent: "laisser vide pour conserver l'actuel",
+    staffService: "Service",
+    staffSpecialty: "Spécialité",
+    staffMatricule: "Matricule",
+    staffFonction: "Fonction",
     confirmDeleteStaff: "Voulez-vous vraiment supprimer",
     staffDeleteQueuedOffline:
       "Suppression du membre du personnel mise en attente hors ligne et sera synchronisée en ligne",

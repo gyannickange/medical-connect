@@ -13,6 +13,7 @@ export interface ConsultationFilters {
   assignedDoctorId?: string;
   scheduledOnOrAfter?: string;
   patientId?: string;
+  roomId?: string;
 }
 
 @Injectable()
@@ -133,6 +134,7 @@ export class ConsultationsRepository {
     if (filters?.assignedDoctorId) selector.assignedDoctorId = filters.assignedDoctorId;
     if (filters?.scheduledOnOrAfter) selector.scheduledAt = { $gte: filters.scheduledOnOrAfter };
     if (filters?.patientId) selector.patientId = filters.patientId;
+    if (filters?.roomId) selector.roomId = filters.roomId;
 
     const result = await db.find({ selector, sort: [{ scheduledAt: "asc" }], limit, skip });
     return (result.docs as any[]).map((doc) => ({ ...doc, id: doc.id ?? publicDocumentId(doc._id, "consultation") }));

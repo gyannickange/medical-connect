@@ -174,6 +174,11 @@ describe("toPublicLocalUser / buildLocalTenant", () => {
       role: "manager",
       tenantId: "local",
       isActive: true,
+      service: null,
+      specialty: null,
+      matricule: null,
+      fonction: null,
+      photoS3Key: null,
       createdAt: doc.createdAt,
     });
     expect(publicUser).not.toHaveProperty("password");
