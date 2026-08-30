@@ -3,6 +3,7 @@ import { randomUUID } from "crypto";
 import type { DocumentScope } from "nano";
 import { CouchDBService } from "../../database/couchdb.service";
 import { ConsultationsRepository } from "../consultations/consultations.repository";
+import { S3Service } from "../../lib/s3.service";
 import type { InsertLabOrder, LabOrder, LabOrderExamLine, LabOrderFollowUpAction, LabOrderStatus } from "@shared/schema";
 import { couchDocumentId, publicDocumentId, tenantDatabaseName } from "../../database/couchdb-naming";
 
@@ -17,13 +18,15 @@ export interface UpdateLabOrderData {
   status?: LabOrderStatus;
   examLines?: LabOrderExamLine[];
   problemReport?: string;
+  labComment?: string | null;
 }
 
 @Injectable()
 export class LabOrdersRepository {
   constructor(
     private readonly couchDBService: CouchDBService,
-    private readonly consultationsRepository: ConsultationsRepository
+    private readonly consultationsRepository: ConsultationsRepository,
+    private readonly s3Service: S3Service
   ) {}
 
   async create(data: InsertLabOrder): Promise<LabOrder> {
@@ -41,12 +44,18 @@ export class LabOrdersRepository {
       tenantId: data.tenantId,
       consultationId: data.consultationId,
       patientId: consultation.patientId,
-      examLines: data.examLines.map((line) => ({ examName: line.examName, resultText: null })),
+      examLines: data.examLines.map((line) => ({
+        examName: line.examName,
+        resultText: null,
+        parameters: (line.parameters ?? []).map((parameter) => ({ ...parameter, value: null, status: null })),
+      })),
       requestedByUserId: data.requestedByUserId,
       requestedAt: now,
       priority: data.priority ?? "normal",
       clinicalContext: data.clinicalContext ?? null,
       specialInstructions: data.specialInstructions ?? null,
+      labComment: null,
+      attachments: [],
       status: "demande",
       takenInChargeByUserId: null,
       takenInChargeAt: null,
@@ -133,6 +142,42 @@ export class LabOrdersRepository {
     return this.hydrate(updated);
   }
 
+  async addAttachment(id: string, tenantId: string, fileName: string, contentType: string, base64Body: string): Promise<LabOrder> {
+    const db = await this.database(tenantId);
+    const current = await this.findExisting(db, id);
+    if (!current || current.type !== "lab_order" || current.tenantId !== tenantId) {
+      throw new NotFoundException("Lab order not found");
+    }
+
+    const attachmentId = randomUUID();
+    const s3Key = `tenants/${tenantId}/lab-orders/${id}/attachments/${attachmentId}-${fileName}`;
+    await this.s3Service.uploadObject(s3Key, Buffer.from(base64Body, "base64"), contentType);
+
+    const now = new Date().toISOString();
+    const attachment = { id: attachmentId, fileName, contentType, s3Key, uploadedAt: now };
+    const updated = { ...current, attachments: [...(current.attachments ?? []), attachment], updatedAt: now };
+
+    try {
+      await db.insert(updated as any);
+    } catch (error) {
+      throw this.unavailable(error);
+    }
+    return this.hydrate(updated);
+  }
+
+  async getAttachmentUrl(id: string, tenantId: string, attachmentId: string): Promise<string> {
+    const db = await this.database(tenantId);
+    const current = await this.findExisting(db, id);
+    if (!current || current.type !== "lab_order" || current.tenantId !== tenantId) {
+      throw new NotFoundException("Lab order not found");
+    }
+    const attachment = (current.attachments ?? []).find((a: any) => a.id === attachmentId);
+    if (!attachment) {
+      throw new NotFoundException("Attachment not found");
+    }
+    return this.s3Service.getPresignedUrl(attachment.s3Key, 300);
+  }
+
   async findById(id: string, tenantId: string): Promise<LabOrder> {
     const db = await this.database(tenantId);
     const doc = await this.findExisting(db, id);
@@ -185,6 +230,9 @@ export class LabOrdersRepository {
     return {
       ...doc,
       id: doc.id ?? publicDocumentId(doc._id, "lab_order"),
+      examLines: (doc.examLines ?? []).map((line: any) => ({ ...line, parameters: line.parameters ?? [] })),
+      labComment: doc.labComment ?? null,
+      attachments: (doc.attachments ?? []).map((attachment: any) => ({ ...attachment, uploadedAt: new Date(attachment.uploadedAt) })),
       requestedAt: new Date(doc.requestedAt),
       takenInChargeAt: doc.takenInChargeAt ? new Date(doc.takenInChargeAt) : null,
       validatedAt: doc.validatedAt ? new Date(doc.validatedAt) : null,

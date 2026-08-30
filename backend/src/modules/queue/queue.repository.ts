@@ -74,11 +74,19 @@ export class QueueRepository {
   }
 
   async getEventsSince(tenantId: string, since: Date): Promise<FoldedQueueEntry[]> {
+    return this.foldEvents(tenantId, { $gte: since.toISOString() });
+  }
+
+  async getEventsBetween(tenantId: string, since: Date, until: Date): Promise<FoldedQueueEntry[]> {
+    return this.foldEvents(tenantId, { $gte: since.toISOString(), $lt: until.toISOString() });
+  }
+
+  private async foldEvents(tenantId: string, occurredAt: Record<string, string>): Promise<FoldedQueueEntry[]> {
     const dbName = this.databaseName(tenantId);
     const db = await this.database(tenantId);
     await this.couchDBService.ensureIndex(dbName, "queue_events_by_tenant_time", ["tenantId", "type", "occurredAt"]);
     const result = await db.find({
-      selector: { type: "queue_event", tenantId, occurredAt: { $gte: since.toISOString() } },
+      selector: { type: "queue_event", tenantId, occurredAt },
       sort: [{ occurredAt: "asc" }],
       limit: 1000,
     });

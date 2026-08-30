@@ -21,6 +21,8 @@ import { useTenant } from "../../contexts/TenantContext";
 import { useToast } from "@/hooks/use-toast";
 import { offlineApiRequest } from "@/lib/offlineApiRequest";
 import { showApiErrorToast } from "@/lib/errorHandler";
+import { ConsultationJourneySidebar } from "./ConsultationJourneySidebar";
+import { useConsultationJourney } from "./useConsultationJourney";
 import type { Consultation, LabOrder, Patient, Prescription } from "@shared/schema";
 
 const RESOLVED_LAB_ORDER_STATUSES = new Set(["termine", "annule"]);
@@ -73,6 +75,15 @@ export default function ResumeCloture() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/consultations/detail", consultationId] });
       toast({ title: t("success"), description: t("consultationClosedSuccessfully") });
+      if (consultation) {
+        void offlineApiRequest(
+          "POST",
+          "/api/queue/events",
+          { consultationId, patientId: consultation.patientId, eventType: "completed", tenantId: consultation.tenantId },
+          { collection: "queue" }
+        );
+        queryClient.invalidateQueries({ queryKey: ["/api/queue"] });
+      }
       setConfirmOpen(false);
     },
     onError: (error: unknown) => {
@@ -80,6 +91,8 @@ export default function ResumeCloture() {
       setConfirmOpen(false);
     },
   });
+
+  const steps = useConsultationJourney(consultation, patient);
 
   if (!consultation || !patient) {
     return (
@@ -174,7 +187,9 @@ export default function ResumeCloture() {
   }
 
   return (
-    <div className="space-y-6 pb-10" data-testid="resume-cloture-form">
+    <div className="flex gap-6 items-start" data-testid="resume-cloture-page">
+      <ConsultationJourneySidebar steps={steps} />
+      <div className="flex-1 min-w-0 space-y-6 pb-10" data-testid="resume-cloture-form">
       <div className="flex flex-col gap-4 border-b border-border bg-card px-6 py-5 sm:flex-row sm:items-center sm:justify-between sm:px-8">
         <div>
           <Button variant="link" size="sm" className="h-auto p-0 text-xs font-medium text-muted-foreground" onClick={() => setLocation(`/consultations/${consultationId}/consultation-medicale`)}>
@@ -282,6 +297,7 @@ export default function ResumeCloture() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+      </div>
     </div>
   );
 }

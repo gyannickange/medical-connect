@@ -94,4 +94,7 @@ export class UpdateConsultationDto {
   @IsString() @IsOptional() diagnosisHypothesis?: string;
   @ValidateNested() @Type(() => CarePlanDto) @IsOptional() carePlan?: CarePlanDto;
   @IsIn(["planifiee", "en_attente", "en_cours", "terminee", "annulee"]) @IsOptional() status?: string;
+  @IsString() @IsOptional() examInterpretation?: string | null;
+  @IsString() @IsOptional() examDecision?: string | null;
+  @IsDateString() @IsOptional() examsReviewedAt?: string;
 }

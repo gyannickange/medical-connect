@@ -287,7 +287,7 @@ export default function Settings() {
                 <Input
                   id="company-name"
                   {...companyForm.register("name")}
-                  className="glass-input rounded-xl"
+                  className="rounded-xl"
                 />
                 {companyForm.formState.errors.name && (
                   <p className="text-sm text-destructive">
@@ -301,7 +301,7 @@ export default function Settings() {
                 <Input
                   id="company-phone"
                   {...companyForm.register("phone")}
-                  className="glass-input rounded-xl"
+                  className="rounded-xl"
                 />
               </div>
 
@@ -311,7 +311,7 @@ export default function Settings() {
                   id="company-email"
                   type="email"
                   {...companyForm.register("email")}
-                  className="glass-input rounded-xl"
+                  className="rounded-xl"
                 />
                 {companyForm.formState.errors.email && (
                   <p className="text-sm text-destructive">
@@ -325,7 +325,7 @@ export default function Settings() {
                 <Input
                   id="company-website"
                   {...companyForm.register("website")}
-                  className="glass-input rounded-xl"
+                  className="rounded-xl"
                 />
               </div>
             </div>
@@ -335,7 +335,7 @@ export default function Settings() {
               <Textarea
                 id="company-address"
                 {...companyForm.register("address")}
-                className="glass-input rounded-xl"
+                className="rounded-xl"
               />
             </div>
 
@@ -367,7 +367,7 @@ export default function Settings() {
                   onValueChange={(value) =>
                     currencyForm.setValue("defaultCurrency", value)
                   }>
-                  <SelectTrigger className="glass-input min-h-11 rounded-xl">
+                  <SelectTrigger className="min-h-11 rounded-xl">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -393,7 +393,7 @@ export default function Settings() {
                   onValueChange={(value: "before" | "after") =>
                     currencyForm.setValue("symbolPosition", value)
                   }>
-                  <SelectTrigger className="glass-input min-h-11 rounded-xl">
+                  <SelectTrigger className="min-h-11 rounded-xl">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -412,7 +412,7 @@ export default function Settings() {
                   onValueChange={(value: "." | ",") =>
                     currencyForm.setValue("decimalSeparator", value)
                   }>
-                  <SelectTrigger className="glass-input min-h-11 rounded-xl">
+                  <SelectTrigger className="min-h-11 rounded-xl">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -431,7 +431,7 @@ export default function Settings() {
                   onValueChange={(value: "none" | "," | "." | " ") =>
                     currencyForm.setValue("thousandSeparator", value)
                   }>
-                  <SelectTrigger className="glass-input min-h-11 rounded-xl">
+                  <SelectTrigger className="min-h-11 rounded-xl">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -453,7 +453,7 @@ export default function Settings() {
                   {...currencyForm.register("decimalPlaces", {
                     valueAsNumber: true,
                   })}
-                  className="glass-input rounded-xl"
+                  className="rounded-xl"
                 />
               </div>
             </div>
@@ -494,7 +494,7 @@ export default function Settings() {
                 {...taxForm.register("defaultTaxRate", {
                   valueAsNumber: true,
                 })}
-                className="glass-input rounded-xl max-w-xs"
+                className="rounded-xl max-w-xs"
               />
               {taxForm.formState.errors.defaultTaxRate && (
                 <p className="text-sm text-destructive">

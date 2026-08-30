@@ -62,6 +62,9 @@ export class ConsultationsRepository {
       medicalConsultationSavedAt: null,
       carePlan: null,
       carePlanSavedAt: null,
+      examInterpretation: null,
+      examDecision: null,
+      examsReviewedAt: null,
       closedAt: null,
       status: "planifiee",
       createdAt: now,
@@ -181,6 +184,9 @@ export class ConsultationsRepository {
       vitalsRecordedAt: doc.vitalsRecordedAt ? new Date(doc.vitalsRecordedAt) : null,
       medicalConsultationSavedAt: doc.medicalConsultationSavedAt ? new Date(doc.medicalConsultationSavedAt) : null,
       carePlanSavedAt: doc.carePlanSavedAt ? new Date(doc.carePlanSavedAt) : null,
+      examInterpretation: doc.examInterpretation ?? null,
+      examDecision: doc.examDecision ?? null,
+      examsReviewedAt: doc.examsReviewedAt ? new Date(doc.examsReviewedAt) : null,
       closedAt: doc.closedAt ? new Date(doc.closedAt) : null,
     } as Consultation;
   }

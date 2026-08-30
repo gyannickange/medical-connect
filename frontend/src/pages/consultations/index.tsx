@@ -17,12 +17,6 @@ function statusVariant(status: Consultation["status"]): "default" | "secondary" 
   return "default";
 }
 
-function statusAccentClass(status: Consultation["status"]): string {
-  if (status === "annulee") return "border-l-red-500";
-  if (status === "terminee") return "border-l-emerald-500";
-  return "border-l-primary";
-}
-
 function statusLabelKey(status: string): string {
   return "consultationStatus" + status[0].toUpperCase() + status.slice(1).replace(/_([a-z])/g, (_, c: string) => c.toUpperCase());
 }
@@ -68,13 +62,13 @@ export default function Consultations() {
         </PolicyGuard>
       </div>
 
-      <div className="space-y-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {isLoading ? (
-          <div className="flex items-center justify-center min-h-64">
+          <div className="md:col-span-2 flex items-center justify-center min-h-64">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
           </div>
         ) : consultationsList.length === 0 ? (
-          <div className="glass-card rounded-xl p-8 text-center text-muted-foreground">{t("noConsultationsToday")}</div>
+          <div className="md:col-span-2 glass-card rounded-xl p-8 text-center text-muted-foreground">{t("noConsultationsToday")}</div>
         ) : (
           consultationsList.map((consultation) => {
             const patient = patientById[consultation.patientId];
@@ -86,7 +80,7 @@ export default function Consultations() {
             return (
               <div
                 key={consultation.id}
-                className={`glass-card rounded-xl p-6 space-y-4 border-l-4 ${statusAccentClass(consultation.status)}`}
+                className="glass-card rounded-xl p-6 space-y-4"
                 data-testid={`row-consultation-${consultation.id}`}>
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex items-center gap-3">

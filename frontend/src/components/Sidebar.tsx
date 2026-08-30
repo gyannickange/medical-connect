@@ -99,7 +99,7 @@ export const Sidebar: React.FC = () => {
       className="fixed left-0 top-0 z-40 flex h-screen w-20 flex-col border-r border-border bg-card lg:w-[260px]"
       data-testid="sidebar">
       {/* Logo */}
-      <div className="flex shrink-0 items-center border-b border-border px-4 py-8">
+      <div className="flex shrink-0 items-center border-b border-border p-4">
         <div className="flex items-center gap-3">
           <BrandMark className="h-9 w-9 shrink-0" />
           <div className="hidden lg:block">

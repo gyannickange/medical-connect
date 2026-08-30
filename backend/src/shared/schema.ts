@@ -71,7 +71,12 @@ export type RoomEffectiveStatus = "occupee" | "reservee" | "disponible" | "en_ma
 export interface Room { id: string; tenantId: string; number: string; type: string; floor: string | null; capacity: number; equipment: string[]; notes: string | null; status: RoomStatus; createdAt: Date; updatedAt: Date }
 export interface InsertRoom { id?: string; number: string; type: string; floor?: string | null; capacity: number; equipment?: string[]; notes?: string | null; status?: RoomStatus; tenantId: string }
 
-export interface Consultation { id: string; tenantId: string; number: string | null; patientId: string; scheduledAt: Date; specialty: string; assignedDoctorId: string; roomId: string | null; priority: ConsultationPriority; reason: string; nurseNotes: string | null; symptoms: string | null; vitals: VitalSigns | null; vitalsRecordedAt: Date | null; relevantHistory: string[]; presentIllnessHistory: string | null; physicalExam: PhysicalExam | null; diagnosisPrincipal: DiagnosisPrincipal | null; diagnosisSecondary: string[]; diagnosisHypothesis: string | null; medicalConsultationSavedAt: Date | null; carePlan: CarePlan | null; carePlanSavedAt: Date | null; closedAt: Date | null; status: ConsultationStatus; createdAt: Date; updatedAt: Date }
+export type ExamTypeCategory = "laboratoire" | "imagerie" | "explorations_fonctionnelles" | "autre";
+export interface ExamTypeParameter { name: string; unit: string | null; referenceRange: string | null }
+export interface ExamType { id: string; tenantId: string; name: string; category: ExamTypeCategory; isActive: boolean; parameters: ExamTypeParameter[]; createdAt: Date; updatedAt: Date }
+export interface InsertExamType { id?: string; name: string; category: ExamTypeCategory; isActive?: boolean; parameters?: ExamTypeParameter[]; tenantId: string }
+
+export interface Consultation { id: string; tenantId: string; number: string | null; patientId: string; scheduledAt: Date; specialty: string; assignedDoctorId: string; roomId: string | null; priority: ConsultationPriority; reason: string; nurseNotes: string | null; symptoms: string | null; vitals: VitalSigns | null; vitalsRecordedAt: Date | null; relevantHistory: string[]; presentIllnessHistory: string | null; physicalExam: PhysicalExam | null; diagnosisPrincipal: DiagnosisPrincipal | null; diagnosisSecondary: string[]; diagnosisHypothesis: string | null; medicalConsultationSavedAt: Date | null; carePlan: CarePlan | null; carePlanSavedAt: Date | null; examInterpretation: string | null; examDecision: string | null; examsReviewedAt: Date | null; closedAt: Date | null; status: ConsultationStatus; createdAt: Date; updatedAt: Date }
 export interface InsertConsultation { id?: string; patientId: string; scheduledAt: Date | string; specialty: string; assignedDoctorId: string; roomId?: string | null; priority?: ConsultationPriority; reason: string; nurseNotes?: string | null; tenantId: string }
 
 export type CarePlanOrientation = "retour_domicile" | "controle_suivi" | "hospitalisation" | "orientation_specialiste" | "transfert_urgent" | "autre";
@@ -143,7 +148,13 @@ export type LabOrderFollowUpAction = "aucune_action" | "contacter_patient" | "mo
 
 export type LabOrderStatus = "demande" | "en_cours" | "a_valider" | "termine" | "probleme_signale" | "annule";
 
-export interface LabOrderExamLine { examName: string; resultText: string | null }
+export type ExamResultStatus = "normal" | "bas" | "eleve" | "anormal";
+
+export interface LabResultParameter { name: string; unit: string | null; referenceRange: string | null; value: string | null; status: ExamResultStatus | null }
+
+export interface LabOrderExamLine { examName: string; resultText: string | null; parameters: LabResultParameter[] }
+
+export interface LabOrderAttachment { id: string; fileName: string; contentType: string; s3Key: string; uploadedAt: Date }
 
 export interface LabOrder {
   id: string;
@@ -156,6 +167,8 @@ export interface LabOrder {
   priority: "normal" | "urgent";
   clinicalContext: string | null;
   specialInstructions: string | null;
+  labComment: string | null;
+  attachments: LabOrderAttachment[];
   status: LabOrderStatus;
   takenInChargeByUserId: string | null;
   takenInChargeAt: Date | null;
@@ -173,7 +186,7 @@ export interface InsertLabOrder {
   id?: string;
   tenantId: string;
   consultationId: string;
-  examLines: { examName: string }[];
+  examLines: { examName: string; parameters?: ExamTypeParameter[] }[];
   priority?: "normal" | "urgent";
   clinicalContext?: string | null;
   specialInstructions?: string | null;

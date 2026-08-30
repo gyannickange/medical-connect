@@ -30,21 +30,26 @@ const EditConsultation = lazy(() => import("./pages/consultations/edit"));
 const ConsultationDetails = lazy(() => import("./pages/consultations/show"));
 const PreConsultationForm = lazy(() => import("./pages/consultations/pre-consultation"));
 const ConsultationMedicaleForm = lazy(() => import("./pages/consultations/consultation-medicale"));
+const PrescriptionForm = lazy(() => import("./pages/consultations/prescription"));
+const ResultatExamens = lazy(() => import("./pages/consultations/resultat-examens"));
 const PlanPriseEnCharge = lazy(() => import("./pages/consultations/plan-prise-en-charge"));
 const ResumeCloture = lazy(() => import("./pages/consultations/resume-cloture"));
 const Suivi = lazy(() => import("./pages/consultations/suivi"));
 const SuiviResultat = lazy(() => import("./pages/consultations/suivi-resultat"));
 const LaboratoireIndex = lazy(() => import("./pages/laboratoire"));
 const NewLabOrder = lazy(() => import("./pages/laboratoire/new"));
+const ExamTypesManager = lazy(() => import("./pages/laboratoire/exam-types"));
+const ExamTypeForm = lazy(() => import("./pages/laboratoire/exam-type-form"));
 const LabOrderDetails = lazy(() => import("./pages/laboratoire/show"));
 const PharmacieIndex = lazy(() => import("./pages/pharmacie"));
 const PrescriptionDetails = lazy(() => import("./pages/pharmacie/show"));
 const SallesIndex = lazy(() => import("./pages/salles"));
 const NewSalle = lazy(() => import("./pages/salles/new"));
 const SalleDetails = lazy(() => import("./pages/salles/show"));
-const FileAttente = lazy(() => import("./pages/FileAttente"));
-const QueueRegister = lazy(() => import("./pages/QueueRegister"));
-const QueueEntryDetails = lazy(() => import("./pages/QueueEntryDetails"));
+const FileAttente = lazy(() => import("./pages/file-attente"));
+const QueueRegister = lazy(() => import("./pages/file-attente/new"));
+const QueueEntryDetails = lazy(() => import("./pages/file-attente/show"));
+const FileAttenteArchive = lazy(() => import("./pages/file-attente/archive"));
 const Staff = lazy(() => import("./pages/Staff"));
 const Settings = lazy(() => import("./pages/Settings"));
 const AuditLogs = lazy(() => import("./pages/AuditLogs"));
@@ -171,6 +176,20 @@ function Router() {
             </Layout>
           </ProtectedRoute>
         </Route>
+        <Route path="/consultations/:id/prescription">
+          <ProtectedRoute>
+            <Layout>
+              <PrescriptionForm />
+            </Layout>
+          </ProtectedRoute>
+        </Route>
+        <Route path="/consultations/:id/resultats-examens">
+          <ProtectedRoute>
+            <Layout>
+              <ResultatExamens />
+            </Layout>
+          </ProtectedRoute>
+        </Route>
         <Route path="/consultations/:id/plan-prise-en-charge">
           <ProtectedRoute>
             <Layout>
@@ -220,6 +239,13 @@ function Router() {
             </Layout>
           </ProtectedRoute>
         </Route>
+        <Route path="/file-attente/archive">
+          <ProtectedRoute>
+            <Layout>
+              <FileAttenteArchive />
+            </Layout>
+          </ProtectedRoute>
+        </Route>
         <Route path="/file-attente/:consultationId">
           <ProtectedRoute>
             <Layout>
@@ -238,6 +264,27 @@ function Router() {
           <ProtectedRoute>
             <Layout>
               <NewLabOrder />
+            </Layout>
+          </ProtectedRoute>
+        </Route>
+        <Route path="/laboratoire/exam-types">
+          <ProtectedRoute>
+            <Layout>
+              <ExamTypesManager />
+            </Layout>
+          </ProtectedRoute>
+        </Route>
+        <Route path="/laboratoire/exam-types/new">
+          <ProtectedRoute>
+            <Layout>
+              <ExamTypeForm />
+            </Layout>
+          </ProtectedRoute>
+        </Route>
+        <Route path="/laboratoire/exam-types/:id/edit">
+          <ProtectedRoute>
+            <Layout>
+              <ExamTypeForm />
             </Layout>
           </ProtectedRoute>
         </Route>

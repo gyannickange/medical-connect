@@ -65,7 +65,7 @@ export default function Patients() {
             placeholder={t("searchPatientsPlaceholder")}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="glass-input rounded-xl pl-10"
+            className="rounded-xl pl-10"
             data-testid="input-search-patients"
           />
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />

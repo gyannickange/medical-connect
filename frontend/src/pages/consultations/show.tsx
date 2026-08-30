@@ -1,11 +1,10 @@
 import React from "react";
-import { ArrowLeft, ArrowRight, Edit, Printer, User, StickyNote, Ban } from "lucide-react";
+import { ArrowLeft, ArrowRight, Edit, Printer, User, StickyNote, Ban, ListPlus } from "lucide-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useLocation, useParams } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
 import { useTranslation } from "../../lib/i18n";
 import { useTenant } from "../../contexts/TenantContext";
 import { useToast } from "@/hooks/use-toast";
@@ -14,6 +13,7 @@ import { showApiErrorToast } from "@/lib/errorHandler";
 import { ConsultationsPolicy } from "@/lib/policies/consultations.policy";
 import { PolicyGuard } from "@/components/PolicyGuard";
 import { computeConsultationJourney, type JourneyStep } from "@/lib/consultationJourney";
+import { ConsultationJourneySidebar } from "./ConsultationJourneySidebar";
 import type { Consultation, LabOrder, Patient, Prescription, QueueItem } from "@shared/schema";
 
 const STEP_LABEL_KEYS: Record<string, string> = {
@@ -110,7 +110,6 @@ export default function ConsultationHub() {
   const queueItem = queueItems.find((item) => item.consultationId === consultationId);
   const steps = computeConsultationJourney(patient, consultation, queueItem, labOrders, prescriptions);
   const currentStep = steps.find((s) => s.state === "current");
-  const completedCount = steps.filter((s) => s.state === "completed").length;
 
   function stepLabel(step: JourneyStep): string {
     return t(STEP_LABEL_KEYS[step.key]);
@@ -120,12 +119,7 @@ export default function ConsultationHub() {
     if (!currentStep) return null;
     switch (currentStep.key) {
       case "queue":
-        return (
-          <Button className="btn-primary" onClick={() => queueMutation.mutate()} disabled={queueMutation.isPending} data-testid="button-hub-add-to-queue">
-            {t("putInQueue")}
-            <ArrowRight className="w-4 h-4 ml-2" />
-          </Button>
-        );
+        return null;
       case "preConsultation":
         return (
           <Button className="btn-primary" onClick={() => setLocation(`/consultations/${consultationId}/pre-consultation`)} data-testid="button-hub-continue-pre-consultation">
@@ -136,6 +130,20 @@ export default function ConsultationHub() {
       case "medicalConsultation":
         return (
           <Button className="btn-primary" onClick={() => setLocation(`/consultations/${consultationId}/consultation-medicale`)} data-testid="button-hub-continue-medical-consultation">
+            {t("continueToStep")}
+            <ArrowRight className="w-4 h-4 ml-2" />
+          </Button>
+        );
+      case "exams":
+        return (
+          <Button className="btn-primary" onClick={() => setLocation(`/laboratoire/new?consultationId=${consultationId}`)} data-testid="button-hub-continue-exams">
+            {t("continueToStep")}
+            <ArrowRight className="w-4 h-4 ml-2" />
+          </Button>
+        );
+      case "prescription":
+        return (
+          <Button className="btn-primary" onClick={() => setLocation(`/consultations/${consultationId}/prescription`)} data-testid="button-hub-continue-prescription">
             {t("continueToStep")}
             <ArrowRight className="w-4 h-4 ml-2" />
           </Button>
@@ -179,30 +187,10 @@ export default function ConsultationHub() {
         <p className="text-sm text-muted-foreground">{patient.firstName} {patient.lastName} · {consultation.specialty}</p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-6">
-        <Card className="p-6 space-y-4">
-          <h2 className="font-semibold text-foreground">{t("journeyPanelTitle")}</h2>
-          <ol className="space-y-3">
-            {steps.map((step) => (
-              <li key={step.key} className="flex items-center gap-2 text-sm" data-testid={`journey-step-${step.key}`}>
-                <span
-                  className={
-                    step.state === "completed"
-                      ? "w-2 h-2 rounded-full bg-primary"
-                      : step.state === "current"
-                        ? "w-2 h-2 rounded-full border-2 border-primary"
-                        : "w-2 h-2 rounded-full bg-muted"
-                  }
-                />
-                <span className={step.state === "not_started" ? "text-muted-foreground" : "text-foreground"}>{stepLabel(step)}</span>
-              </li>
-            ))}
-          </ol>
-          <Progress value={(completedCount / steps.length) * 100} />
-          <p className="text-xs text-muted-foreground">{completedCount} / {steps.length}</p>
-        </Card>
+      <div className="flex gap-6 items-start">
+        <ConsultationJourneySidebar steps={steps} />
 
-        <div className="space-y-6">
+        <div className="flex-1 min-w-0 space-y-6">
           <div>
             <h2 className="font-semibold text-foreground">{t("quickViewTitle")}</h2>
             <p className="text-sm text-muted-foreground">{t("quickViewSubtitle")}</p>
@@ -232,6 +220,16 @@ export default function ConsultationHub() {
             </p>
           </Card>
 
+          {steps.find((s) => s.key === "queue")?.state !== "completed" && (
+            <Card className="p-4 space-y-1 flex flex-col justify-between" data-testid="card-hub-queue">
+              <span className="text-sm font-medium">{t("queueTitle")}</span>
+              <Button variant="outline" size="sm" className="w-fit" onClick={() => queueMutation.mutate()} disabled={queueMutation.isPending} data-testid="button-add-to-queue">
+                <ListPlus className="w-4 h-4 mr-2" />
+                {t("putInQueue")}
+              </Button>
+            </Card>
+          )}
+
           <Card className="p-4 space-y-1">
             <div className="flex items-center justify-between">
               <span className="text-sm font-medium">{t("diagnosisCardTitle")}</span>
@@ -246,7 +244,7 @@ export default function ConsultationHub() {
             <div className="flex items-center justify-between">
               <span className="text-sm font-medium">{t("examsCardTitle")}</span>
               {labOrders.length > 0 && (
-                <Button variant="link" size="sm" className="h-auto p-0" onClick={() => setLocation(`/consultations/${consultationId}/consultation-medicale`)}>{t("viewLabel")}</Button>
+                <Button variant="link" size="sm" className="h-auto p-0" onClick={() => setLocation(`/consultations/${consultationId}/resultats-examens`)}>{t("viewLabel")}</Button>
               )}
             </div>
             <p className="text-sm text-muted-foreground">
@@ -257,7 +255,7 @@ export default function ConsultationHub() {
             <div className="flex items-center justify-between">
               <span className="text-sm font-medium">{t("prescriptionCardTitle")}</span>
               {prescriptions.length > 0 && (
-                <Button variant="link" size="sm" className="h-auto p-0" onClick={() => setLocation(`/consultations/${consultationId}/consultation-medicale`)}>{t("viewLabel")}</Button>
+                <Button variant="link" size="sm" className="h-auto p-0" onClick={() => setLocation(`/consultations/${consultationId}/prescription`)}>{t("viewLabel")}</Button>
               )}
             </div>
             <p className="text-sm text-muted-foreground">

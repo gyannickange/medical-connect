@@ -119,7 +119,7 @@ export default function SuiviResultat() {
           </RadioGroup>
           <div>
             <Label htmlFor="followup-note">{t("followUpNoteField")}</Label>
-            <Textarea id="followup-note" className="glass-input" value={note} onChange={(e) => setNote(e.target.value)} data-testid="textarea-followup-note" />
+            <Textarea id="followup-note" value={note} onChange={(e) => setNote(e.target.value)} data-testid="textarea-followup-note" />
           </div>
           <div className="flex justify-end gap-2">
             <Button variant="outline" onClick={() => setLocation(`/consultations/${consultationId}/suivi`)}>

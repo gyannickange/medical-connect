@@ -217,7 +217,7 @@ export default function InitialSetup() {
                     <Textarea
                       id="setup-company-address"
                       autoComplete="street-address"
-                      className="min-h-24 glass-input"
+                      className="min-h-24"
                       {...form.register("companyAddress")}
                     />
                   </div>
@@ -239,7 +239,7 @@ export default function InitialSetup() {
                       <div className="space-y-2">
                         <Label htmlFor="setup-currency">{t("defaultCurrency")}</Label>
                         <Select value={field.value} onValueChange={field.onChange}>
-                          <SelectTrigger id="setup-currency" className="h-12 glass-input">
+                          <SelectTrigger id="setup-currency" className="h-12">
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
@@ -267,7 +267,7 @@ export default function InitialSetup() {
                       <div className="space-y-2">
                         <Label htmlFor="setup-symbol-position">{t("symbolPosition")}</Label>
                         <Select value={field.value} onValueChange={field.onChange}>
-                          <SelectTrigger id="setup-symbol-position" className="h-12 glass-input">
+                          <SelectTrigger id="setup-symbol-position" className="h-12">
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
@@ -286,7 +286,7 @@ export default function InitialSetup() {
                       <div className="space-y-2">
                         <Label htmlFor="setup-decimal-separator">{t("decimalSeparator")}</Label>
                         <Select value={field.value} onValueChange={field.onChange}>
-                          <SelectTrigger id="setup-decimal-separator" className="h-12 glass-input">
+                          <SelectTrigger id="setup-decimal-separator" className="h-12">
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
@@ -305,7 +305,7 @@ export default function InitialSetup() {
                       <div className="space-y-2">
                         <Label htmlFor="setup-thousand-separator">{t("thousandSeparator")}</Label>
                         <Select value={field.value} onValueChange={field.onChange}>
-                          <SelectTrigger id="setup-thousand-separator" className="h-12 glass-input">
+                          <SelectTrigger id="setup-thousand-separator" className="h-12">
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>

@@ -56,7 +56,7 @@ export default function PrescriptionsTab({ prescriptions, staffNameById }: Presc
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder={t("searchPrescriptionsPlaceholder")}
-          className="glass-input pl-10"
+          className="pl-10"
           data-testid="input-search-prescriptions"
         />
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />

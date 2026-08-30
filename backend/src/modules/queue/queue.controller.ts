@@ -17,6 +17,12 @@ export class QueueController {
     return this.queueService.getActiveQueue(this.tenantId(req, tenantId));
   }
 
+  @Get(":tenantId/history/:date")
+  @CheckPolicy(QueuePolicy, "view")
+  async getQueueHistory(@Param("tenantId") tenantId: string, @Param("date") date: string, @Request() req: any) {
+    return this.queueService.getQueueHistory(this.tenantId(req, tenantId), date);
+  }
+
   @Post("events")
   @CheckPolicy(QueuePolicy, "appendEvent")
   async appendEvent(@Body() dto: AppendQueueEventDto, @Request() req: any) {

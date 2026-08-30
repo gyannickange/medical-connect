@@ -70,7 +70,12 @@ export type RoomEffectiveStatus = "occupee" | "reservee" | "disponible" | "en_ma
 export interface Room { id: string; tenantId: string; number: string; type: string; floor: string | null; capacity: number; equipment: string[]; notes: string | null; status: RoomStatus; createdAt: string; updatedAt: string }
 export interface InsertRoom { id?: string; number: string; type: string; floor?: string | null; capacity: number; equipment?: string[]; notes?: string | null; status?: RoomStatus; tenantId: string }
 
-export interface Consultation { id: string; tenantId: string; number: string | null; patientId: string; scheduledAt: string; specialty: string; assignedDoctorId: string; roomId: string | null; priority: ConsultationPriority; reason: string; nurseNotes: string | null; symptoms: string | null; vitals: VitalSigns | null; vitalsRecordedAt: string | null; relevantHistory: string[]; presentIllnessHistory: string | null; physicalExam: PhysicalExam | null; diagnosisPrincipal: DiagnosisPrincipal | null; diagnosisSecondary: string[]; diagnosisHypothesis: string | null; medicalConsultationSavedAt: string | null; carePlan: CarePlan | null; carePlanSavedAt: string | null; closedAt: string | null; status: ConsultationStatus; createdAt: string; updatedAt: string }
+export type ExamTypeCategory = "laboratoire" | "imagerie" | "explorations_fonctionnelles" | "autre";
+export interface ExamTypeParameter { name: string; unit: string | null; referenceRange: string | null }
+export interface ExamType { id: string; tenantId: string; name: string; category: ExamTypeCategory; isActive: boolean; parameters: ExamTypeParameter[]; createdAt: string; updatedAt: string }
+export interface InsertExamType { id?: string; name: string; category: ExamTypeCategory; isActive?: boolean; parameters?: ExamTypeParameter[]; tenantId: string }
+
+export interface Consultation { id: string; tenantId: string; number: string | null; patientId: string; scheduledAt: string; specialty: string; assignedDoctorId: string; roomId: string | null; priority: ConsultationPriority; reason: string; nurseNotes: string | null; symptoms: string | null; vitals: VitalSigns | null; vitalsRecordedAt: string | null; relevantHistory: string[]; presentIllnessHistory: string | null; physicalExam: PhysicalExam | null; diagnosisPrincipal: DiagnosisPrincipal | null; diagnosisSecondary: string[]; diagnosisHypothesis: string | null; medicalConsultationSavedAt: string | null; carePlan: CarePlan | null; carePlanSavedAt: string | null; examInterpretation: string | null; examDecision: string | null; examsReviewedAt: string | null; closedAt: string | null; status: ConsultationStatus; createdAt: string; updatedAt: string }
 export interface InsertConsultation { id?: string; patientId: string; scheduledAt: string; specialty: string; assignedDoctorId: string; roomId?: string | null; priority?: ConsultationPriority; reason: string; nurseNotes?: string | null; tenantId: string }
 
 export type CarePlanOrientation = "retour_domicile" | "controle_suivi" | "hospitalisation" | "orientation_specialiste" | "transfert_urgent" | "autre";
@@ -142,7 +147,13 @@ export type LabOrderFollowUpAction = "aucune_action" | "contacter_patient" | "mo
 
 export type LabOrderStatus = "demande" | "en_cours" | "a_valider" | "termine" | "probleme_signale" | "annule";
 
-export interface LabOrderExamLine { examName: string; resultText: string | null }
+export type ExamResultStatus = "normal" | "bas" | "eleve" | "anormal";
+
+export interface LabResultParameter { name: string; unit: string | null; referenceRange: string | null; value: string | null; status: ExamResultStatus | null }
+
+export interface LabOrderExamLine { examName: string; resultText: string | null; parameters: LabResultParameter[] }
+
+export interface LabOrderAttachment { id: string; fileName: string; contentType: string; s3Key: string; uploadedAt: string }
 
 export interface LabOrder {
   id: string;
@@ -155,6 +166,8 @@ export interface LabOrder {
   priority: "normal" | "urgent";
   clinicalContext: string | null;
   specialInstructions: string | null;
+  labComment: string | null;
+  attachments: LabOrderAttachment[];
   status: LabOrderStatus;
   takenInChargeByUserId: string | null;
   takenInChargeAt: string | null;
