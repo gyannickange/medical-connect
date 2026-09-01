@@ -79,30 +79,6 @@ export default function PatientProfileCard({ patient, photoUrl, uploading, onPho
             </div>
           </div>
         )}
-
-        <div>
-          <p className="text-xs text-muted-foreground">{t("primaryPhone")}</p>
-          <p>{patient.primaryPhone}</p>
-        </div>
-
-        {patient.facilityService && (
-          <div>
-            <p className="text-xs text-muted-foreground">{t("facilityService")}</p>
-            <p>{patient.facilityService}</p>
-          </div>
-        )}
-
-        {patient.referringDoctorId && (
-          <div>
-            <p className="text-xs text-muted-foreground">{t("referringDoctor")}</p>
-            <p>{patient.referringDoctorId}</p>
-          </div>
-        )}
-
-        <div>
-          <p className="text-xs text-muted-foreground">{t("admittedSinceLabel")}</p>
-          <p>{new Date(patient.createdAt).toLocaleDateString()}</p>
-        </div>
       </div>
     </Card>
   );

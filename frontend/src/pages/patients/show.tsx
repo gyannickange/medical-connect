@@ -120,7 +120,9 @@ export default function PatientDetails() {
       <PatientHeader patient={patient} />
 
       <div className="grid grid-cols-1 lg:grid-cols-[320px_1fr] gap-6 items-start">
-        <PatientProfileCard patient={patient} photoUrl={photoUrl} uploading={uploading} onPhotoSelected={handlePhotoSelected} />
+        <div className="lg:sticky lg:top-6">
+          <PatientProfileCard patient={patient} photoUrl={photoUrl} uploading={uploading} onPhotoSelected={handlePhotoSelected} />
+        </div>
 
         <Tabs defaultValue="profil">
           <TabsList>
