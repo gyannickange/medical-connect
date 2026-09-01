@@ -25,6 +25,7 @@ const EditPatient = lazy(() => import("./pages/patients/edit"));
 const PatientDetails = lazy(() => import("./pages/patients/show"));
 const DossierMedical = lazy(() => import("./pages/patients/dossier-medical"));
 const Consultations = lazy(() => import("./pages/consultations"));
+const ConsultationsArchive = lazy(() => import("./pages/consultations/archive"));
 const NewConsultation = lazy(() => import("./pages/consultations/new"));
 const EditConsultation = lazy(() => import("./pages/consultations/edit"));
 const ConsultationDetails = lazy(() => import("./pages/consultations/show"));
@@ -147,6 +148,13 @@ function Router() {
           <ProtectedRoute>
             <Layout>
               <Consultations />
+            </Layout>
+          </ProtectedRoute>
+        </Route>
+        <Route path="/consultations/archive">
+          <ProtectedRoute>
+            <Layout>
+              <ConsultationsArchive />
             </Layout>
           </ProtectedRoute>
         </Route>
