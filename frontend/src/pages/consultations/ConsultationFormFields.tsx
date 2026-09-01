@@ -3,9 +3,8 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useLocation, useSearchParams } from "wouter";
-import { CalendarDays, ChevronDown, Search } from "lucide-react";
+import { Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
@@ -16,16 +15,19 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Combobox } from "@/components/ui/combobox";
+import { DateTimePicker } from "@/components/ui/date-time-picker";
 import { useTranslation } from "../../lib/i18n";
 import { useTenant } from "../../contexts/TenantContext";
 import { useToast } from "@/hooks/use-toast";
+import { useDoctors } from "@/hooks/useStaffDirectory";
 import { offlineApiRequest } from "@/lib/offlineApiRequest";
 import { showApiErrorToast } from "@/lib/errorHandler";
-import { insertConsultationSchema, type InsertConsultation, type Consultation, type Patient, type Room } from "@shared/schema";
+import { insertConsultationSchema, type InsertConsultation, type Consultation, type Patient, type Room, type Service } from "@shared/schema";
 
-const inputClass = "bg-white border border-[#e2e8f0] rounded-[8px] px-3 py-3 text-[14px] text-[#0f172a] placeholder:text-[#94a3b8] h-auto";
-const disabledFieldClass = "bg-[#f8fafc] border border-[#e2e8f0] rounded-[8px] px-3 py-3 flex items-center";
-const labelClass = "font-semibold text-[#475569] text-[13px]";
+const inputClass = "bg-card border border-border rounded-[8px] px-3 py-3 text-[14px] text-foreground placeholder:text-muted-foreground h-auto";
+const disabledFieldClass = "bg-muted border border-border rounded-[8px] px-3 py-3 flex items-center";
+const labelClass = "font-semibold text-secondary-foreground text-[13px]";
 
 function defaultValuesFor(consultation: Consultation | null, tenantId: string): InsertConsultation {
   if (!consultation) {
@@ -58,6 +60,14 @@ export default function ConsultationFormFields({ consultationId: editingId }: Co
   const prefillPatientId = searchParams.get("patientId") ?? "";
   const [patientQuery, setPatientQuery] = useState("");
   const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null);
+  const doctors = useDoctors();
+  const doctorOptions = doctors.map((doctor) => ({ value: doctor.id, label: `${doctor.firstName} ${doctor.lastName}` }));
+
+  const { data: services = [] } = useQuery<Service[]>({
+    queryKey: ["/api/services", currentTenant?.id],
+    enabled: !!currentTenant?.id,
+  });
+  const activeServices = services.filter((service) => service.isActive);
 
   const { data: existingConsultation } = useQuery<Consultation>({
     queryKey: ["/api/consultations/detail", editingId],
@@ -148,32 +158,32 @@ export default function ConsultationFormFields({ consultationId: editingId }: Co
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-1">
-        <h1 className="font-bold text-[#0f172a] text-[24px]">{editingId ? t("editConsultation") : t("newConsultation")}</h1>
-        <p className="font-medium text-[#64748b] text-[14px]">{editingId ? t("editConsultationSubtitle") : t("newConsultationSubtitle")}</p>
+        <h1 className="font-bold text-foreground text-[24px]">{editingId ? t("editConsultation") : t("newConsultation")}</h1>
+        <p className="font-medium text-muted-foreground text-[14px]">{editingId ? t("editConsultationSubtitle") : t("newConsultationSubtitle")}</p>
       </div>
 
       <form
         onSubmit={form.handleSubmit((data) => saveMutation.mutate(data))}
-        className="bg-white border border-[#e2e8f0] rounded-[16px] shadow-sm flex flex-col gap-6 p-8 w-full"
+        className="bg-card border border-border rounded-[16px] shadow-sm flex flex-col gap-6 p-8 w-full"
         data-testid="consultation-form">
-        <p className="font-bold text-[#0f172a] text-[18px]">{t("consultationRegistrationForm")}</p>
-        <div className="border-t border-[#e2e8f0]" />
+        <p className="font-bold text-foreground text-[18px]">{t("consultationRegistrationForm")}</p>
+        <div className="border-t border-border" />
 
         <div className="flex gap-6 items-start w-full">
           <div className="flex-1 flex flex-col gap-2 relative">
             <Label className={labelClass}>{t("searchPatientToAssign")}</Label>
             {editingId ? (
               <div className={disabledFieldClass}>
-                <span className="text-[#0f172a] text-[14px]">
+                <span className="text-foreground text-[14px]">
                   {assignedPatient ? `${assignedPatient.firstName} ${assignedPatient.lastName}` : t("loading")}
                 </span>
               </div>
             ) : (
               <>
-                <div className={`flex gap-2 items-center px-3 py-3 rounded-[8px] border ${selectedPatient ? "border-[#047857] border-[1.5px]" : "border-[#e2e8f0]"} bg-white`}>
-                  <Search className="w-4 h-4 text-[#64748b]" />
+                <div className={`flex gap-2 items-center px-3 py-3 rounded-[8px] border ${selectedPatient ? "border-primary border-[1.5px]" : "border-border"} bg-card`}>
+                  <Search className="w-4 h-4 text-muted-foreground" />
                   <input
-                    className="flex-1 outline-none text-[14px] text-[#0f172a] placeholder:text-[#94a3b8]"
+                    className="flex-1 outline-none bg-transparent text-[14px] text-foreground placeholder:text-muted-foreground"
                     placeholder={t("searchPatientPlaceholder")}
                     value={selectedPatient ? `${selectedPatient.firstName} ${selectedPatient.lastName}` : patientQuery}
                     onChange={(e) => {
@@ -184,12 +194,12 @@ export default function ConsultationFormFields({ consultationId: editingId }: Co
                   />
                 </div>
                 {!selectedPatient && patientResults.length > 0 && (
-                  <div className="bg-white border border-[#e2e8f0] rounded-[8px] flex flex-col p-1 w-full absolute top-full mt-1 z-10 shadow-md">
+                  <div className="bg-card border border-border rounded-[8px] flex flex-col p-1 w-full absolute top-full mt-1 z-10 shadow-md">
                     {patientResults.map((patient, index) => (
                       <button
                         type="button"
                         key={patient.id}
-                        className={`text-left px-3 py-2.5 rounded-[6px] text-[13px] ${index === 0 ? "bg-[#ecfdf5] text-[#047857] font-semibold" : "text-[#475569]"}`}
+                        className={`text-left px-3 py-2.5 rounded-[6px] text-[13px] ${index === 0 ? "bg-accent text-primary font-semibold" : "text-secondary-foreground"}`}
                         onClick={() => {
                           setSelectedPatient(patient);
                           form.setValue("patientId", patient.id, { shouldValidate: true });
@@ -206,10 +216,12 @@ export default function ConsultationFormFields({ consultationId: editingId }: Co
           </div>
           <div className="flex-1 flex flex-col gap-2">
             <Label className={labelClass}>{t("scheduledDateTime")}</Label>
-            <div className="relative">
-              <Input type="datetime-local" className={`${inputClass} pr-9`} {...form.register("scheduledAt")} data-testid="input-scheduledAt" />
-              <CalendarDays className="w-4 h-4 text-[#64748b] absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
-            </div>
+            <DateTimePicker
+              value={typeof form.watch("scheduledAt") === "string" ? (form.watch("scheduledAt") as string) : ""}
+              onValueChange={(value) => form.setValue("scheduledAt", value, { shouldValidate: true })}
+              className={inputClass}
+              data-testid="input-scheduledAt"
+            />
             {errors.scheduledAt && <p className="text-sm text-destructive">{errors.scheduledAt.message}</p>}
           </div>
         </div>
@@ -217,18 +229,33 @@ export default function ConsultationFormFields({ consultationId: editingId }: Co
         <div className="flex gap-6 items-start w-full">
           <div className="flex-1 flex flex-col gap-2">
             <Label className={labelClass}>{t("specialty")}</Label>
-            <div className="relative">
-              <Input className={`${inputClass} pr-9`} placeholder="Cardiologie" {...form.register("specialty")} data-testid="input-specialty" />
-              <ChevronDown className="w-3.5 h-3.5 text-[#64748b] absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
-            </div>
+            <Select
+              value={form.watch("specialty") ?? ""}
+              onValueChange={(value) => form.setValue("specialty", value, { shouldValidate: true })}
+              disabled={activeServices.length === 0}>
+              <SelectTrigger className={inputClass} data-testid="select-specialty">
+                <SelectValue placeholder={activeServices.length === 0 ? t("noServicesAvailable") : t("selectServicePlaceholder")} />
+              </SelectTrigger>
+              <SelectContent>
+                {activeServices.map((service) => (
+                  <SelectItem key={service.id} value={service.name}>{service.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
             {errors.specialty && <p className="text-sm text-destructive">{errors.specialty.message}</p>}
           </div>
           <div className="flex-1 flex flex-col gap-2">
             <Label className={labelClass}>{t("assignedDoctor")}</Label>
-            <div className="relative">
-              <Input className={`${inputClass} pr-9`} placeholder="Dr. Mbarga (Cardiologue)" {...form.register("assignedDoctorId")} data-testid="input-assignedDoctorId" />
-              <ChevronDown className="w-3.5 h-3.5 text-[#64748b] absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
-            </div>
+            <Combobox
+              options={doctorOptions}
+              value={form.watch("assignedDoctorId") ?? ""}
+              onValueChange={(value) => form.setValue("assignedDoctorId", value, { shouldValidate: true })}
+              placeholder={t("selectDoctorPlaceholder")}
+              searchPlaceholder={t("searchDoctorPlaceholder")}
+              emptyText={t("noDoctorsFound")}
+              className={inputClass}
+              data-testid="combobox-assignedDoctorId"
+            />
             {errors.assignedDoctorId && <p className="text-sm text-destructive">{errors.assignedDoctorId.message}</p>}
           </div>
         </div>
@@ -262,15 +289,15 @@ export default function ConsultationFormFields({ consultationId: editingId }: Co
               onValueChange={(value) => form.setValue("priority", value as InsertConsultation["priority"])}>
               <div className="flex gap-2 items-center">
                 <RadioGroupItem value="normal" id="c-priority-normal" />
-                <Label htmlFor="c-priority-normal" className="text-[#0f172a] text-[14px] font-semibold">{t("priorityNormal")}</Label>
+                <Label htmlFor="c-priority-normal" className="text-foreground text-[14px] font-semibold">{t("priorityNormal")}</Label>
               </div>
               <div className="flex gap-2 items-center">
                 <RadioGroupItem value="urgent" id="c-priority-urgent" />
-                <Label htmlFor="c-priority-urgent" className="text-[#475569] text-[14px] font-normal">{t("priorityUrgent")}</Label>
+                <Label htmlFor="c-priority-urgent" className="text-secondary-foreground text-[14px] font-normal">{t("priorityUrgent")}</Label>
               </div>
               <div className="flex gap-2 items-center">
                 <RadioGroupItem value="tres_urgent" id="c-priority-tres-urgent" />
-                <Label htmlFor="c-priority-tres-urgent" className="text-[#475569] text-[14px] font-normal">{t("priorityTresUrgent")}</Label>
+                <Label htmlFor="c-priority-tres-urgent" className="text-secondary-foreground text-[14px] font-normal">{t("priorityTresUrgent")}</Label>
               </div>
             </RadioGroup>
           </div>
@@ -287,17 +314,17 @@ export default function ConsultationFormFields({ consultationId: editingId }: Co
           <Textarea className={`${inputClass} h-[80px]`} placeholder={t("nursePreliminaryNotesPlaceholder")} {...form.register("nurseNotes")} />
         </div>
 
-        <div className="border-t border-[#e2e8f0] flex gap-4 items-start justify-end pt-2 w-full">
+        <div className="border-t border-border flex gap-4 items-start justify-end pt-2 w-full">
           <Button
             type="button"
             variant="outline"
-            className="border-[#e2e8f0] text-[#475569] font-semibold rounded-[8px] px-5 py-2.5 h-auto"
+            className="font-semibold rounded-[8px] px-5 py-2.5 h-auto"
             onClick={() => setLocation(editingId ? `/consultations/${editingId}` : "/consultations")}>
             {t("cancel")}
           </Button>
           <Button
             type="submit"
-            className="bg-[#047857] hover:bg-[#065f46] text-white font-semibold rounded-[8px] px-6 py-2.5 h-auto shadow-sm"
+            className="font-semibold rounded-[8px] px-6 py-2.5 h-auto shadow-sm"
             disabled={saveMutation.isPending}
             data-testid="button-save-consultation">
             {saveMutation.isPending ? t("saving") : t("save")}
