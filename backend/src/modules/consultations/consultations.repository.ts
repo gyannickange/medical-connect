@@ -12,6 +12,7 @@ export interface ConsultationFilters {
   specialty?: string;
   assignedDoctorId?: string;
   scheduledOnOrAfter?: string;
+  scheduledOnOrBefore?: string;
   patientId?: string;
   roomId?: string;
 }
@@ -135,7 +136,12 @@ export class ConsultationsRepository {
     const selector: Record<string, any> = { type: "consultation", tenantId };
     if (filters?.specialty) selector.specialty = filters.specialty;
     if (filters?.assignedDoctorId) selector.assignedDoctorId = filters.assignedDoctorId;
-    if (filters?.scheduledOnOrAfter) selector.scheduledAt = { $gte: filters.scheduledOnOrAfter };
+    if (filters?.scheduledOnOrAfter || filters?.scheduledOnOrBefore) {
+      selector.scheduledAt = {
+        ...(filters.scheduledOnOrAfter ? { $gte: filters.scheduledOnOrAfter } : {}),
+        ...(filters.scheduledOnOrBefore ? { $lte: filters.scheduledOnOrBefore } : {}),
+      };
+    }
     if (filters?.patientId) selector.patientId = filters.patientId;
     if (filters?.roomId) selector.roomId = filters.roomId;
 

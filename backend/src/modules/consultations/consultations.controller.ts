@@ -19,10 +19,17 @@ export class ConsultationsController {
     @Query("specialty") specialty?: string,
     @Query("assignedDoctorId") assignedDoctorId?: string,
     @Query("scheduledOnOrAfter") scheduledOnOrAfter?: string,
+    @Query("scheduledOnOrBefore") scheduledOnOrBefore?: string,
     @Query("patientId") patientId?: string,
     @Request() req?: any
   ) {
-    return this.consultationsService.findByTenant(this.tenantId(req, tenantId), { specialty, assignedDoctorId, scheduledOnOrAfter, patientId });
+    return this.consultationsService.findByTenant(this.tenantId(req, tenantId), {
+      specialty,
+      assignedDoctorId,
+      scheduledOnOrAfter,
+      scheduledOnOrBefore,
+      patientId,
+    });
   }
 
   @Get("detail/:id")
