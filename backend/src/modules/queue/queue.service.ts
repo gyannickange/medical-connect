@@ -21,12 +21,15 @@ export class QueueService {
     return this.toQueueItems(tenantId, folded);
   }
 
-  async getQueueHistory(tenantId: string, date: string): Promise<QueueItem[]> {
+  async getQueueHistory(tenantId: string, date: string, endDate?: string): Promise<QueueItem[]> {
     if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
       throw new BadRequestException("date must be formatted as YYYY-MM-DD");
     }
+    if (endDate && !/^\d{4}-\d{2}-\d{2}$/.test(endDate)) {
+      throw new BadRequestException("endDate must be formatted as YYYY-MM-DD");
+    }
     const startOfDay = new Date(`${date}T00:00:00.000Z`);
-    const endOfDay = new Date(`${date}T00:00:00.000Z`);
+    const endOfDay = new Date(`${endDate ?? date}T00:00:00.000Z`);
     endOfDay.setUTCDate(endOfDay.getUTCDate() + 1);
     const folded = await this.queueRepository.getEventsBetween(tenantId, startOfDay, endOfDay);
     return this.toQueueItems(tenantId, folded);

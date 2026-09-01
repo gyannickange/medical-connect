@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param, UseGuards, Request, ForbiddenException } from "@nestjs/common";
+import { Controller, Get, Post, Body, Param, Query, UseGuards, Request, ForbiddenException } from "@nestjs/common";
 import { QueueService } from "./queue.service";
 import { AppendQueueEventDto } from "./dto/append-queue-event.dto";
 import { JwtAuthGuard } from "../auth/jwt-auth.guard";
@@ -19,8 +19,13 @@ export class QueueController {
 
   @Get(":tenantId/history/:date")
   @CheckPolicy(QueuePolicy, "view")
-  async getQueueHistory(@Param("tenantId") tenantId: string, @Param("date") date: string, @Request() req: any) {
-    return this.queueService.getQueueHistory(this.tenantId(req, tenantId), date);
+  async getQueueHistory(
+    @Param("tenantId") tenantId: string,
+    @Param("date") date: string,
+    @Query("endDate") endDate: string | undefined,
+    @Request() req: any
+  ) {
+    return this.queueService.getQueueHistory(this.tenantId(req, tenantId), date, endDate);
   }
 
   @Post("events")
