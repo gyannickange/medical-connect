@@ -4,6 +4,7 @@ import { CouchDBService } from "../src/database/couchdb.service";
 import { TenantsRepository } from "../src/modules/identity/tenants.repository";
 import { UsersRepository } from "../src/modules/identity/users.repository";
 import { SettingsRepository } from "../src/modules/settings/settings.repository";
+import { ServicesRepository } from "../src/modules/services/services.repository";
 import { S3Service } from "../src/lib/s3.service";
 
 async function main() {
@@ -13,6 +14,7 @@ async function main() {
   const tenants = new TenantsRepository(couch);
   const users = new UsersRepository(couch, s3);
   const settings = new SettingsRepository(couch);
+  const services = new ServicesRepository(couch);
 
   const { tenant } = await tenants.create({
     id: "00000000-0000-4000-8000-000000000001",
@@ -59,6 +61,7 @@ async function main() {
     { key: "currency", value: "XOF", category: "company", dataType: "string" },
     tenant.id
   );
+  await services.seedDefaults(tenant.id);
   console.log(`Seeded tenant ${tenant.id}; login: admin`);
 }
 
