@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from "react";
 import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
+import { DatePicker } from "@/components/ui/date-picker";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -86,11 +86,11 @@ export default function ResultatsLaboTab({ labOrders }: ResultatsLaboTabProps) {
       <div className="flex flex-wrap items-end gap-4">
         <div>
           <label className="text-sm text-muted-foreground block mb-1">{t("startDateLabel")}</label>
-          <Input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} data-testid="input-labo-start-date" />
+          <DatePicker value={startDate} onValueChange={setStartDate} className="w-auto" data-testid="input-labo-start-date" />
         </div>
         <div>
           <label className="text-sm text-muted-foreground block mb-1">{t("endDateLabel")}</label>
-          <Input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} data-testid="input-labo-end-date" />
+          <DatePicker value={endDate} onValueChange={setEndDate} className="w-auto" data-testid="input-labo-end-date" />
         </div>
         <div>
           <label className="text-sm text-muted-foreground block mb-1">{t("statusColumnLabel")}</label>

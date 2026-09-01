@@ -4,6 +4,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useLocation, useParams } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { DatePicker } from "@/components/ui/date-picker";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
@@ -404,7 +405,7 @@ export default function PlanPriseEnCharge() {
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
                       <FieldLabel>{t("appointmentDateField")}</FieldLabel>
-                      <Input type="date" value={controleSuivi.appointmentDate} onChange={(e) => setControleSuivi((p) => ({ ...p, appointmentDate: e.target.value }))} data-testid="input-appointment-date" />
+                      <DatePicker value={controleSuivi.appointmentDate} onValueChange={(value) => setControleSuivi((p) => ({ ...p, appointmentDate: value }))} data-testid="input-appointment-date" />
                     </div>
                     <div>
                       <FieldLabel>{t("specialtyField")}</FieldLabel>

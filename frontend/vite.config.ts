@@ -18,6 +18,15 @@ export default defineConfig({
       "@shared": path.resolve(__dirname, "shared"),
     },
   },
+  optimizeDeps: {
+    // Force these onto the initial dependency scan instead of letting Vite
+    // discover them lazily the first time a new component imports them —
+    // a lazy discovery mid-session forces a re-optimize + cache-hash bump,
+    // which orphans any already-open tab ("Outdated Optimize Dep" 504s)
+    // until it's hard-refreshed. Add to this list whenever a newly-added
+    // component is the first real user of a dependency in the repo.
+    include: ["cmdk", "react-day-picker", "date-fns"],
+  },
   server: {
     port: 3000,
     proxy: {

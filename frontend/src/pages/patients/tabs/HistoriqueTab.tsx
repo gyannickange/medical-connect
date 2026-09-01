@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
+import { DatePicker } from "@/components/ui/date-picker";
 import { Button } from "@/components/ui/button";
 import { useTranslation } from "../../../lib/i18n";
 import { buildPatientTimeline, type PatientTimelineEventType } from "@/lib/patientTimeline";
@@ -52,11 +52,11 @@ export default function HistoriqueTab({ consultations, labOrders, prescriptions 
       <Card className="p-4 flex flex-wrap items-end gap-4">
         <div>
           <label className="text-sm text-muted-foreground block mb-1">{t("startDateLabel")}</label>
-          <Input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} data-testid="input-history-start-date" />
+          <DatePicker value={startDate} onValueChange={setStartDate} className="w-auto" data-testid="input-history-start-date" />
         </div>
         <div>
           <label className="text-sm text-muted-foreground block mb-1">{t("endDateLabel")}</label>
-          <Input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} data-testid="input-history-end-date" />
+          <DatePicker value={endDate} onValueChange={setEndDate} className="w-auto" data-testid="input-history-end-date" />
         </div>
         <Button variant="outline" onClick={() => { setAppliedStart(startDate); setAppliedEnd(endDate); }} data-testid="button-apply-history-filter">
           {t("applyFilterAction")}
