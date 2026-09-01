@@ -52,6 +52,8 @@ const QueueEntryDetails = lazy(() => import("./pages/file-attente/show"));
 const FileAttenteArchive = lazy(() => import("./pages/file-attente/archive"));
 const Staff = lazy(() => import("./pages/Staff"));
 const Settings = lazy(() => import("./pages/Settings"));
+const ServicesManager = lazy(() => import("./pages/settings/services"));
+const ServiceForm = lazy(() => import("./pages/settings/service-form"));
 const AuditLogs = lazy(() => import("./pages/AuditLogs"));
 const Login = lazy(() => import("./pages/Login"));
 const Register = lazy(() => import("./pages/Register"));
@@ -341,6 +343,27 @@ function Router() {
           <ProtectedRoute>
             <Layout>
               <Settings />
+            </Layout>
+          </ProtectedRoute>
+        </Route>
+        <Route path="/settings/services">
+          <ProtectedRoute>
+            <Layout>
+              <ServicesManager />
+            </Layout>
+          </ProtectedRoute>
+        </Route>
+        <Route path="/settings/services/new">
+          <ProtectedRoute>
+            <Layout>
+              <ServiceForm />
+            </Layout>
+          </ProtectedRoute>
+        </Route>
+        <Route path="/settings/services/:id/edit">
+          <ProtectedRoute>
+            <Layout>
+              <ServiceForm />
             </Layout>
           </ProtectedRoute>
         </Route>
