@@ -86,20 +86,19 @@ export default function Patients() {
               <TableHead>{t("age")}</TableHead>
               <TableHead>{t("sex")}</TableHead>
               <TableHead>{t("dossierNumber")}</TableHead>
-              <TableHead>{t("assignedService")}</TableHead>
               <TableHead className="text-right">{t("actions")}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {isLoading ? (
               <TableRow>
-                <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
+                <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
                   {t("loading")}
                 </TableCell>
               </TableRow>
             ) : patientsList.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
+                <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
                   {searchQuery ? t("noPatientsMatchSearch") : t("addFirstPatient")}
                 </TableCell>
               </TableRow>
@@ -126,7 +125,6 @@ export default function Patients() {
                   <TableCell className="font-mono text-sm">
                     {patient.dossierNumber ?? t("pendingSync")}
                   </TableCell>
-                  <TableCell>{patient.facilityService ?? "—"}</TableCell>
                   <TableCell className="text-right">
                     <Badge variant={statusVariant(patient.status)}>
                       {t(`patientStatus${patient.status[0].toUpperCase()}${patient.status.slice(1)}`)}
