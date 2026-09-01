@@ -41,6 +41,7 @@ export class PatientsRepository {
       profession: data.profession ?? null,
       maritalStatus: data.maritalStatus ?? null,
       idDocumentType: data.idDocumentType ?? null,
+      idDocumentTypeOther: data.idDocumentTypeOther ?? null,
       idDocumentNumber: data.idDocumentNumber ?? null,
       idDocumentExpiry: data.idDocumentExpiry ?? null,
       email: data.email ?? null,
