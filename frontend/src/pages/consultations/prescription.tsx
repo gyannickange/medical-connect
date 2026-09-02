@@ -132,9 +132,9 @@ export default function PrescriptionForm() {
                     <div key={index} className="flex items-center gap-2 text-sm">
                       <Pill className="w-3.5 h-3.5 text-primary shrink-0" />
                       <span className="font-semibold text-foreground">{line.drugName}</span>
-                      <span className="text-muted-foreground">{line.dosage} · {line.frequency}</span>
+                      <span className="text-muted-foreground">{t("dosageLabel")} {line.dosage} · {t("frequencyLabel")} {line.frequency}</span>
                       {line.durationDays && <span className="text-muted-foreground">· {line.durationDays} {t("daysShortSuffix")}</span>}
-                      {line.quantity && <span className="text-muted-foreground">· {line.quantity}</span>}
+                      {line.quantity && <span className="text-muted-foreground">· {t("quantityLabel")} {line.quantity}</span>}
                     </div>
                   ))}
                 </div>

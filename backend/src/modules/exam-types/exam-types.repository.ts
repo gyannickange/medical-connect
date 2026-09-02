@@ -2,8 +2,66 @@ import { Injectable, NotFoundException, ServiceUnavailableException } from "@nes
 import { randomUUID } from "crypto";
 import type { DocumentScope } from "nano";
 import { CouchDBService } from "../../database/couchdb.service";
-import type { ExamType, InsertExamType } from "@shared/schema";
+import type { ExamType, ExamTypeCategory, ExamTypeParameter, InsertExamType } from "@shared/schema";
 import { couchDocumentId, publicDocumentId, tenantDatabaseName } from "../../database/couchdb-naming";
+
+function param(name: string, unit: string, referenceRange: string): ExamTypeParameter {
+  return { name, unit, referenceRange };
+}
+
+export const DEFAULT_EXAM_TYPES: { name: string; category: ExamTypeCategory; parameters?: ExamTypeParameter[] }[] = [
+  {
+    name: "Numération Formule Sanguine (NFS)",
+    category: "laboratoire",
+    parameters: [
+      param("Hémoglobine", "g/dL", "12-16"),
+      param("Leucocytes", "/mm³", "4000-10000"),
+      param("Plaquettes", "/mm³", "150000-450000"),
+      param("Hématocrite", "%", "36-46"),
+    ],
+  },
+  { name: "Glycémie à jeun", category: "laboratoire", parameters: [param("Glycémie", "g/L", "0.70-1.10")] },
+  { name: "Créatininémie", category: "laboratoire", parameters: [param("Créatinine", "mg/L", "6-13")] },
+  {
+    name: "Bilan lipidique",
+    category: "laboratoire",
+    parameters: [
+      param("Cholestérol total", "g/L", "< 2.00"),
+      param("Triglycérides", "g/L", "< 1.50"),
+      param("HDL-Cholestérol", "g/L", "> 0.40"),
+      param("LDL-Cholestérol", "g/L", "< 1.60"),
+    ],
+  },
+  {
+    name: "Transaminases (ASAT/ALAT)",
+    category: "laboratoire",
+    parameters: [param("ASAT", "UI/L", "10-40"), param("ALAT", "UI/L", "10-40")],
+  },
+  { name: "Goutte épaisse (Paludisme)", category: "laboratoire" },
+  { name: "Test de diagnostic rapide du paludisme", category: "laboratoire" },
+  { name: "Groupage sanguin ABO/Rhésus", category: "laboratoire" },
+  { name: "Sérologie VIH", category: "laboratoire" },
+  { name: "Sérologie typhoïdique (Widal-Félix)", category: "laboratoire" },
+  { name: "Examen Parasitologique des Selles (EPS)", category: "laboratoire" },
+  { name: "Examen Cytobactériologique des Urines (ECBU)", category: "laboratoire" },
+  {
+    name: "Ionogramme sanguin",
+    category: "laboratoire",
+    parameters: [
+      param("Sodium (Na+)", "mmol/L", "135-145"),
+      param("Potassium (K+)", "mmol/L", "3.5-5.0"),
+      param("Chlore (Cl-)", "mmol/L", "95-105"),
+    ],
+  },
+  { name: "Protéine C-réactive (CRP)", category: "laboratoire", parameters: [param("CRP", "mg/L", "< 6")] },
+  { name: "Test de grossesse (bHCG)", category: "laboratoire", parameters: [param("bHCG", "mUI/mL", "< 5 (négatif)")] },
+  { name: "Radiographie thoracique", category: "imagerie" },
+  { name: "Échographie abdominale", category: "imagerie" },
+  { name: "Échographie obstétricale", category: "imagerie" },
+  { name: "Scanner cérébral", category: "imagerie" },
+  { name: "Électrocardiogramme (ECG)", category: "explorations_fonctionnelles" },
+  { name: "Spirométrie", category: "explorations_fonctionnelles" },
+];
 
 @Injectable()
 export class ExamTypesRepository {
@@ -79,6 +137,15 @@ export class ExamTypesRepository {
     await this.couchDBService.ensureIndex(dbName, "exam_types_by_tenant_name", ["tenantId", "type", "name"]);
     const result = await db.find({ selector: { type: "exam_type", tenantId }, sort: [{ name: "asc" }], limit: 500 });
     return (result.docs as any[]).map((doc) => this.hydrate(doc));
+  }
+
+  /** Idempotent: only inserts the default catalog if the tenant has no exam types yet. */
+  async seedDefaults(tenantId: string): Promise<void> {
+    const existing = await this.findByTenant(tenantId);
+    if (existing.length > 0) return;
+    for (const { name, category, parameters } of DEFAULT_EXAM_TYPES) {
+      await this.create({ name, category, isActive: true, parameters, tenantId });
+    }
   }
 
   private async findExisting(db: DocumentScope<unknown>, id: string): Promise<Record<string, any> | null> {

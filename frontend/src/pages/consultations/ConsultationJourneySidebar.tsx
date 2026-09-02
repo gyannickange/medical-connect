@@ -24,7 +24,9 @@ export function ConsultationJourneySidebar({ steps }: { steps: JourneyStep[] }) 
   const progress = (stepNumber / steps.length) * 100;
 
   return (
-    <div className="relative flex flex-col gap-4 w-[210px] shrink-0 self-stretch border-r border-border bg-background p-5" data-testid="consultation-journey-sidebar">
+    <div
+      className="sticky top-[73px] flex flex-col gap-4 w-[210px] shrink-0 border-r border-border bg-background p-5"
+      data-testid="consultation-journey-sidebar">
       <div className="absolute left-0 top-0 h-full w-[3px] bg-primary" />
       <p className="text-[13px] font-bold text-muted-foreground">{t("journeyPanelTitle")}</p>
       <ol className="flex flex-col">

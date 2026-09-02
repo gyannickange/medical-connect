@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -19,11 +20,11 @@ import { offlineApiRequest } from "@/lib/offlineApiRequest";
 import { showApiErrorToast } from "@/lib/errorHandler";
 import { calculateAge } from "@/lib/patientAge";
 import { LabOrdersPolicy } from "@/lib/policies/labOrders.policy";
-import { PrescriptionsPolicy } from "@/lib/policies/prescriptions.policy";
 import { PolicyGuard } from "@/components/PolicyGuard";
 import { ConsultationJourneySidebar } from "./ConsultationJourneySidebar";
 import { useConsultationJourney } from "./useConsultationJourney";
 import type { Consultation, DiagnosisPrincipal, ExamSystem, LabOrder, Patient, PhysicalExam, Prescription } from "@shared/schema";
+import { GENERAL_STATE_OPTIONS, CONSCIOUSNESS_OPTIONS, HYDRATION_OPTIONS } from "@/lib/physicalExamOptions";
 
 const EXAM_SYSTEMS: ExamSystem[] = ["cardiovasculaire", "respiratoire", "neurologique", "digestif", "orl", "dermatologique"];
 
@@ -51,9 +52,6 @@ export default function ConsultationMedicaleForm() {
   const [newSecondaryDiagnosis, setNewSecondaryDiagnosis] = useState("");
   const [diagnosisHypothesis, setDiagnosisHypothesis] = useState("");
   const [initialized, setInitialized] = useState(false);
-  const [newDrugName, setNewDrugName] = useState("");
-  const [newDosage, setNewDosage] = useState("");
-  const [newFrequency, setNewFrequency] = useState("");
 
   const { data: consultation } = useQuery<Consultation>({
     queryKey: ["/api/consultations/detail", consultationId],
@@ -106,7 +104,8 @@ export default function ConsultationMedicaleForm() {
   }
 
   function payload() {
-    return { relevantHistory, presentIllnessHistory, physicalExam, diagnosisPrincipal, diagnosisSecondary, diagnosisHypothesis };
+    const sanitizedDiagnosisPrincipal = diagnosisPrincipal?.label.trim() ? diagnosisPrincipal : null;
+    return { relevantHistory, presentIllnessHistory, physicalExam, diagnosisPrincipal: sanitizedDiagnosisPrincipal, diagnosisSecondary, diagnosisHypothesis };
   }
 
   function markInConsultation() {
@@ -151,28 +150,6 @@ export default function ConsultationMedicaleForm() {
     },
   });
 
-  const addPrescriptionLineMutation = useMutation({
-    mutationFn: async () => {
-      const response = await offlineApiRequest(
-        "POST",
-        "/api/prescriptions",
-        { consultationId, lines: [{ drugName: newDrugName, dosage: newDosage, frequency: newFrequency }] },
-        { collection: "prescriptions" }
-      );
-      return response.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [`/api/prescriptions/${currentTenant?.id}?consultationId=${consultationId}`] });
-      toast({ title: t("success"), description: t("prescriptionCreatedSuccessfully") });
-      setNewDrugName("");
-      setNewDosage("");
-      setNewFrequency("");
-    },
-    onError: (error: unknown) => {
-      void showApiErrorToast(toast, error, t("error"), t("failedToCreatePrescription"), t("networkRequestFailed"));
-    },
-  });
-
   function updateFinding(system: ExamSystem, patch: Partial<{ status: "normal" | "anormal" | "non_examine"; notes: string }>) {
     setPhysicalExam((prev) => ({
       ...prev,
@@ -192,14 +169,15 @@ export default function ConsultationMedicaleForm() {
   const vitals = consultation.vitals;
 
   return (
-    <div className="flex gap-6 items-start" data-testid="consultation-medicale-page">
-      <ConsultationJourneySidebar steps={steps} />
-      <div className="flex-1 min-w-0 space-y-6" data-testid="consultation-medicale-form">
-        <Button variant="ghost" onClick={() => setLocation(`/consultations/${consultationId}`)}>
-          <ArrowLeft className="w-4 h-4 mr-2" />
-          {t("consultations")}
-        </Button>
+    <div className="space-y-6" data-testid="consultation-medicale-page">
+      <Button variant="ghost" onClick={() => setLocation(`/consultations/${consultationId}`)}>
+        <ArrowLeft className="w-4 h-4 mr-2" />
+        {t("consultations")}
+      </Button>
 
+      <div className="flex gap-6 items-start">
+        <ConsultationJourneySidebar steps={steps} />
+        <div className="flex-1 min-w-0 space-y-6" data-testid="consultation-medicale-form">
         <div>
           <h1 className="text-2xl font-display font-bold text-foreground">{t("consultationMedicaleTitle")} — {consultation.number ?? t("pendingSync")}</h1>
           <p className="text-sm text-muted-foreground">{t("sessionActiveLabel")} · {consultation.specialty}</p>
@@ -329,15 +307,48 @@ export default function ConsultationMedicaleForm() {
             <div className="grid grid-cols-3 gap-4 mt-2">
               <div>
                 <Label htmlFor="generalState">{t("generalStateField")}</Label>
-                <Input id="generalState" value={physicalExam.generalState ?? ""} onChange={(e) => setPhysicalExam((prev) => ({ ...prev, generalState: e.target.value }))} />
+                <Select
+                  value={physicalExam.generalState ?? ""}
+                  onValueChange={(value) => setPhysicalExam((prev) => ({ ...prev, generalState: value }))}>
+                  <SelectTrigger id="generalState" data-testid="select-general-state">
+                    <SelectValue placeholder={t("generalStateSelectPlaceholder")} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {GENERAL_STATE_OPTIONS.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>{t(option.labelKey)}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
               <div>
                 <Label htmlFor="consciousness">{t("consciousnessField")}</Label>
-                <Input id="consciousness" value={physicalExam.consciousness ?? ""} onChange={(e) => setPhysicalExam((prev) => ({ ...prev, consciousness: e.target.value }))} />
+                <Select
+                  value={physicalExam.consciousness ?? ""}
+                  onValueChange={(value) => setPhysicalExam((prev) => ({ ...prev, consciousness: value }))}>
+                  <SelectTrigger id="consciousness" data-testid="select-consciousness">
+                    <SelectValue placeholder={t("consciousnessSelectPlaceholder")} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {CONSCIOUSNESS_OPTIONS.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>{t(option.labelKey)}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
               <div>
                 <Label htmlFor="hydration">{t("hydrationField")}</Label>
-                <Input id="hydration" value={physicalExam.hydration ?? ""} onChange={(e) => setPhysicalExam((prev) => ({ ...prev, hydration: e.target.value }))} />
+                <Select
+                  value={physicalExam.hydration ?? ""}
+                  onValueChange={(value) => setPhysicalExam((prev) => ({ ...prev, hydration: value }))}>
+                  <SelectTrigger id="hydration" data-testid="select-hydration">
+                    <SelectValue placeholder={t("hydrationSelectPlaceholder")} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {HYDRATION_OPTIONS.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>{t(option.labelKey)}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
             </div>
             {vitals && (vitals.weightKg != null || vitals.heightCm != null || vitals.bmi != null) && (
@@ -538,20 +549,6 @@ export default function ConsultationMedicaleForm() {
             </TableBody>
           </Table>
         )}
-        <PolicyGuard policy={PrescriptionsPolicy} action="canCreate">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
-            <Input value={newDrugName} onChange={(e) => setNewDrugName(e.target.value)} placeholder={t("drugNameLabel")} data-testid="input-new-drug-name" />
-            <Input value={newDosage} onChange={(e) => setNewDosage(e.target.value)} placeholder={t("dosageLabel")} data-testid="input-new-dosage" />
-            <Input value={newFrequency} onChange={(e) => setNewFrequency(e.target.value)} placeholder={t("frequencyLabel")} data-testid="input-new-frequency" />
-          </div>
-          <Button
-            variant="outline"
-            onClick={() => addPrescriptionLineMutation.mutate()}
-            disabled={!newDrugName.trim() || !newDosage.trim() || !newFrequency.trim() || addPrescriptionLineMutation.isPending}
-            data-testid="button-prescribe">
-            {t("addMedicationLine")}
-          </Button>
-        </PolicyGuard>
       </Card>
 
       <Card className="p-6 space-y-2" data-testid="card-care-plan">
@@ -580,10 +577,15 @@ export default function ConsultationMedicaleForm() {
           <Button variant="outline" onClick={() => setLocation(`/consultations/${consultationId}/resume-cloture`)} data-testid="button-close-consultation">
             {t("closeConsultationAction")}
           </Button>
-          <Button className="btn-primary" onClick={() => markCompletedMutation.mutate()} disabled={isPending} data-testid="button-mark-completed">
+          <Button
+            className="btn-primary"
+            onClick={() => markCompletedMutation.mutate()}
+            disabled={isPending || !diagnosisPrincipal?.label.trim()}
+            data-testid="button-mark-completed">
             {markCompletedMutation.isPending ? t("saving") : t("markCompleted")}
           </Button>
         </div>
+      </div>
       </div>
     </div>
   );

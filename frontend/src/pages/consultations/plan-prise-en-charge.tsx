@@ -19,6 +19,7 @@ import { cn } from "@/lib/utils";
 import { ConsultationJourneySidebar } from "./ConsultationJourneySidebar";
 import { useConsultationJourney } from "./useConsultationJourney";
 import type { CarePlan, CarePlanOrientation, Consultation, Patient, Prescription } from "@shared/schema";
+import { GENERAL_STATE_OPTIONS, physicalExamLabel } from "@/lib/physicalExamOptions";
 
 const ORIENTATIONS: CarePlanOrientation[] = ["retour_domicile", "controle_suivi", "hospitalisation", "orientation_specialiste", "transfert_urgent", "autre"];
 
@@ -256,7 +257,7 @@ export default function PlanPriseEnCharge() {
   }
 
   function synthese(): string {
-    const parts = [consultation!.reason, consultation!.diagnosisPrincipal?.label, consultation!.physicalExam?.generalState].filter(Boolean);
+    const parts = [consultation!.reason, consultation!.diagnosisPrincipal?.label, physicalExamLabel(GENERAL_STATE_OPTIONS, consultation!.physicalExam?.generalState, t)].filter(Boolean);
     return parts.length > 0 ? parts.join(" — ") : t("noDataAvailable");
   }
 

@@ -23,11 +23,7 @@ export const examTypes: TranslationSection = {
     noExamTypes: "No exam types yet.",
     examTypeCreatedSuccessfully: "Exam type created",
     examTypeUpdatedSuccessfully: "Exam type updated",
-    examTypeDeletedSuccessfully: "Exam type deleted",
     failedToSaveExamType: "Failed to save the exam type",
-    failedToDeleteExamType: "Failed to delete the exam type",
-    deleteExamTypeConfirmTitle: "Delete this exam type?",
-    deleteAction: "Delete",
   },
   fr: {
     examTypesManagerTitle: "Types d'examens",
@@ -51,10 +47,6 @@ export const examTypes: TranslationSection = {
     noExamTypes: "Aucun type d'examen pour le moment.",
     examTypeCreatedSuccessfully: "Type d'examen créé",
     examTypeUpdatedSuccessfully: "Type d'examen mis à jour",
-    examTypeDeletedSuccessfully: "Type d'examen supprimé",
     failedToSaveExamType: "Échec de l'enregistrement du type d'examen",
-    failedToDeleteExamType: "Échec de la suppression du type d'examen",
-    deleteExamTypeConfirmTitle: "Supprimer ce type d'examen ?",
-    deleteAction: "Supprimer",
   },
 };

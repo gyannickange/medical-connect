@@ -24,6 +24,7 @@ import { showApiErrorToast } from "@/lib/errorHandler";
 import { ConsultationJourneySidebar } from "./ConsultationJourneySidebar";
 import { useConsultationJourney } from "./useConsultationJourney";
 import type { Consultation, LabOrder, Patient, Prescription } from "@shared/schema";
+import { GENERAL_STATE_OPTIONS, physicalExamLabel } from "@/lib/physicalExamOptions";
 
 const RESOLVED_LAB_ORDER_STATUSES = new Set(["termine", "annule"]);
 
@@ -242,7 +243,7 @@ export default function ResumeCloture() {
       <Card className="space-y-4 p-5">
         <SectionTitle label={t("physicalExamSection")} onClick={() => setLocation(`/consultations/${consultationId}/consultation-medicale`)} action={t("modifyLabel")} />
         <div className="space-y-2 text-sm leading-6 text-muted-foreground">
-          {physicalFindings.length > 0 ? physicalFindings.map((finding) => <p key={finding.system}><span className="font-semibold text-foreground">{finding.system}: </span>{finding.notes}</p>) : <p>{consultation.physicalExam?.generalState || t("notStartedYet")}</p>}
+          {physicalFindings.length > 0 ? physicalFindings.map((finding) => <p key={finding.system}><span className="font-semibold text-foreground">{finding.system}: </span>{finding.notes}</p>) : <p>{physicalExamLabel(GENERAL_STATE_OPTIONS, consultation.physicalExam?.generalState, t) || t("notStartedYet")}</p>}
         </div>
       </Card>
 

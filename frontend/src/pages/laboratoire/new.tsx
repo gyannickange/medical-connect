@@ -90,11 +90,11 @@ export default function NewLabOrder() {
       );
       return response.json();
     },
-    onSuccess: (created) => {
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [`/api/lab-orders/${currentTenant?.id}`] });
       queryClient.invalidateQueries({ queryKey: [`/api/lab-orders/${currentTenant?.id}?consultationId=${consultationId}`] });
       toast({ title: t("success"), description: t("labOrderCreatedSuccessfully") });
-      setLocation(`/laboratoire/${created.id}`);
+      setLocation(`/consultations/${consultationId}/consultation-medicale`);
     },
     onError: (error: unknown) => {
       void showApiErrorToast(toast, error, t("error"), t("failedToCreateLabOrder"), t("networkRequestFailed"));

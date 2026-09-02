@@ -105,10 +105,10 @@ describe("computeConsultationJourney", () => {
     expect(steps[7]).toMatchObject({ key: "carePlan", state: "current" });
   });
 
-  it("marks step 7 completed once the Prescription is delivre_partiel", () => {
+  it("marks step 7 completed as soon as a Prescription is created, regardless of dispense status", () => {
     const c = consultation({ vitalsRecordedAt: "2026-08-27T10:25:00.000Z", medicalConsultationSavedAt: "2026-08-27T10:35:00.000Z" });
     const prescriptions: Prescription[] = [
-      { id: "pr1", tenantId: "t1", consultationId: "c1", patientId: "p1", lines: [], prescribedByUserId: "doctor-1", prescribedAt: "2026-08-27T10:40:00.000Z", status: "delivre_partiel", dispensedByUserId: "pharmacist-1", dispensedAt: "2026-08-27T11:00:00.000Z", createdAt: "2026-08-27T10:40:00.000Z", updatedAt: "2026-08-27T11:00:00.000Z" } as any,
+      { id: "pr1", tenantId: "t1", consultationId: "c1", patientId: "p1", lines: [], prescribedByUserId: "doctor-1", prescribedAt: "2026-08-27T10:40:00.000Z", status: "en_attente", dispensedByUserId: null, dispensedAt: null, createdAt: "2026-08-27T10:40:00.000Z", updatedAt: "2026-08-27T10:40:00.000Z" } as any,
     ];
 
     const steps = computeConsultationJourney(patient(), c, undefined, [], prescriptions);

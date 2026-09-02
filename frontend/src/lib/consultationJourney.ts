@@ -21,7 +21,6 @@ const STEP_KEYS = [
 ] as const;
 
 const RESOLVED_LAB_ORDER_STATUSES = new Set(["termine", "annule"]);
-const RESOLVED_PRESCRIPTION_STATUSES = new Set(["delivre", "delivre_partiel", "annule"]);
 
 export function computeConsultationJourney(
   patient: Patient,
@@ -37,8 +36,7 @@ export function computeConsultationJourney(
     labOrders.length > 0 ? labOrders.every((order) => RESOLVED_LAB_ORDER_STATUSES.has(order.status)) : consultationClosed;
   const examsOccurredAt = examsResolved ? mostRecentDate(labOrders.map((o) => o.updatedAt)) ?? (consultationClosed ? new Date(consultation.updatedAt) : null) : null;
 
-  const prescriptionResolved =
-    prescriptions.length > 0 ? prescriptions.every((p) => RESOLVED_PRESCRIPTION_STATUSES.has(p.status)) : consultationClosed;
+  const prescriptionResolved = prescriptions.length > 0 || consultationClosed;
   const prescriptionOccurredAt = prescriptionResolved
     ? mostRecentDate(prescriptions.map((p) => p.updatedAt)) ?? (consultationClosed ? new Date(consultation.updatedAt) : null)
     : null;
