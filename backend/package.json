@@ -8,6 +8,7 @@
   "scripts": {
     "dev": "nest start --watch",
     "build": "nest build",
+    "build:client": "vite build",
     "start": "node dist/main",
     "start:dev": "nest start --watch",
     "start:prod": "node dist/main",
