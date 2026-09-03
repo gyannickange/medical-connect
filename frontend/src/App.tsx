@@ -25,31 +25,39 @@ const EditPatient = lazy(() => import("./pages/patients/edit"));
 const PatientDetails = lazy(() => import("./pages/patients/show"));
 const DossierMedical = lazy(() => import("./pages/patients/dossier-medical"));
 const Consultations = lazy(() => import("./pages/consultations"));
+const ConsultationsArchive = lazy(() => import("./pages/consultations/archive"));
 const NewConsultation = lazy(() => import("./pages/consultations/new"));
 const EditConsultation = lazy(() => import("./pages/consultations/edit"));
 const ConsultationDetails = lazy(() => import("./pages/consultations/show"));
 const PreConsultationForm = lazy(() => import("./pages/consultations/pre-consultation"));
 const ConsultationMedicaleForm = lazy(() => import("./pages/consultations/consultation-medicale"));
+const PrescriptionForm = lazy(() => import("./pages/consultations/prescription"));
+const ResultatExamens = lazy(() => import("./pages/consultations/resultat-examens"));
 const PlanPriseEnCharge = lazy(() => import("./pages/consultations/plan-prise-en-charge"));
 const ResumeCloture = lazy(() => import("./pages/consultations/resume-cloture"));
 const Suivi = lazy(() => import("./pages/consultations/suivi"));
 const SuiviResultat = lazy(() => import("./pages/consultations/suivi-resultat"));
 const LaboratoireIndex = lazy(() => import("./pages/laboratoire"));
 const NewLabOrder = lazy(() => import("./pages/laboratoire/new"));
+const ExamTypesManager = lazy(() => import("./pages/laboratoire/exam-types"));
+const ExamTypeForm = lazy(() => import("./pages/laboratoire/exam-type-form"));
 const LabOrderDetails = lazy(() => import("./pages/laboratoire/show"));
 const PharmacieIndex = lazy(() => import("./pages/pharmacie"));
 const PrescriptionDetails = lazy(() => import("./pages/pharmacie/show"));
 const SallesIndex = lazy(() => import("./pages/salles"));
 const NewSalle = lazy(() => import("./pages/salles/new"));
 const SalleDetails = lazy(() => import("./pages/salles/show"));
-const FileAttente = lazy(() => import("./pages/FileAttente"));
-const QueueRegister = lazy(() => import("./pages/QueueRegister"));
-const QueueEntryDetails = lazy(() => import("./pages/QueueEntryDetails"));
+const FileAttente = lazy(() => import("./pages/file-attente"));
+const QueueRegister = lazy(() => import("./pages/file-attente/new"));
+const QueueEntryDetails = lazy(() => import("./pages/file-attente/show"));
+const FileAttenteArchive = lazy(() => import("./pages/file-attente/archive"));
 const Staff = lazy(() => import("./pages/Staff"));
 const Settings = lazy(() => import("./pages/Settings"));
+const ServicesManager = lazy(() => import("./pages/settings/services"));
+const ServiceForm = lazy(() => import("./pages/settings/service-form"));
 const AuditLogs = lazy(() => import("./pages/AuditLogs"));
 const Login = lazy(() => import("./pages/Login"));
-const Register = lazy(() => import("./pages/Register"));
+const PlatformAdmin = lazy(() => import("./pages/PlatformAdmin"));
 const PasswordReset = lazy(() => import("./pages/PasswordReset"));
 const PasswordResetRequest = lazy(
   () => import("./pages/PasswordResetRequest"),
@@ -79,7 +87,6 @@ function Router() {
       <Switch>
         {/* Public routes */}
         <Route path="/login" component={Login} />
-        <Route path="/register" component={Register} />
         <Route path="/reset-password" component={PasswordReset} />
         <Route
           path="/request-password-reset"
@@ -143,6 +150,13 @@ function Router() {
             </Layout>
           </ProtectedRoute>
         </Route>
+        <Route path="/consultations/archive">
+          <ProtectedRoute>
+            <Layout>
+              <ConsultationsArchive />
+            </Layout>
+          </ProtectedRoute>
+        </Route>
         <Route path="/consultations/new">
           <ProtectedRoute>
             <Layout>
@@ -168,6 +182,20 @@ function Router() {
           <ProtectedRoute>
             <Layout>
               <ConsultationMedicaleForm />
+            </Layout>
+          </ProtectedRoute>
+        </Route>
+        <Route path="/consultations/:id/prescription">
+          <ProtectedRoute>
+            <Layout>
+              <PrescriptionForm />
+            </Layout>
+          </ProtectedRoute>
+        </Route>
+        <Route path="/consultations/:id/resultats-examens">
+          <ProtectedRoute>
+            <Layout>
+              <ResultatExamens />
             </Layout>
           </ProtectedRoute>
         </Route>
@@ -220,6 +248,13 @@ function Router() {
             </Layout>
           </ProtectedRoute>
         </Route>
+        <Route path="/file-attente/archive">
+          <ProtectedRoute>
+            <Layout>
+              <FileAttenteArchive />
+            </Layout>
+          </ProtectedRoute>
+        </Route>
         <Route path="/file-attente/:consultationId">
           <ProtectedRoute>
             <Layout>
@@ -238,6 +273,27 @@ function Router() {
           <ProtectedRoute>
             <Layout>
               <NewLabOrder />
+            </Layout>
+          </ProtectedRoute>
+        </Route>
+        <Route path="/laboratoire/exam-types">
+          <ProtectedRoute>
+            <Layout>
+              <ExamTypesManager />
+            </Layout>
+          </ProtectedRoute>
+        </Route>
+        <Route path="/laboratoire/exam-types/new">
+          <ProtectedRoute>
+            <Layout>
+              <ExamTypeForm />
+            </Layout>
+          </ProtectedRoute>
+        </Route>
+        <Route path="/laboratoire/exam-types/:id/edit">
+          <ProtectedRoute>
+            <Layout>
+              <ExamTypeForm />
             </Layout>
           </ProtectedRoute>
         </Route>
@@ -297,11 +353,37 @@ function Router() {
             </Layout>
           </ProtectedRoute>
         </Route>
+        <Route path="/settings/services">
+          <ProtectedRoute>
+            <Layout>
+              <ServicesManager />
+            </Layout>
+          </ProtectedRoute>
+        </Route>
+        <Route path="/settings/services/new">
+          <ProtectedRoute>
+            <Layout>
+              <ServiceForm />
+            </Layout>
+          </ProtectedRoute>
+        </Route>
+        <Route path="/settings/services/:id/edit">
+          <ProtectedRoute>
+            <Layout>
+              <ServiceForm />
+            </Layout>
+          </ProtectedRoute>
+        </Route>
         <Route path="/audit-logs">
           <ProtectedRoute>
             <Layout>
               <AuditLogs />
             </Layout>
+          </ProtectedRoute>
+        </Route>
+        <Route path="/platform-admin">
+          <ProtectedRoute>
+            <PlatformAdmin />
           </ProtectedRoute>
         </Route>
 

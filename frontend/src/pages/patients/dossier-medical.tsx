@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { AlertTriangle, ArrowLeft, BookOpen, Clock, FileText, Sparkles, TrendingDown } from "lucide-react";
+import { AlertTriangle, BookOpen, Clock, FileText, Sparkles, TrendingDown } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { useLocation, useParams } from "wouter";
 import { Button } from "@/components/ui/button";
@@ -11,7 +11,7 @@ import { useTenant } from "../../contexts/TenantContext";
 import { calculateAge } from "@/lib/patientAge";
 import { buildPatientTimeline } from "@/lib/patientTimeline";
 import { buildSparklinePoints } from "@/lib/sparkline";
-import type { Consultation, LabOrder, Patient, Prescription } from "@shared/schema";
+import type { Consultation, LabOrder, Patient, Prescription, User } from "@shared/schema";
 
 export default function DossierMedical() {
   const { t } = useTranslation();
@@ -42,6 +42,11 @@ export default function DossierMedical() {
   const { data: prescriptions = [] } = useQuery<Prescription[]>({
     queryKey: [`/api/prescriptions/${currentTenant?.id}?patientId=${patientId}`],
     enabled: !!currentTenant?.id && !!patientId,
+  });
+
+  const { data: staffList = [] } = useQuery<User[]>({
+    queryKey: ["/api/staff", currentTenant?.id],
+    enabled: !!currentTenant?.id,
   });
 
   if (!patient) {
@@ -94,25 +99,38 @@ export default function DossierMedical() {
     prescription_delivered: "patientTimelinePrescriptionDelivered",
   };
 
+  const mostRecentDoctor = mostRecent ? staffList.find((member) => member.id === mostRecent.assignedDoctorId) : undefined;
+
   return (
     <div className="space-y-6" data-testid="dossier-medical">
-      <Button variant="ghost" onClick={() => setLocation(`/patients/${patientId}`)}>
-        <ArrowLeft className="w-4 h-4 mr-2" />
-        {t("patients")}
-      </Button>
+      <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
+        <Button variant="link" size="sm" className="h-auto p-0 text-muted-foreground" onClick={() => setLocation("/patients")}>{t("patients")}</Button>
+        <span>›</span>
+        <Button variant="link" size="sm" className="h-auto p-0 text-muted-foreground" onClick={() => setLocation(`/patients/${patientId}`)}>{patient.firstName} {patient.lastName}</Button>
+        <span>›</span>
+        <span className="font-medium text-primary">{t("dossierMedicalTitle")}</span>
+      </div>
 
       <Card className="p-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-display font-bold text-foreground">{t("dossierMedicalTitle")} — {patient.firstName} {patient.lastName}</h1>
-          <p className="text-sm text-muted-foreground">
-            {calculateAge(patient.dateOfBirth)} {t("age").toLowerCase()} · {patient.sex}
-            {patient.bloodGroup ? ` · ${t("bloodGroup")}: ${patient.bloodGroup}` : ""}
-            {patient.dossierNumber ? ` · ${patient.dossierNumber}` : ""}
-          </p>
+        <div className="flex items-center gap-4">
+          <div className="flex items-center justify-center rounded-full border-2 border-primary bg-primary/10 size-14 shrink-0">
+            <span className="font-bold text-primary text-lg">{`${patient.firstName[0]}${patient.lastName[0]}`.toUpperCase()}</span>
+          </div>
+          <div>
+            <h1 className="text-lg font-display font-bold text-foreground">{patient.firstName} {patient.lastName}</h1>
+            <p className="text-sm text-muted-foreground">
+              {calculateAge(patient.dateOfBirth)} {t("age").toLowerCase()} · {patient.sex}
+              {patient.dossierNumber ? ` · ${t("dossierNumberFieldLabel")}: ${patient.dossierNumber}` : ""}
+              {patient.bloodGroup ? ` · ${t("bloodGroup")}: ${patient.bloodGroup}` : ""}
+            </p>
+          </div>
         </div>
         {mostRecent && (
-          <div className="text-sm text-right">
-            <p className="text-muted-foreground">{new Date(mostRecent.createdAt).toLocaleDateString()} — {mostRecent.specialty}</p>
+          <div className="text-sm text-right space-y-0.5">
+            <p><span className="font-semibold text-foreground">{t("lastConsultationLabel")} </span><span className="text-muted-foreground">{new Date(mostRecent.createdAt).toLocaleDateString()} - {mostRecent.specialty}</span></p>
+            {mostRecentDoctor && (
+              <p><span className="font-semibold text-foreground">{t("lastDoctorLabel")} </span><span className="text-muted-foreground">{mostRecentDoctor.firstName} {mostRecentDoctor.lastName}</span></p>
+            )}
           </div>
         )}
       </Card>

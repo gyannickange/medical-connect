@@ -389,7 +389,7 @@ export default function Staff() {
             placeholder={t("searchStaffPlaceholder")}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="glass-input rounded-xl pl-10"
+            className="rounded-xl pl-10"
             data-testid="input-search-staff"
           />
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
@@ -552,7 +552,7 @@ export default function Staff() {
                 <Input
                   id="firstName"
                   {...form.register("firstName")}
-                  className="glass-input rounded-xl"
+                  className="rounded-xl"
                   placeholder="John"
                   data-testid="input-first-name"
                 />
@@ -572,7 +572,7 @@ export default function Staff() {
                 <Input
                   id="lastName"
                   {...form.register("lastName")}
-                  className="glass-input rounded-xl"
+                  className="rounded-xl"
                   placeholder="Doe"
                   data-testid="input-last-name"
                 />
@@ -593,7 +593,7 @@ export default function Staff() {
               <Input
                 id="username"
                 {...form.register("username")}
-                className="glass-input rounded-xl"
+                className="rounded-xl"
                 placeholder="johndoe"
                 data-testid="input-username"
               />
@@ -619,7 +619,7 @@ export default function Staff() {
                 id="password"
                 type="password"
                 {...form.register("password")}
-                className="glass-input rounded-xl"
+                className="rounded-xl"
                 placeholder={
                   editingStaff ? t("leaveBlankToKeepCurrent") : t("password")
                 }
@@ -643,7 +643,7 @@ export default function Staff() {
                 type="email"
                 required
                 {...form.register("email")}
-                className="glass-input rounded-xl"
+                className="rounded-xl"
                 placeholder="john.doe@example.com"
                 data-testid="input-email"
               />
@@ -659,13 +659,13 @@ export default function Staff() {
                 <Label htmlFor="service" className="text-sm font-medium text-foreground">
                   {t("staffService")}
                 </Label>
-                <Input id="service" {...form.register("service")} className="glass-input rounded-xl" data-testid="input-service" />
+                <Input id="service" {...form.register("service")} className="rounded-xl" data-testid="input-service" />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="specialty" className="text-sm font-medium text-foreground">
                   {t("staffSpecialty")}
                 </Label>
-                <Input id="specialty" {...form.register("specialty")} className="glass-input rounded-xl" data-testid="input-specialty" />
+                <Input id="specialty" {...form.register("specialty")} className="rounded-xl" data-testid="input-specialty" />
               </div>
             </div>
 
@@ -674,19 +674,19 @@ export default function Staff() {
                 <Label htmlFor="matricule" className="text-sm font-medium text-foreground">
                   {t("staffMatricule")}
                 </Label>
-                <Input id="matricule" {...form.register("matricule")} className="glass-input rounded-xl" data-testid="input-matricule" />
+                <Input id="matricule" {...form.register("matricule")} className="rounded-xl" data-testid="input-matricule" />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="fonction" className="text-sm font-medium text-foreground">
                   {t("staffFonction")}
                 </Label>
-                <Input id="fonction" {...form.register("fonction")} className="glass-input rounded-xl" data-testid="input-fonction" />
+                <Input id="fonction" {...form.register("fonction")} className="rounded-xl" data-testid="input-fonction" />
               </div>
             </div>
 
             <div className="space-y-2">
               <Label className="text-sm font-medium text-foreground">{t("uploadPhoto")}</Label>
-              <label className="glass-input rounded-xl h-24 flex flex-col items-center justify-center gap-1 cursor-pointer text-sm text-muted-foreground">
+              <label className="rounded-xl h-24 flex flex-col items-center justify-center gap-1 cursor-pointer text-sm text-muted-foreground">
                 <input
                   type="file"
                   accept="image/jpeg,image/png"
@@ -715,7 +715,7 @@ export default function Staff() {
                   form.trigger("role"); // Trigger validation for this field
                 }}>
                 <SelectTrigger
-                  className="glass-input rounded-xl"
+                  className="rounded-xl"
                   data-testid="select-role">
                   <SelectValue placeholder={t("selectRole")} />
                 </SelectTrigger>

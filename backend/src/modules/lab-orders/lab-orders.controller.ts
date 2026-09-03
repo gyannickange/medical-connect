@@ -3,6 +3,7 @@ import { LabOrdersService } from "./lab-orders.service";
 import { CreateLabOrderDto } from "./dto/create-lab-order.dto";
 import { UpdateLabOrderDto } from "./dto/update-lab-order.dto";
 import { RecordLabOrderFollowUpDto } from "./dto/record-lab-order-follow-up.dto";
+import { AddLabOrderAttachmentDto } from "./dto/add-lab-order-attachment.dto";
 import { JwtAuthGuard } from "../auth/jwt-auth.guard";
 import { PolicyGuard } from "../auth/guards/policy.guard";
 import { CheckPolicy } from "../auth/decorators/check-policy.decorator";
@@ -48,6 +49,18 @@ export class LabOrdersController {
   @CheckPolicy(LabOrdersPolicy, "recordFollowUp")
   async recordFollowUp(@Param("id") id: string, @Body() dto: RecordLabOrderFollowUpDto, @Request() req: any) {
     return this.labOrdersService.recordFollowUp(id, this.tenantId(req), dto as any);
+  }
+
+  @Post(":id/attachments")
+  @CheckPolicy(LabOrdersPolicy, "update")
+  async addAttachment(@Param("id") id: string, @Body() dto: AddLabOrderAttachmentDto, @Request() req: any) {
+    return this.labOrdersService.addAttachment(id, this.tenantId(req), dto.fileName, dto.contentType, dto.fileBase64);
+  }
+
+  @Get(":id/attachments/:attachmentId/url")
+  @CheckPolicy(LabOrdersPolicy, "view")
+  async getAttachmentUrl(@Param("id") id: string, @Param("attachmentId") attachmentId: string, @Request() req: any) {
+    return { url: await this.labOrdersService.getAttachmentUrl(id, this.tenantId(req), attachmentId) };
   }
 
   private tenantId(req: any, legacyTenantId?: string): string {

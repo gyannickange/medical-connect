@@ -1,5 +1,5 @@
 import React from "react";
-import { Hash, Activity, Plus, FileText, FlaskConical, Printer } from "lucide-react";
+import { Activity, Plus, FileText, FlaskConical, Printer } from "lucide-react";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -51,28 +51,18 @@ export default function PatientHeader({ patient }: PatientHeaderProps) {
 
   return (
     <div className="space-y-4" data-testid="patient-header">
-      <div>
-        <h2 className="text-xl font-display font-bold text-foreground" data-testid="text-patient-file-heading">
+      <div className="space-y-1">
+        <h1 className="text-xl font-display font-bold text-foreground" data-testid="text-patient-file-heading">
           {t("patientFileHeading")} – {patient.firstName} {patient.lastName}
-        </h2>
-        <p className="text-sm text-muted-foreground">
-          {patient.dossierNumber ?? t("pendingSync")} • {t("lastUpdatedPrefix")} {relativeTimeLabel(t, new Date(patient.updatedAt))}
-        </p>
-      </div>
-
-      <div className="space-y-2">
-        <h1 className="text-3xl font-display font-bold text-foreground">
-          {patient.firstName} {patient.lastName}
         </h1>
         <div className="flex items-center gap-2">
-          <Badge variant="outline" className="gap-1" data-testid="badge-patient-id">
-            <Hash className="w-3.5 h-3.5" />
-            {patient.dossierNumber ?? t("pendingSync")}
-          </Badge>
           <Badge variant={statusVariant(patient.status)} className="gap-1" data-testid="badge-patient-status">
             <Activity className="w-3.5 h-3.5" />
             {t(`patientStatus${patient.status[0].toUpperCase()}${patient.status.slice(1)}`)}
           </Badge>
+          <span className="text-sm text-muted-foreground">
+            {t("lastUpdatedPrefix")} {relativeTimeLabel(t, new Date(patient.updatedAt))}
+          </span>
         </div>
       </div>
 

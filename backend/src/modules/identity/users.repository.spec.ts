@@ -57,6 +57,40 @@ describe("UsersRepository.create", () => {
   });
 });
 
+describe("UsersRepository.findByRole", () => {
+  it("queries CouchDB by type and role", async () => {
+    const db = {
+      find: jest.fn().mockResolvedValue({
+        docs: [
+          {
+            _id: "user:root",
+            id: "root",
+            type: "user",
+            username: "root",
+            role: "platform_admin",
+            tenantId: null,
+            createdAt: new Date().toISOString(),
+          },
+        ],
+      }),
+    };
+    const repository = new UsersRepository({ getDatabase: jest.fn().mockResolvedValue(db) } as any, {} as any);
+
+    const result = await repository.findByRole("platform_admin");
+
+    expect(db.find).toHaveBeenCalledWith({ selector: { type: "user", role: "platform_admin" } });
+    expect(result).toHaveLength(1);
+    expect(result[0].username).toBe("root");
+  });
+
+  it("returns an empty array when no user has that role", async () => {
+    const db = { find: jest.fn().mockResolvedValue({ docs: [] }) };
+    const repository = new UsersRepository({ getDatabase: jest.fn().mockResolvedValue(db) } as any, {} as any);
+
+    await expect(repository.findByRole("platform_admin")).resolves.toEqual([]);
+  });
+});
+
 describe("UsersRepository.attachPhoto / getPhotoUrl", () => {
   function existingUser(overrides: Record<string, unknown> = {}) {
     return {

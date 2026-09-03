@@ -1,12 +1,13 @@
-import { IsString, IsNotEmpty, IsOptional, IsUUID, IsIn, IsEmail, IsBoolean, ValidateNested } from "class-validator";
+import { IsString, IsNotEmpty, IsOptional, IsUUID, IsIn, IsEmail, IsBoolean, ValidateNested, ValidateIf } from "class-validator";
 import { Type } from "class-transformer";
 
 class EmergencyContactDto {
   @IsString() @IsNotEmpty() name: string;
   @IsString() @IsNotEmpty() relation: string;
+  @IsString() @IsOptional() relationOther?: string;
   @IsString() @IsNotEmpty() phone: string;
   @IsString() @IsOptional() address?: string;
-  @IsBoolean() isPriority: boolean;
+  @IsBoolean() @IsOptional() isPriority?: boolean;
 }
 
 class PediatricInfoDto {
@@ -15,6 +16,7 @@ class PediatricInfoDto {
   @IsString() @IsOptional() legalGuardian?: string;
   @IsString() @IsOptional() guardianPhone?: string;
   @IsString() @IsOptional() guardianRelation?: string;
+  @IsString() @IsOptional() guardianRelationOther?: string;
   @IsString() @IsOptional() weightKg?: string;
   @IsString() @IsOptional() heightCm?: string;
   @IsString() @IsOptional() birthInfo?: string;
@@ -34,10 +36,11 @@ export class CreatePatientDto {
   @IsString() @IsOptional() nationality?: string;
   @IsString() @IsOptional() profession?: string;
   @IsString() @IsOptional() maritalStatus?: string;
-  @IsIn(["cni", "passeport", "permis", "autre"]) @IsOptional() idDocumentType?: string;
+  @IsIn(["cni", "passeport", "permis", "anip", "autre"]) @IsOptional() idDocumentType?: string;
+  @IsString() @IsOptional() idDocumentTypeOther?: string;
   @IsString() @IsOptional() idDocumentNumber?: string;
   @IsString() @IsOptional() idDocumentExpiry?: string;
-  @IsEmail() @IsOptional() email?: string;
+  @ValidateIf((o) => !!o.email) @IsEmail() email?: string;
   @IsString() @IsOptional() secondaryPhone?: string;
   @IsString() @IsOptional() residenceZone?: string;
   @IsString() @IsOptional() fullAddress?: string;
@@ -51,7 +54,7 @@ export class CreatePatientDto {
   @IsString() @IsOptional() currentTreatments?: string;
   @IsString() @IsOptional() disabilities?: string;
   @IsString() @IsOptional() facilityService?: string;
-  @IsUUID() @IsOptional() referringDoctorId?: string;
+  @IsString() @IsOptional() referringDoctorId?: string;
   @IsIn(["externe", "hospitalise", "urgence"]) @IsOptional() patientType?: string;
   @IsIn(["assurance", "mutuelle", "tiers_payant", "comptant"]) @IsOptional() paymentMode?: string;
   @IsString() @IsOptional() insuranceName?: string;

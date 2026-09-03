@@ -1,9 +1,13 @@
 import React from "react";
 import { Check } from "lucide-react";
 import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { useTranslation } from "../../../lib/i18n";
+import { useStaffDirectory } from "@/hooks/useStaffDirectory";
 import type { Patient } from "@shared/schema";
+
+function capitalizedKey(prefix: string, value: string): string {
+  return `${prefix}${value[0].toUpperCase()}${value.slice(1)}`;
+}
 
 function Field({ label, value }: { label: string; value: React.ReactNode }) {
   return (
@@ -22,57 +26,54 @@ export interface ProfilTabProps {
   patient: Patient;
 }
 
+const FINANCIALLY_RESPONSIBLE_KEYS: Record<string, string> = {
+  patient: "financiallyResponsiblePatient",
+  parent: "financiallyResponsibleParent",
+  epoux_epouse: "financiallyResponsibleSpouse",
+  autre: "financiallyResponsibleAutre",
+};
+
 export default function ProfilTab({ patient }: ProfilTabProps) {
   const { t } = useTranslation();
-  const allergyList = patient.allergyDetails
-    ? patient.allergyDetails.split(",").map((a) => a.trim()).filter(Boolean)
-    : [];
+  const staffList = useStaffDirectory();
+  const doctorNameById = Object.fromEntries(staffList.map((member) => [member.id, `${member.firstName} ${member.lastName}`]));
   const hasPediatricInfo = !!patient.pediatricInfo;
+  const idDocumentTypeLabel = patient.idDocumentType
+    ? patient.idDocumentType === "autre"
+      ? patient.idDocumentTypeOther
+      : t(capitalizedKey("idDocumentType", patient.idDocumentType))
+    : null;
+  const guardianRelationLabel = patient.pediatricInfo?.guardianRelation
+    ? patient.pediatricInfo.guardianRelation === "autre"
+      ? patient.pediatricInfo.guardianRelationOther
+      : t(capitalizedKey("guardianOption", patient.pediatricInfo.guardianRelation))
+    : null;
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6" data-testid="tab-content-profil">
       <Card className="p-6 space-y-3">
         <CardTitle>{t("identificationCardTitle")}</CardTitle>
-        <Field label={t("fullNameLabel")} value={`${patient.firstName} ${patient.lastName}`} />
         <Field label={t("dateOfBirth")} value={patient.dateOfBirth} />
         <Field label={t("birthPlace")} value={patient.birthPlace} />
-        <Field label={t("sex")} value={patient.sex === "M" ? t("sexMale") : t("sexFemale")} />
         <Field label={t("nationality")} value={patient.nationality} />
         <Field label={t("profession")} value={patient.profession} />
-        <Field label={t("maritalStatus")} value={patient.maritalStatus} />
-        <Field label={t("idDocumentType")} value={patient.idDocumentType ? t(`idDocumentType${patient.idDocumentType[0].toUpperCase()}${patient.idDocumentType.slice(1)}`) : null} />
+        <Field label={t("maritalStatus")} value={patient.maritalStatus ? t(capitalizedKey("maritalStatus", patient.maritalStatus)) : null} />
+        <Field label={t("idDocumentType")} value={idDocumentTypeLabel} />
         <Field label={t("idDocumentNumber")} value={patient.idDocumentNumber} />
         <Field label={t("idDocumentExpiry")} value={patient.idDocumentExpiry} />
-        <Field label={t("email")} value={patient.email} />
       </Card>
 
       <Card className="p-6 space-y-3">
         <CardTitle>{t("contactCardTitle")}</CardTitle>
         <Field label={t("primaryPhone")} value={patient.primaryPhone} />
-        <Field label={t("secondaryPhone")} value={patient.secondaryPhone} />
         <Field label={t("email")} value={patient.email} />
+        <Field label={t("secondaryPhone")} value={patient.secondaryPhone} />
         <Field label={t("residenceZone")} value={patient.residenceZone} />
         <Field label={t("fullAddress")} value={patient.fullAddress} />
       </Card>
 
       <Card className="p-6 space-y-3">
         <CardTitle>{t("medicalInfoCardTitle")}</CardTitle>
-        <div>
-          <p className="text-xs text-muted-foreground">{t("bloodGroup")}</p>
-          {patient.bloodGroup ? <Badge variant="outline" className="mt-1">{patient.bloodGroup}</Badge> : <p className="text-sm text-foreground">—</p>}
-        </div>
-        <div>
-          <p className="text-xs text-muted-foreground">{t("allergiesLabel")}</p>
-          {allergyList.length > 0 ? (
-            <div className="flex flex-wrap gap-1.5 mt-1">
-              {allergyList.map((allergy) => (
-                <Badge key={allergy} variant="danger">{allergy}</Badge>
-              ))}
-            </div>
-          ) : (
-            <p className="text-sm text-foreground">—</p>
-          )}
-        </div>
         <Field label={t("medicalHistory")} value={patient.medicalHistory} />
         <Field label={t("surgicalHistory")} value={patient.surgicalHistory} />
         <Field label={t("chronicDiseases")} value={patient.chronicDiseases} />
@@ -83,7 +84,16 @@ export default function ProfilTab({ patient }: ProfilTabProps) {
       <Card className="p-6 space-y-3">
         <CardTitle>{t("emergencyContactCardTitle")}</CardTitle>
         <Field label={t("emergencyContactName")} value={patient.emergencyContact?.name} />
-        <Field label={t("emergencyContactRelation")} value={patient.emergencyContact?.relation} />
+        <Field
+          label={t("emergencyContactRelation")}
+          value={
+            patient.emergencyContact?.relation
+              ? patient.emergencyContact.relation === "autre"
+                ? patient.emergencyContact.relationOther
+                : t(capitalizedKey("emergencyContactRelation", patient.emergencyContact.relation))
+              : null
+          }
+        />
         <Field label={t("emergencyContactPhone")} value={patient.emergencyContact?.phone} />
         <Field label={t("emergencyContactAddress")} value={patient.emergencyContact?.address} />
         <div>
@@ -101,10 +111,9 @@ export default function ProfilTab({ patient }: ProfilTabProps) {
 
       <Card className="p-6 space-y-3">
         <CardTitle>{t("administrativeInfoCardTitle")}</CardTitle>
-        <Field label={t("dossierNumber")} value={patient.dossierNumber} />
         <Field label={t("fileCreationDate")} value={new Date(patient.createdAt).toLocaleDateString()} />
         <Field label={t("facilityService")} value={patient.facilityService} />
-        <Field label={t("referringDoctor")} value={patient.referringDoctorId} />
+        <Field label={t("referringDoctor")} value={patient.referringDoctorId ? doctorNameById[patient.referringDoctorId] ?? patient.referringDoctorId : null} />
         <Field label={t("patientType")} value={t(`patientType${patient.patientType[0].toUpperCase()}${patient.patientType.slice(1)}`)} />
         <Field
           label={t("paymentMode")}
@@ -112,7 +121,14 @@ export default function ProfilTab({ patient }: ProfilTabProps) {
         />
         <Field label={t("insuranceName")} value={patient.insuranceName} />
         <Field label={t("insuranceNumber")} value={patient.insuranceNumber} />
-        <Field label={t("financiallyResponsible")} value={patient.financiallyResponsible} />
+        <Field
+          label={t("financiallyResponsible")}
+          value={
+            patient.financiallyResponsible
+              ? t(FINANCIALLY_RESPONSIBLE_KEYS[patient.financiallyResponsible] ?? patient.financiallyResponsible)
+              : null
+          }
+        />
       </Card>
 
       <Card className={`p-6 space-y-3 ${!hasPediatricInfo ? "opacity-60" : ""}`} data-testid="card-pediatric-info">
@@ -123,8 +139,11 @@ export default function ProfilTab({ patient }: ProfilTabProps) {
           <>
             <Field label={t("pediatricFatherName")} value={patient.pediatricInfo?.fatherName} />
             <Field label={t("pediatricMotherName")} value={patient.pediatricInfo?.motherName} />
-            <Field label={t("pediatricLegalGuardian")} value={patient.pediatricInfo?.legalGuardian} />
-            <Field label={t("pediatricGuardianRelation")} value={patient.pediatricInfo?.guardianRelation} />
+            <Field
+              label={t("pediatricLegalGuardian")}
+              value={patient.pediatricInfo?.legalGuardian ? t(capitalizedKey("guardianOption", patient.pediatricInfo.legalGuardian)) : null}
+            />
+            <Field label={t("pediatricGuardianRelation")} value={guardianRelationLabel} />
             <Field label={t("pediatricGuardianPhone")} value={patient.pediatricInfo?.guardianPhone} />
             <Field label={t("pediatricWeightKg")} value={patient.pediatricInfo?.weightKg} />
             <Field label={t("pediatricHeightCm")} value={patient.pediatricInfo?.heightCm} />

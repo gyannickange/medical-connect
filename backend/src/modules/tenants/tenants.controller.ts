@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, UseGuards } from "@nestjs/common";
+import { Controller, Get, Post, Body, UseGuards, Request } from "@nestjs/common";
 import { TenantsService } from "./tenants.service";
 import { CreateTenantDto } from "./dto/create-tenant.dto";
 import { JwtAuthGuard } from "../auth/jwt-auth.guard";
@@ -13,8 +13,8 @@ export class TenantsController {
 
   @Get()
   @CheckPolicy(TenantsPolicy, "view")
-  async findAll() {
-    return this.tenantsService.findAll();
+  async findAll(@Request() req: any) {
+    return this.tenantsService.findAll(req.user);
   }
 
   @Post()

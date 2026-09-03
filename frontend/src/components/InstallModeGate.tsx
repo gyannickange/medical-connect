@@ -21,7 +21,6 @@ import { useToast } from "@/hooks/use-toast";
 
 const SETUP_PATHS = ["/setup"];
 const CONNECTED_ONLY_PATHS = [
-  "/register",
   "/reset-password",
   "/request-password-reset",
 ];

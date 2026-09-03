@@ -30,18 +30,7 @@ interface AuthContextType {
   isLoading: boolean;
   login: (username: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
-  register: (data: RegisterData) => Promise<void>;
   checkAuth: () => Promise<void>;
-}
-
-interface RegisterData {
-  username: string;
-  password: string;
-  firstName: string;
-  lastName: string;
-  email?: string;
-  tenantId: string;
-  role?: "admin" | "manager" | "cashier";
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -234,22 +223,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
-  const register = async (data: RegisterData) => {
-    const response = await fetch("/api/auth/register", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(data),
-      credentials: "include",
-    });
-
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.message || "Registration failed");
-    }
-  };
-
   useInactivityLogout(logout, !!user);
 
   return (
@@ -262,7 +235,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         isLoading,
         login,
         logout,
-        register,
         checkAuth,
       }}>
       {children}

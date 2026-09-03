@@ -12,6 +12,7 @@ export interface ConsultationFilters {
   specialty?: string;
   assignedDoctorId?: string;
   scheduledOnOrAfter?: string;
+  scheduledOnOrBefore?: string;
   patientId?: string;
   roomId?: string;
 }
@@ -62,6 +63,9 @@ export class ConsultationsRepository {
       medicalConsultationSavedAt: null,
       carePlan: null,
       carePlanSavedAt: null,
+      examInterpretation: null,
+      examDecision: null,
+      examsReviewedAt: null,
       closedAt: null,
       status: "planifiee",
       createdAt: now,
@@ -132,7 +136,12 @@ export class ConsultationsRepository {
     const selector: Record<string, any> = { type: "consultation", tenantId };
     if (filters?.specialty) selector.specialty = filters.specialty;
     if (filters?.assignedDoctorId) selector.assignedDoctorId = filters.assignedDoctorId;
-    if (filters?.scheduledOnOrAfter) selector.scheduledAt = { $gte: filters.scheduledOnOrAfter };
+    if (filters?.scheduledOnOrAfter || filters?.scheduledOnOrBefore) {
+      selector.scheduledAt = {
+        ...(filters.scheduledOnOrAfter ? { $gte: filters.scheduledOnOrAfter } : {}),
+        ...(filters.scheduledOnOrBefore ? { $lte: filters.scheduledOnOrBefore } : {}),
+      };
+    }
     if (filters?.patientId) selector.patientId = filters.patientId;
     if (filters?.roomId) selector.roomId = filters.roomId;
 
@@ -181,6 +190,9 @@ export class ConsultationsRepository {
       vitalsRecordedAt: doc.vitalsRecordedAt ? new Date(doc.vitalsRecordedAt) : null,
       medicalConsultationSavedAt: doc.medicalConsultationSavedAt ? new Date(doc.medicalConsultationSavedAt) : null,
       carePlanSavedAt: doc.carePlanSavedAt ? new Date(doc.carePlanSavedAt) : null,
+      examInterpretation: doc.examInterpretation ?? null,
+      examDecision: doc.examDecision ?? null,
+      examsReviewedAt: doc.examsReviewedAt ? new Date(doc.examsReviewedAt) : null,
       closedAt: doc.closedAt ? new Date(doc.closedAt) : null,
     } as Consultation;
   }

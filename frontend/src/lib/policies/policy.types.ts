@@ -6,7 +6,8 @@ export type UserRole =
   | "infirmier"
   | "medecin"
   | "laboratoire"
-  | "pharmacien";
+  | "pharmacien"
+  | "platform_admin";
 
 export type PolicyAction = string;
 

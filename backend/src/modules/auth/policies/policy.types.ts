@@ -8,13 +8,14 @@ export type UserRole =
   | "infirmier"
   | "medecin"
   | "laboratoire"
-  | "pharmacien";
+  | "pharmacien"
+  | "platform_admin";
 
 export interface RequestWithUser extends Request {
   user: {
     id: string;
     username: string;
-    tenantId: string;
+    tenantId: string | null;
     role: UserRole;
     [key: string]: any;
   };
@@ -23,4 +24,3 @@ export interface RequestWithUser extends Request {
 export type PolicyAction = string;
 
 export type PolicyResult = boolean;
-

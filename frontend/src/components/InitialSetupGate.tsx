@@ -16,7 +16,7 @@ interface InitialSetupGateProps {
 }
 
 export function InitialSetupGate({ children }: InitialSetupGateProps) {
-  const { isAuthenticated, isLoading: isAuthLoading } = useAuth();
+  const { isAuthenticated, isLoading: isAuthLoading, user } = useAuth();
   const { currentTenant, isLoading: isTenantLoading } = useTenant();
   const {
     getSetting,
@@ -25,6 +25,7 @@ export function InitialSetupGate({ children }: InitialSetupGateProps) {
   const [location, setLocation] = useLocation();
   const { t } = useTranslation();
 
+  const isPlatformAdmin = user?.role === "platform_admin";
   const tenantReady = !isTenantLoading && Boolean(currentTenant);
   const settingsReady = tenantReady && !areSettingsLoading;
   const completed = initialSetupCompleted(
@@ -36,6 +37,7 @@ export function InitialSetupGate({ children }: InitialSetupGateProps) {
     settingsReady,
     completed,
     location,
+    isPlatformAdmin,
   });
   const showLoader = shouldShowInitialSetupLoader({
     authLoading: isAuthLoading,
@@ -43,6 +45,7 @@ export function InitialSetupGate({ children }: InitialSetupGateProps) {
     tenantLoading: isTenantLoading,
     tenantReady,
     settingsLoading: areSettingsLoading,
+    isPlatformAdmin,
   });
 
   useEffect(() => {

@@ -7,13 +7,16 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
+import { cn } from "@/lib/utils";
 import { useTranslation } from "../../lib/i18n";
+import { useTenant } from "../../contexts/TenantContext";
 import { useToast } from "@/hooks/use-toast";
 import { offlineApiRequest } from "@/lib/offlineApiRequest";
 import { showApiErrorToast } from "@/lib/errorHandler";
-import type { Consultation, Patient, VitalSigns } from "@shared/schema";
+import { ConsultationJourneySidebar } from "./ConsultationJourneySidebar";
+import { useConsultationJourney } from "./useConsultationJourney";
+import type { Consultation, Patient, Room, User, VitalSigns } from "@shared/schema";
 
 const EMPTY_VITALS: VitalSigns = {
   bloodPressureSystolic: null,
@@ -36,9 +39,18 @@ function computeBmi(weightKg: number | null, heightCm: number | null): number | 
   return Math.round((weightKg / (heightM * heightM)) * 10) / 10;
 }
 
+function painLevelKey(score: number): string {
+  if (score === 0) return "painLevelNone";
+  if (score <= 3) return "painLevelMild";
+  if (score <= 6) return "painLevelModerate";
+  if (score <= 9) return "painLevelSevere";
+  return "painLevelExtreme";
+}
+
 export default function PreConsultationForm() {
   const { t } = useTranslation();
   const { toast } = useToast();
+  const { currentTenant } = useTenant();
   const queryClient = useQueryClient();
   const [, setLocation] = useLocation();
   const { id: consultationId } = useParams<{ id: string }>();
@@ -64,6 +76,20 @@ export default function PreConsultationForm() {
     enabled: !!consultation?.patientId,
   });
 
+  const { data: staffList = [] } = useQuery<User[]>({
+    queryKey: ["/api/staff", currentTenant?.id],
+    enabled: !!currentTenant?.id,
+  });
+  const assignedDoctor = staffList.find((member) => member.id === consultation?.assignedDoctorId);
+
+  const { data: roomsList = [] } = useQuery<Room[]>({
+    queryKey: ["/api/rooms", currentTenant?.id],
+    enabled: !!currentTenant?.id,
+  });
+  const assignedRoom = roomsList.find((room) => room.id === consultation?.roomId);
+
+  const steps = useConsultationJourney(consultation, patient);
+
   if (consultation && !initialized) {
     setVitals(consultation.vitals ?? EMPTY_VITALS);
     setSymptoms(consultation.symptoms ?? "");
@@ -86,6 +112,15 @@ export default function PreConsultationForm() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/consultations/detail", consultationId] });
       toast({ title: t("success"), description: t("vitalsSavedSuccessfully") });
+      if (consultation) {
+        void offlineApiRequest(
+          "POST",
+          "/api/queue/events",
+          { consultationId, patientId: consultation.patientId, eventType: "in_care", tenantId: consultation.tenantId },
+          { collection: "queue" }
+        );
+        queryClient.invalidateQueries({ queryKey: ["/api/queue"] });
+      }
       setLocation(`/consultations/${consultationId}`);
     },
     onError: (error: unknown) => {
@@ -102,7 +137,7 @@ export default function PreConsultationForm() {
           <Input
             id={`vital-${key}`}
             type="number"
-            className="glass-input"
+           
             value={value ?? ""}
             onChange={(e) => setVitals((prev) => ({ ...prev, [key]: e.target.value === "" ? null : Number(e.target.value) }))}
             data-testid={`input-vital-${key}`}
@@ -122,25 +157,49 @@ export default function PreConsultationForm() {
   }
 
   return (
-    <div className="space-y-6" data-testid="pre-consultation-form">
-      <div className="flex items-center justify-between">
-        <Button variant="ghost" onClick={() => setLocation(`/consultations/${consultationId}`)}>
-          <ArrowLeft className="w-4 h-4 mr-2" />
-          {t("consultations")}
-        </Button>
-      </div>
+    <div className="flex gap-6 items-start" data-testid="pre-consultation-page">
+      <ConsultationJourneySidebar steps={steps} />
+      <div className="flex-1 min-w-0 space-y-6" data-testid="pre-consultation-form">
+        <div className="flex items-center justify-between">
+          <Button variant="ghost" onClick={() => setLocation(`/consultations/${consultationId}`)}>
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            {t("consultations")}
+          </Button>
+        </div>
 
-      <div>
-        <h1 className="text-2xl font-display font-bold text-foreground">{t("preConsultationTitle")}</h1>
-        <p className="text-sm text-muted-foreground">{t("preConsultationSubtitle")}</p>
-      </div>
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <h1 className="text-2xl font-display font-bold text-foreground">{t("preConsultationTitle")}</h1>
+            <p className="text-sm text-muted-foreground">{t("preConsultationSubtitle")}</p>
+          </div>
+          <div className="flex items-center gap-2 rounded-full bg-primary/10 px-3 py-1.5 shrink-0">
+            <span className="size-2 rounded-full bg-primary" />
+            <span className="text-xs font-semibold text-primary">
+              {t("vitalsRecordedAtLabel")} {new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+            </span>
+          </div>
+        </div>
 
-      <Card className="p-6 space-y-1">
-        <p className="font-semibold text-foreground">{patient.firstName} {patient.lastName}</p>
-        <p className="text-sm text-muted-foreground">{patient.dossierNumber ?? t("pendingSync")} · {consultation.specialty}</p>
-      </Card>
+        <Card className="p-5 flex flex-wrap items-center gap-6">
+          <p className="font-bold text-foreground text-base">{patient.firstName} {patient.lastName}</p>
+          <div className="h-8 w-px bg-border hidden md:block" />
+          <div>
+            <p className="text-[11px] uppercase font-semibold text-muted-foreground">{t("dossierNumberFieldLabel")}</p>
+            <p className="text-sm text-foreground">{patient.dossierNumber ?? t("pendingSync")}</p>
+          </div>
+          <div>
+            <p className="text-[11px] uppercase font-semibold text-muted-foreground">{t("assignedDoctorFieldLabel")}</p>
+            <p className="text-sm text-foreground">{assignedDoctor ? `${assignedDoctor.firstName} ${assignedDoctor.lastName}` : "—"} · {consultation.specialty}</p>
+          </div>
+          {assignedRoom && (
+            <div>
+              <p className="text-[11px] uppercase font-semibold text-muted-foreground">{t("locationFieldLabel")}</p>
+              <p className="text-sm font-semibold text-primary">{assignedRoom.number}</p>
+            </div>
+          )}
+        </Card>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <Card className="p-6 space-y-4">
           <h2 className="font-semibold text-foreground">{t("vitalSignsSection")}</h2>
           <div className="grid grid-cols-2 gap-4">
@@ -155,22 +214,29 @@ export default function PreConsultationForm() {
           </div>
           <div>
             <Label>{t("bmiCalculatedField")}</Label>
-            <Input value={bmi ?? ""} disabled className="glass-input" data-testid="input-vital-bmi" />
+            <Input value={bmi ?? ""} disabled data-testid="input-vital-bmi" />
           </div>
           {numberField(t("capillaryGlycemiaField"), "g/L", "capillaryGlycemia")}
-          <div>
+          <div className="space-y-2">
             <div className="flex items-center justify-between">
               <Label>{t("painScaleField")}</Label>
-              <span className="text-sm text-muted-foreground">{vitals.painScoreEva ?? 0} / 10</span>
+              <span className="text-sm font-bold text-amber-600">{vitals.painScoreEva ?? 0} / 10 — {t(painLevelKey(vitals.painScoreEva ?? 0))}</span>
             </div>
-            <Slider
-              value={[vitals.painScoreEva ?? 0]}
-              min={0}
-              max={10}
-              step={1}
-              onValueChange={([v]) => setVitals((prev) => ({ ...prev, painScoreEva: v }))}
-              data-testid="slider-pain-score"
-            />
+            <div className="flex gap-1 rounded-lg bg-muted p-1">
+              {Array.from({ length: 11 }, (_, level) => level).map((level) => (
+                <button
+                  key={level}
+                  type="button"
+                  onClick={() => setVitals((prev) => ({ ...prev, painScoreEva: level }))}
+                  className={cn(
+                    "flex-1 rounded-md py-1.5 text-xs font-semibold transition-colors",
+                    (vitals.painScoreEva ?? 0) === level ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-accent"
+                  )}
+                  data-testid={`button-pain-level-${level}`}>
+                  {level}
+                </button>
+              ))}
+            </div>
           </div>
         </Card>
 
@@ -178,7 +244,7 @@ export default function PreConsultationForm() {
           <h2 className="font-semibold text-foreground">{t("clinicalInfoSection")}</h2>
           <div>
             <Label htmlFor="symptoms">{t("symptomsComplaints")}</Label>
-            <Textarea id="symptoms" className="glass-input" value={symptoms} onChange={(e) => setSymptoms(e.target.value)} data-testid="textarea-symptoms" />
+            <Textarea id="symptoms" value={symptoms} onChange={(e) => setSymptoms(e.target.value)} data-testid="textarea-symptoms" />
           </div>
           <div>
             <Label>{t("knownAllergiesFromRecord")}</Label>
@@ -190,7 +256,7 @@ export default function PreConsultationForm() {
           </div>
           <div>
             <Label htmlFor="nurseNotes">{t("nurseNotesObservations")}</Label>
-            <Textarea id="nurseNotes" className="glass-input" value={nurseNotes} onChange={(e) => setNurseNotes(e.target.value)} data-testid="textarea-nurse-notes" />
+            <Textarea id="nurseNotes" value={nurseNotes} onChange={(e) => setNurseNotes(e.target.value)} data-testid="textarea-nurse-notes" />
           </div>
           <div className="flex items-center justify-between">
             <div>
@@ -209,12 +275,13 @@ export default function PreConsultationForm() {
         </Card>
       </div>
 
-      <div className="flex justify-end gap-2">
-        <Button variant="outline" onClick={() => setLocation(`/consultations/${consultationId}`)}>{t("cancel")}</Button>
-        <Button className="btn-primary" onClick={() => saveMutation.mutate()} disabled={saveMutation.isPending} data-testid="button-validate-patient-ready">
-          <CheckCircle className="w-4 h-4 mr-2" />
-          {saveMutation.isPending ? t("saving") : t("validatePatientReady")}
-        </Button>
+        <div className="flex justify-end gap-2">
+          <Button variant="outline" onClick={() => setLocation(`/consultations/${consultationId}`)}>{t("cancel")}</Button>
+          <Button className="btn-primary" onClick={() => saveMutation.mutate()} disabled={saveMutation.isPending} data-testid="button-validate-patient-ready">
+            <CheckCircle className="w-4 h-4 mr-2" />
+            {saveMutation.isPending ? t("saving") : t("validatePatientReady")}
+          </Button>
+        </div>
       </div>
     </div>
   );

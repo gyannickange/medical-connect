@@ -4,6 +4,8 @@ import { CouchDBService } from "../src/database/couchdb.service";
 import { TenantsRepository } from "../src/modules/identity/tenants.repository";
 import { UsersRepository } from "../src/modules/identity/users.repository";
 import { SettingsRepository } from "../src/modules/settings/settings.repository";
+import { ServicesRepository } from "../src/modules/services/services.repository";
+import { ExamTypesRepository } from "../src/modules/exam-types/exam-types.repository";
 import { RoomsRepository } from "../src/modules/rooms/rooms.repository";
 import { PatientsRepository } from "../src/modules/patients/patients.repository";
 import { ConsultationsRepository } from "../src/modules/consultations/consultations.repository";
@@ -61,6 +63,8 @@ async function main() {
   const tenants = new TenantsRepository(couch);
   const users = new UsersRepository(couch, s3);
   const settings = new SettingsRepository(couch);
+  const services = new ServicesRepository(couch);
+  const examTypes = new ExamTypesRepository(couch);
   const rooms = new RoomsRepository(couch);
   const patients = new PatientsRepository(couch, sequences, s3);
   const consultations = new ConsultationsRepository(couch, sequences, patients);
@@ -87,6 +91,9 @@ async function main() {
   } else {
     tenant = await tenants.update(tenant.id, tenantData);
   }
+
+  await services.seedDefaults(tenant.id);
+  await examTypes.seedDefaults(tenant.id);
 
   // ---- Staff -------------------------------------------------------------
   // Every field on InsertUser is set explicitly (including email/matricule,

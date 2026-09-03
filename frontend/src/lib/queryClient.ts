@@ -8,7 +8,6 @@ async function throwIfResNotOk(res: Response) {
       // Only redirect if not already on public pages (use exact match to avoid false positives)
       if (
         window.location.pathname !== "/login" &&
-        window.location.pathname !== "/register" &&
         window.location.pathname !== "/reset-password" &&
         window.location.pathname !== "/request-password-reset"
       ) {

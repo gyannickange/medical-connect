@@ -11,12 +11,7 @@ export default {
         sm: "calc(var(--radius) - 4px)",
       },
       colors: {
-        background: {
-          primary: "#0A0B0D",
-          secondary: "#12151A",
-          tertiary: "#1A1D24",
-          overlay: "rgba(0, 0, 0, 0.85)",
-        },
+        background: "var(--background)",
         foreground: "var(--foreground)",
         card: {
           DEFAULT: "var(--card)",
@@ -78,14 +73,14 @@ export default {
       },
       fontFamily: {
         sans: [
-          "Inter",
+          "DM Sans",
           "-apple-system",
           "BlinkMacSystemFont",
           "'Segoe UI'",
           "sans-serif",
         ],
         mono: ["'JetBrains Mono'", "'SF Mono'", "Monaco", "monospace"],
-        display: ["'Space Grotesk'", "Inter", "sans-serif"],
+        display: ["'DM Sans'", "-apple-system", "BlinkMacSystemFont", "sans-serif"],
       },
       fontSize: {
         xs: "0.75rem",

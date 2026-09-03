@@ -5,6 +5,8 @@ import { TenantsModule } from "./modules/tenants/tenants.module";
 import { PatientsModule } from "./modules/patients/patients.module";
 import { ConsultationsModule } from "./modules/consultations/consultations.module";
 import { LabOrdersModule } from "./modules/lab-orders/lab-orders.module";
+import { ExamTypesModule } from "./modules/exam-types/exam-types.module";
+import { ServicesModule } from "./modules/services/services.module";
 import { PrescriptionsModule } from "./modules/prescriptions/prescriptions.module";
 import { QueueModule } from "./modules/queue/queue.module";
 import { StaffModule } from "./modules/staff/staff.module";
@@ -18,6 +20,7 @@ import { ViteModule } from "./vite/vite.module";
 import { AuditModule } from "./modules/audit/audit.module";
 import { LanIdentityModule } from "./modules/lan-identity/lan-identity.module";
 import { DeviceAuthorizationModule } from "./modules/device-authorization/device-authorization.module";
+import { PlatformModule } from "./modules/platform/platform.module";
 import { LoggingInterceptor } from "./common/interceptors/logging.interceptor";
 import { AllExceptionsFilter } from "./common/filters/http-exception.filter";
 import { AuditInterceptor } from "./common/interceptors/audit.interceptor";
@@ -29,6 +32,8 @@ import { AuditInterceptor } from "./common/interceptors/audit.interceptor";
     PatientsModule,
     ConsultationsModule,
     LabOrdersModule,
+    ExamTypesModule,
+    ServicesModule,
     PrescriptionsModule,
     QueueModule,
     StaffModule,
@@ -42,6 +47,7 @@ import { AuditInterceptor } from "./common/interceptors/audit.interceptor";
     AuditModule,
     LanIdentityModule,
     DeviceAuthorizationModule,
+    PlatformModule,
   ],
   providers: [
     {

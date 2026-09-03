@@ -1,5 +1,6 @@
 import React from "react";
-import { Globe, User, LogOut, Sun, Moon } from "lucide-react";
+import { Globe, User, LogOut, Settings, Sun, Moon } from "lucide-react";
+import { useLocation } from "wouter";
 import { useTranslation } from "../lib/i18n";
 import { useTheme } from "../contexts/ThemeContext";
 import { useAuth } from "../contexts/AuthContext";
@@ -17,6 +18,7 @@ import { Badge } from "@/components/ui/badge";
 import { OfflineIndicator } from "./OfflineIndicator";
 
 export const Header: React.FC = () => {
+  const [, setLocation] = useLocation();
   const { t, language, changeLanguage } = useTranslation();
   const { theme, toggleTheme } = useTheme();
   const { user, logout } = useAuth();
@@ -38,12 +40,12 @@ export const Header: React.FC = () => {
 
   return (
     <header
-      className="fixed top-0 right-0 left-20 lg:left-64 z-30 glass-navbar-card rounded-none border-l-0 border-r-0 border-t-0 p-3"
+      className="fixed top-0 right-0 left-20 z-30 h-[73px] border-x-0 border-b border-t-0 border-border bg-card px-4 py-4 lg:left-[260px] lg:px-8"
       data-testid="header">
       <div className="flex items-center justify-between">
-        <div></div>
+        <div className="text-xs text-muted-foreground">Medical Connect</div>
 
-        <div className="flex items-center space-x-4">
+        <div className="flex items-center gap-2">
           {/* Offline Indicator */}
           <OfflineIndicator />
 
@@ -52,24 +54,23 @@ export const Header: React.FC = () => {
             variant="ghost"
             size="icon"
             onClick={toggleLanguage}
-            className="glass-input rounded-xl hover:bg-accent transition-colors duration-200"
+            className="hover:bg-accent"
             data-testid="language-toggle">
             <Globe className="w-5 h-5" />
           </Button>
 
-          {/* Theme Toggle */}
           <Button
             variant="ghost"
             size="icon"
             onClick={toggleTheme}
-            className="glass-input rounded-xl hover:bg-accent transition-colors duration-200"
+            className="hover:bg-accent"
             aria-label={t("toggleTheme")}
             data-testid="theme-toggle">
-            {theme === "dark" ? (
-              <Sun className="w-5 h-5" />
-            ) : (
-              <Moon className="w-5 h-5" />
-            )}
+            {theme === "dark" ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+          </Button>
+
+          <Button variant="ghost" size="icon" className="hover:bg-accent" aria-label={t("settings")} onClick={() => setLocation("/settings")} data-testid="settings-shortcut">
+            <Settings className="w-5 h-5" />
           </Button>
 
           {/* Profile */}
@@ -77,9 +78,9 @@ export const Header: React.FC = () => {
             <DropdownMenuTrigger asChild>
               <Button
                 variant="ghost"
-                className="flex items-center space-x-3 hover:bg-accent"
+                className="flex h-10 items-center gap-2 px-2 hover:bg-accent"
                 data-testid="user-profile">
-                <div className="w-10 h-10 bg-gradient-to-r from-primary to-chart-5 rounded-xl flex items-center justify-center">
+                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary">
                   <User className="w-5 h-5 text-primary-foreground" />
                 </div>
                 <div className="hidden lg:block text-left">

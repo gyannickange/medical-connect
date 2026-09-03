@@ -1,3 +1,4 @@
+import { ForbiddenException } from "@nestjs/common";
 import { DeviceAuthorizationController } from "./device-authorization.controller";
 
 describe("DeviceAuthorizationController tenant scope", () => {
@@ -58,5 +59,43 @@ describe("DeviceAuthorizationController tenant scope", () => {
       "tenant-1",
       expect.objectContaining({ grantedDeviceId: "device-b" })
     );
+  });
+});
+
+describe("DeviceAuthorizationController platform_admin guard", () => {
+  const platformAdminRequest = {
+    user: { id: "u1", tenantId: null, role: "platform_admin" },
+    headers: { "x-device-id": "u1" },
+  };
+
+  it("rejects request/deliverKey/issueApprovalCapability/reconcileLanGrant for a platform_admin", async () => {
+    const service = {
+      request: jest.fn(),
+      deliverKey: jest.fn(),
+      issueApprovalCapability: jest.fn(),
+      reconcileLanGrant: jest.fn(),
+    };
+    const controller = new DeviceAuthorizationController(service as any);
+
+    await expect(
+      controller.request(
+        { deviceId: "device-a", devicePublicKey: "pubkey" } as any,
+        platformAdminRequest as any
+      )
+    ).rejects.toThrow(ForbiddenException);
+    await expect(
+      controller.deliverKey("device-a", platformAdminRequest as any)
+    ).rejects.toThrow(ForbiddenException);
+    await expect(
+      controller.issueApprovalCapability(platformAdminRequest as any)
+    ).rejects.toThrow(ForbiddenException);
+    await expect(
+      controller.reconcileLanGrant({ grantedDeviceId: "device-b" } as any, platformAdminRequest as any)
+    ).rejects.toThrow(ForbiddenException);
+
+    expect(service.request).not.toHaveBeenCalled();
+    expect(service.deliverKey).not.toHaveBeenCalled();
+    expect(service.issueApprovalCapability).not.toHaveBeenCalled();
+    expect(service.reconcileLanGrant).not.toHaveBeenCalled();
   });
 });

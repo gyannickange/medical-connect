@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  ForbiddenException,
   Post,
   Req,
   UseGuards,
@@ -20,6 +21,9 @@ export class LanIdentityController {
 
   @Post("certificate")
   issueCertificate(@Body() body: CertificateRequest, @Req() request: any) {
+    if (request.user.tenantId === null) {
+      throw new ForbiddenException("Not available for platform administrators");
+    }
     return this.identities.issueCertificate(
       request.user.tenantId,
       body.deviceId,

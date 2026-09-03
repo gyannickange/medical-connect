@@ -46,6 +46,13 @@ export class UsersRepository {
     return (result.docs as any[]).map((doc) => this.hydrate(doc));
   }
 
+  async findByRole(role: User["role"]): Promise<User[]> {
+    const result = await (await this.db()).find({
+      selector: { type: "user", role },
+    });
+    return (result.docs as any[]).map((doc) => this.hydrate(doc));
+  }
+
   async create(data: InsertUser): Promise<User> {
     const input = data as InsertUser & { id?: string };
     const db = await this.db();

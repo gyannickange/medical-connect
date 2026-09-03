@@ -4,9 +4,10 @@ import { TenantsService } from "./tenants.service";
 import { TenantsPolicy } from "./tenants.policy";
 import { AuthModule } from "../auth/auth.module";
 import { IdentityModule } from "../identity/identity.module";
+import { ServicesRepositoryModule } from "../services/services.repository.module";
 
 @Module({
-  imports: [AuthModule, IdentityModule],
+  imports: [AuthModule, IdentityModule, ServicesRepositoryModule],
   controllers: [TenantsController],
   providers: [TenantsService, TenantsPolicy],
   exports: [TenantsService],

@@ -75,20 +75,12 @@ export const TenantProvider: React.FC<TenantProviderProps> = ({ children }) => {
         return;
       }
 
-      // If not authenticated, try to fetch tenants (for registration page)
-      try {
-        const response = await fetch("/api/tenants", {
-          credentials: "include",
-        });
-        if (response.ok) {
-          const fetchedTenants = await response.json();
-          setTenants(fetchedTenants);
-        }
-      } catch (error) {
-        console.error("Failed to fetch tenants:", error);
-      } finally {
-        setIsLoading(false);
-      }
+      // Either not authenticated yet (the /login page), or an
+      // authenticated platform_admin, who has no tenant of their own -
+      // the PlatformAdmin page fetches the tenant list itself.
+      setTenants([]);
+      setCurrentTenant(null);
+      setIsLoading(false);
     };
 
     initializeTenant();

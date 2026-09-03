@@ -1,9 +1,7 @@
 import {
   Injectable,
   UnauthorizedException,
-  ConflictException,
-  BadRequestException,
-  ForbiddenException,
+  GoneException,
 } from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
 import type { User, Tenant } from "@shared/schema";
@@ -15,13 +13,8 @@ import { normalizeUsername } from "../../lib/exceptions";
 
 export interface LoginResponse {
   user: Omit<User, "password">;
-  tenant: Tenant;
+  tenant: Tenant | null;
   access_token: string;
-}
-
-export interface RegisterResponse {
-  user: Omit<User, "password">;
-  tenant: Tenant;
 }
 
 @Injectable()
@@ -32,62 +25,10 @@ export class AuthService {
     private readonly jwtService: JwtService
   ) {}
 
-  async register(
-    username: string,
-    password: string,
-    firstName: string,
-    lastName: string,
-    tenantId: string,
-    email?: string,
-    role: "admin" | "manager" | "cashier" = "cashier",
-    requester?: { userId: string; tenantId: string; role: string } | null
-  ): Promise<RegisterResponse> {
-    username = normalizeUsername(username);
-    // Check if username already exists
-    const existingUser = await this.usersRepository.findByUsername(username);
-    if (existingUser) {
-      throw new ConflictException("Username already exists");
-    }
-
-    // Verify tenant exists
-    const tenant = await this.tenantsRepository.findById(tenantId);
-    if (!tenant) {
-      throw new BadRequestException("Invalid tenant ID");
-    }
-
-    const existingTenantUsers = await this.usersRepository.findByTenant(tenantId, { limit: 1 });
-    if (existingTenantUsers.length > 0) {
-      const isAuthorizedRequester =
-        !!requester &&
-        requester.tenantId === tenantId &&
-        (requester.role === "admin" || requester.role === "manager");
-      if (!isAuthorizedRequester) {
-        throw new ForbiddenException(
-          "Registration for an existing tenant requires an authenticated admin or manager of that tenant"
-        );
-      }
-    }
-
-    // Hash password
-    const saltRounds = 10;
-    const hashedPassword = await bcrypt.hash(password, saltRounds);
-
-    // Create user
-    const user = await this.usersRepository.create({
-      username,
-      password: hashedPassword,
-      firstName,
-      lastName,
-      email,
-      role,
-      tenantId,
-      isActive: true,
-    });
-
-    return {
-      user: this.sanitizeUser(user),
-      tenant,
-    };
+  async register(): Promise<never> {
+    throw new GoneException(
+      "Self-registration is disabled. Contact your platform administrator."
+    );
   }
 
   async login(username: string, password: string): Promise<LoginResponse> {
@@ -122,8 +63,8 @@ export class AuthService {
       throw new UnauthorizedException("Account is deactivated");
     }
 
-    const tenant = await this.tenantsRepository.findById(user.tenantId);
-    if (!tenant) {
+    const tenant = await this.getTenantById(user.tenantId);
+    if (user.tenantId !== null && !tenant) {
       throw new UnauthorizedException("Tenant not found");
     }
 
@@ -203,8 +144,10 @@ export class AuthService {
     return { message: "Password updated successfully" };
   }
 
-  async getTenantById(tenantId: string): Promise<Tenant | undefined> {
-    return this.tenantsRepository.findById(tenantId);
+  async getTenantById(tenantId: string | null): Promise<Tenant | null> {
+    if (tenantId === null) return null;
+    const tenant = await this.tenantsRepository.findById(tenantId);
+    return tenant ?? null;
   }
 
   private sanitizeUser(user: User): Omit<User, "password"> {

@@ -127,6 +127,25 @@ describe("initial setup", () => {
     })).toBe(false);
   });
 
+  it("never gates or redirects a platform_admin, regardless of tenant/settings state", () => {
+    expect(nextInitialSetupLocation({
+      authenticated: true,
+      tenantReady: false,
+      settingsReady: false,
+      completed: false,
+      location: "/platform-admin",
+      isPlatformAdmin: true,
+    })).toBeNull();
+    expect(shouldShowInitialSetupLoader({
+      authLoading: false,
+      authenticated: true,
+      tenantLoading: false,
+      tenantReady: false,
+      settingsLoading: false,
+      isPlatformAdmin: true,
+    })).toBe(false);
+  });
+
   it("writes the completion marker only after every business setting", async () => {
     const calls: string[] = [];
     const updateSetting = vi.fn(async (key: string) => {

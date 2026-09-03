@@ -9,10 +9,8 @@ import {
   Request,
   Response,
 } from "@nestjs/common";
-import { JwtService } from "@nestjs/jwt";
 import { AuthService } from "./auth.service";
 import { LoginDto } from "./dto/login.dto";
-import { RegisterDto } from "./dto/register.dto";
 import {
   RequestPasswordResetDto,
   ResetPasswordDto,
@@ -22,35 +20,12 @@ import { FastifyReply, FastifyRequest } from "fastify";
 
 @Controller("api/auth")
 export class AuthController {
-  constructor(
-    private readonly authService: AuthService,
-    private readonly jwtService: JwtService
-  ) {}
+  constructor(private readonly authService: AuthService) {}
 
   @Post("register")
-  @HttpCode(HttpStatus.CREATED)
-  async register(@Body() registerDto: RegisterDto, @Request() req: FastifyRequest) {
-    const requester = this.tryDecodeRequester((req as any)?.cookies?.access_token);
-    return this.authService.register(
-      registerDto.username,
-      registerDto.password,
-      registerDto.firstName,
-      registerDto.lastName,
-      registerDto.tenantId,
-      registerDto.email,
-      registerDto.role,
-      requester
-    );
-  }
-
-  private tryDecodeRequester(token: string | undefined): { userId: string; tenantId: string; role: string } | null {
-    if (!token) return null;
-    try {
-      const payload: any = this.jwtService.verify(token);
-      return { userId: payload.sub, tenantId: payload.tenantId, role: payload.role };
-    } catch {
-      return null;
-    }
+  @HttpCode(HttpStatus.GONE)
+  async register() {
+    return this.authService.register();
   }
 
   @Post("login")

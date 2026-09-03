@@ -13,6 +13,7 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { DatePicker } from "@/components/ui/date-picker";
 import {
   Select,
   SelectContent,
@@ -184,11 +185,10 @@ export default function AuditLogs() {
                 <label className="text-sm font-medium mb-2 block">
                   {t("startDate")}
                 </label>
-                <Input
-                  type="date"
+                <DatePicker
                   value={filters.startDate}
-                  onChange={(e) =>
-                    setFilters({ ...filters, startDate: e.target.value })
+                  onValueChange={(value) =>
+                    setFilters({ ...filters, startDate: value })
                   }
                 />
               </div>
@@ -196,11 +196,10 @@ export default function AuditLogs() {
                 <label className="text-sm font-medium mb-2 block">
                   {t("endDate")}
                 </label>
-                <Input
-                  type="date"
+                <DatePicker
                   value={filters.endDate}
-                  onChange={(e) =>
-                    setFilters({ ...filters, endDate: e.target.value })
+                  onValueChange={(value) =>
+                    setFilters({ ...filters, endDate: value })
                   }
                 />
               </div>
