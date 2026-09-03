@@ -57,7 +57,7 @@ const ServicesManager = lazy(() => import("./pages/settings/services"));
 const ServiceForm = lazy(() => import("./pages/settings/service-form"));
 const AuditLogs = lazy(() => import("./pages/AuditLogs"));
 const Login = lazy(() => import("./pages/Login"));
-const Register = lazy(() => import("./pages/Register"));
+const PlatformAdmin = lazy(() => import("./pages/PlatformAdmin"));
 const PasswordReset = lazy(() => import("./pages/PasswordReset"));
 const PasswordResetRequest = lazy(
   () => import("./pages/PasswordResetRequest"),
@@ -87,7 +87,6 @@ function Router() {
       <Switch>
         {/* Public routes */}
         <Route path="/login" component={Login} />
-        <Route path="/register" component={Register} />
         <Route path="/reset-password" component={PasswordReset} />
         <Route
           path="/request-password-reset"
@@ -380,6 +379,11 @@ function Router() {
             <Layout>
               <AuditLogs />
             </Layout>
+          </ProtectedRoute>
+        </Route>
+        <Route path="/platform-admin">
+          <ProtectedRoute>
+            <PlatformAdmin />
           </ProtectedRoute>
         </Route>
 

@@ -9,18 +9,18 @@ export class TenantsPolicy extends BasePolicy {
   }
 
   create(): boolean {
-    // Only admin can create
-    return this.isAdmin();
+    // Only a platform admin can create a tenant
+    return this.isPlatformAdmin();
   }
 
   update(): boolean {
-    // Only admin can update
-    return this.isAdmin();
+    // Only a platform admin can update a tenant
+    return this.isPlatformAdmin();
   }
 
   delete(): boolean {
-    // Only admin can delete
-    return this.isAdmin();
+    // Only a platform admin can delete a tenant
+    return this.isPlatformAdmin();
   }
 }
 

@@ -14,6 +14,7 @@
     "db:reset": "tsx scripts/reset-database.ts",
     "db:seed": "tsx scripts/seed-database.ts",
     "db:seed:demo": "tsx scripts/seed-demo-data.ts",
+    "db:create-platform-admin": "tsx scripts/create-platform-admin.ts",
     "db:fresh": "npm run db:reset && npm run db:seed:demo",
     "check:scripts": "tsc -p tsconfig.scripts.json",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",

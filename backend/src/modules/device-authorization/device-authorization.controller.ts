@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, Req, UseGuards } from "@nestjs/common";
+import { Body, Controller, ForbiddenException, Get, Param, Post, Req, UseGuards } from "@nestjs/common";
 import { JwtAuthGuard } from "../auth/jwt-auth.guard";
 import { PolicyGuard } from "../auth/guards/policy.guard";
 import { CheckPolicy } from "../auth/decorators/check-policy.decorator";
@@ -15,6 +15,7 @@ export class DeviceAuthorizationController {
 
   @Post("request")
   async request(@Body() dto: RequestDeviceAuthorizationDto, @Req() req: any) {
+    this.assertHasTenant(req);
     return this.deviceAuthorizationService.request(
       req.user.tenantId,
       dto.deviceId,
@@ -51,11 +52,13 @@ export class DeviceAuthorizationController {
 
   @Post(":deviceId/deliver-key")
   async deliverKey(@Param("deviceId") deviceId: string, @Req() req: any) {
+    this.assertHasTenant(req);
     return this.deviceAuthorizationService.deliverKey(req.user.tenantId, deviceId);
   }
 
   @Post("approval-capability")
   async issueApprovalCapability(@Req() req: any) {
+    this.assertHasTenant(req);
     const deviceId = req.headers["x-device-id"];
     return this.deviceAuthorizationService.issueApprovalCapability(
       req.user.tenantId,
@@ -65,6 +68,13 @@ export class DeviceAuthorizationController {
 
   @Post("reconcile-lan-grant")
   async reconcileLanGrant(@Body() dto: ReconcileLanGrantDto, @Req() req: any) {
+    this.assertHasTenant(req);
     return this.deviceAuthorizationService.reconcileLanGrant(req.user.tenantId, dto);
+  }
+
+  private assertHasTenant(req: any): void {
+    if (req.user.tenantId === null) {
+      throw new ForbiddenException("Not available for platform administrators");
+    }
   }
 }

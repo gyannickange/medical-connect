@@ -19,6 +19,7 @@ import { examTypes } from "./examTypes";
 import { prescriptions } from "./prescriptions";
 import { carePlan } from "./carePlan";
 import { rooms } from "./rooms";
+import { platform } from "./platform";
 
 export type { Language } from "./types";
 
@@ -41,6 +42,7 @@ const sections: TranslationSection[] = [
   prescriptions,
   carePlan,
   rooms,
+  platform,
 ];
 
 const en: Record<string, string> = {};

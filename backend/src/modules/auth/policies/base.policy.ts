@@ -49,6 +49,10 @@ export abstract class BasePolicy {
     return this.hasRole("pharmacien");
   }
 
+  protected isPlatformAdmin(): boolean {
+    return this.hasRole("platform_admin");
+  }
+
   protected isAdminOrManager(): boolean {
     return this.hasAnyRole("admin", "manager");
   }

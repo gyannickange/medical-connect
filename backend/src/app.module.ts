@@ -20,6 +20,7 @@ import { ViteModule } from "./vite/vite.module";
 import { AuditModule } from "./modules/audit/audit.module";
 import { LanIdentityModule } from "./modules/lan-identity/lan-identity.module";
 import { DeviceAuthorizationModule } from "./modules/device-authorization/device-authorization.module";
+import { PlatformModule } from "./modules/platform/platform.module";
 import { LoggingInterceptor } from "./common/interceptors/logging.interceptor";
 import { AllExceptionsFilter } from "./common/filters/http-exception.filter";
 import { AuditInterceptor } from "./common/interceptors/audit.interceptor";
@@ -46,6 +47,7 @@ import { AuditInterceptor } from "./common/interceptors/audit.interceptor";
     AuditModule,
     LanIdentityModule,
     DeviceAuthorizationModule,
+    PlatformModule,
   ],
   providers: [
     {

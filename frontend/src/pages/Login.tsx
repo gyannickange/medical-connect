@@ -20,17 +20,17 @@ export default function Login() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const { login, isAuthenticated } = useAuth();
+  const { login, isAuthenticated, user } = useAuth();
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const { t } = useTranslation();
 
-  // Redirect to home when authenticated
+  // Redirect to home (or the platform admin dashboard) when authenticated
   useEffect(() => {
     if (isAuthenticated && !isLoading) {
-      setLocation("/");
+      setLocation(user?.role === "platform_admin" ? "/platform-admin" : "/");
     }
-  }, [isAuthenticated, isLoading, setLocation]);
+  }, [isAuthenticated, isLoading, user, setLocation]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -105,19 +105,6 @@ export default function Login() {
               )}
             </Button>
           </form>
-          {getInstallMode() !== "local" && (
-            <div className="mt-4 text-center text-sm">
-              <Button
-                type="button"
-                variant="link"
-                size="sm"
-                className="h-auto p-0 text-primary"
-                onClick={() => setLocation("/register")}
-                disabled={isLoading}>
-                {t("dontHaveAccount")}
-              </Button>
-            </div>
-          )}
           <div className="mt-2 text-center text-sm">
             <Button
               type="button"

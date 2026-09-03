@@ -45,7 +45,9 @@ export function shouldShowInitialSetupLoader(input: {
   tenantLoading: boolean;
   tenantReady: boolean;
   settingsLoading: boolean;
+  isPlatformAdmin?: boolean;
 }): boolean {
+  if (input.isPlatformAdmin) return false;
   if (input.authLoading) return true;
   if (!input.authenticated) return false;
 
@@ -58,7 +60,9 @@ export function nextInitialSetupLocation(input: {
   settingsReady: boolean;
   completed: boolean;
   location: string;
+  isPlatformAdmin?: boolean;
 }): string | null {
+  if (input.isPlatformAdmin) return null;
   if (!input.authenticated || !input.tenantReady || !input.settingsReady) {
     return null;
   }
