@@ -13,6 +13,7 @@ import { Layout } from "./components/Layout";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { GlobalOfflineSync } from "./components/GlobalOfflineSync";
 import { GlobalNativeLANAgent } from "./components/GlobalNativeLANAgent";
+import { GlobalNotifications } from "./components/GlobalNotifications";
 import { OfflineSyncProvider } from "./hooks/useOfflineSync";
 import { useTranslation } from "./lib/i18n";
 import { InstallModeGate } from "./components/InstallModeGate";
@@ -407,6 +408,7 @@ function App() {
                     <Toaster />
                     <GlobalOfflineSync />
                     <GlobalNativeLANAgent />
+                    <GlobalNotifications />
                     <InstallModeGate>
                       <InitialSetupGate>
                         <Router />

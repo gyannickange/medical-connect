@@ -238,6 +238,12 @@ export interface InsertQueueEvent { id?: string; consultationId: string; patient
 export interface QueueTimelineEntry { eventType: QueueEventType; occurredAt: string }
 export interface QueueItem { consultationId: string; patientId: string; status: QueueEventType; priority: ConsultationPriority; waitingSinceMs: number | null; timeline: QueueTimelineEntry[] }
 
+export type NotificationType = "queue_patient_ready" | "lab_result_ready";
+export interface NotificationData { consultationNumber?: string; examNames?: string }
+export interface NotificationRelatedEntity { type: "consultation" | "labOrder"; id: string }
+export interface AppNotification { id: string; tenantId: string; recipientUserId: string; notificationType: NotificationType; data: NotificationData; relatedEntity: NotificationRelatedEntity; createdAt: Date; readAt: Date | null }
+export interface InsertAppNotification { id?: string; tenantId: string; recipientUserId: string; notificationType: NotificationType; data: NotificationData; relatedEntity: NotificationRelatedEntity }
+
 export type SyncState = "online" | "offline" | "syncing" | "error";
 export interface SyncStatus { id: string; tenantId: string; deviceId: string; lastSync: Date | null; status: SyncState; pendingChanges: number }
 export interface InsertSyncStatus { id?: string; tenantId: string; deviceId: string; lastSync?: Date | string | null; status?: SyncState; pendingChanges?: number }

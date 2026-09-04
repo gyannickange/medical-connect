@@ -20,6 +20,7 @@ import { prescriptions } from "./prescriptions";
 import { carePlan } from "./carePlan";
 import { rooms } from "./rooms";
 import { platform } from "./platform";
+import { notifications } from "./notifications";
 
 export type { Language } from "./types";
 
@@ -43,6 +44,7 @@ const sections: TranslationSection[] = [
   carePlan,
   rooms,
   platform,
+  notifications,
 ];
 
 const en: Record<string, string> = {};
