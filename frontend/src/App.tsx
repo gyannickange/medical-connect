@@ -20,6 +20,7 @@ import { InstallModeGate } from "./components/InstallModeGate";
 import { InitialSetupGate } from "./components/InitialSetupGate";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 
+const Dashboard = lazy(() => import("./pages/Dashboard"));
 const Patients = lazy(() => import("./pages/patients"));
 const NewPatient = lazy(() => import("./pages/patients/new"));
 const EditPatient = lazy(() => import("./pages/patients/edit"));
@@ -105,7 +106,7 @@ function Router() {
         <Route path="/">
           <ProtectedRoute>
             <Layout>
-              <Patients />
+              <Dashboard />
             </Layout>
           </ProtectedRoute>
         </Route>

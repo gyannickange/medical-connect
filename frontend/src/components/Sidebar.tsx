@@ -13,6 +13,7 @@ import {
   FlaskConical,
   Pill,
   DoorOpen,
+  LayoutDashboard,
 } from "lucide-react";
 import { BrandMark } from "./BrandMark";
 import { useTranslation } from "../lib/i18n";
@@ -51,6 +52,7 @@ export const Sidebar: React.FC = () => {
   const roomsPolicy = usePolicy(RoomsPolicy);
 
   const menuItems = [
+    { icon: LayoutDashboard, label: t("dashboardNavLabel"), path: "/" },
     ...(patientsPolicy.canView()
       ? [{ icon: Users, label: t("patients"), path: "/patients" }]
       : []),
