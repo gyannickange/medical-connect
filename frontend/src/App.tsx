@@ -13,12 +13,14 @@ import { Layout } from "./components/Layout";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { GlobalOfflineSync } from "./components/GlobalOfflineSync";
 import { GlobalNativeLANAgent } from "./components/GlobalNativeLANAgent";
+import { GlobalNotifications } from "./components/GlobalNotifications";
 import { OfflineSyncProvider } from "./hooks/useOfflineSync";
 import { useTranslation } from "./lib/i18n";
 import { InstallModeGate } from "./components/InstallModeGate";
 import { InitialSetupGate } from "./components/InitialSetupGate";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 
+const Dashboard = lazy(() => import("./pages/Dashboard"));
 const Patients = lazy(() => import("./pages/patients"));
 const NewPatient = lazy(() => import("./pages/patients/new"));
 const EditPatient = lazy(() => import("./pages/patients/edit"));
@@ -104,7 +106,7 @@ function Router() {
         <Route path="/">
           <ProtectedRoute>
             <Layout>
-              <Patients />
+              <Dashboard />
             </Layout>
           </ProtectedRoute>
         </Route>
@@ -407,6 +409,7 @@ function App() {
                     <Toaster />
                     <GlobalOfflineSync />
                     <GlobalNativeLANAgent />
+                    <GlobalNotifications />
                     <InstallModeGate>
                       <InitialSetupGate>
                         <Router />

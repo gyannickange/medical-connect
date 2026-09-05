@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
 import { OfflineIndicator } from "./OfflineIndicator";
+import { NotificationBell } from "./NotificationBell";
 
 export const Header: React.FC = () => {
   const [, setLocation] = useLocation();
@@ -48,6 +49,8 @@ export const Header: React.FC = () => {
         <div className="flex items-center gap-2">
           {/* Offline Indicator */}
           <OfflineIndicator />
+
+          <NotificationBell />
 
           {/* Language Toggle */}
           <Button

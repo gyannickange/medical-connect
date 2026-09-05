@@ -3,6 +3,7 @@ import { randomUUID } from "crypto";
 import type { DocumentScope } from "nano";
 import { CouchDBService } from "../../database/couchdb.service";
 import { ConsultationsRepository } from "../consultations/consultations.repository";
+import { NotificationsRepository } from "../notifications/notifications.repository";
 import { S3Service } from "../../lib/s3.service";
 import type { InsertLabOrder, LabOrder, LabOrderExamLine, LabOrderFollowUpAction, LabOrderStatus } from "@shared/schema";
 import { couchDocumentId, publicDocumentId, tenantDatabaseName } from "../../database/couchdb-naming";
@@ -26,7 +27,8 @@ export class LabOrdersRepository {
   constructor(
     private readonly couchDBService: CouchDBService,
     private readonly consultationsRepository: ConsultationsRepository,
-    private readonly s3Service: S3Service
+    private readonly s3Service: S3Service,
+    private readonly notificationsRepository: NotificationsRepository
   ) {}
 
   async create(data: InsertLabOrder): Promise<LabOrder> {
@@ -115,6 +117,17 @@ export class LabOrdersRepository {
     } catch (error) {
       throw this.unavailable(error);
     }
+
+    if (enteringTermine) {
+      await this.notificationsRepository.notifyUser({
+        tenantId,
+        recipientUserId: current.requestedByUserId,
+        notificationType: "lab_result_ready",
+        data: { examNames: (current.examLines ?? []).map((line: any) => line.examName).join(", ") },
+        relatedEntity: { type: "labOrder", id },
+      });
+    }
+
     return this.hydrate(updated);
   }
 

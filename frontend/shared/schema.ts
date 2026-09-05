@@ -236,6 +236,11 @@ export interface InsertSellingPriceEntry { id?: string; variantId?: string | nul
 export interface Setting { id: string; tenantId: string; key: string; value: string; category: string; dataType: string; isEncrypted: boolean; createdAt: string; updatedAt: string }
 export interface AuditLog { id: string; userId: string; tenantId: string; action: "CREATE" | "UPDATE" | "DELETE" | "PATCH"; entityType: string; entityId: string | null; requestBody: unknown; responseBody: unknown; changes: unknown; metadata: unknown; status: "SUCCESS" | "FAILED"; errorMessage: string | null; createdAt: string }
 
+export type NotificationType = "queue_patient_ready" | "lab_result_ready";
+export interface NotificationData { consultationNumber?: string; examNames?: string }
+export interface NotificationRelatedEntity { type: "consultation" | "labOrder"; id: string }
+export interface AppNotification { id: string; tenantId: string; recipientUserId: string; notificationType: NotificationType; data: NotificationData; relatedEntity: NotificationRelatedEntity; createdAt: string; readAt: string | null }
+
 const id = z.string().uuid().optional();
 const money = z.union([z.string(), z.number()]);
 const nullableString = z.string().nullable().optional();

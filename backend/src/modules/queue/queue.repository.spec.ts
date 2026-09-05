@@ -1,8 +1,12 @@
 import { NotFoundException } from "@nestjs/common";
 import { QueueRepository } from "./queue.repository";
 
-function consultationsRepoStub(consultation: any = { type: "consultation", tenantId: "tenant-1" }) {
+function consultationsRepoStub(consultation: any = { type: "consultation", tenantId: "tenant-1", assignedDoctorId: "doctor-1", number: "C-2026-0001" }) {
   return { findExistingForCascade: jest.fn().mockResolvedValue(consultation) };
+}
+
+function notificationsRepositoryStub() {
+  return { notifyUser: jest.fn().mockResolvedValue(undefined) };
 }
 
 describe("QueueRepository", () => {
@@ -11,7 +15,7 @@ describe("QueueRepository", () => {
       const db = { insert: jest.fn().mockResolvedValue({ ok: true, rev: "1-a" }) };
       const couchDBService = { getDatabase: jest.fn().mockResolvedValue(db) };
       const consultationsRepository = consultationsRepoStub();
-      const repository = new QueueRepository(couchDBService as any, consultationsRepository as any);
+      const repository = new QueueRepository(couchDBService as any, consultationsRepository as any, notificationsRepositoryStub() as any);
 
       const result = await repository.appendEvent({
         consultationId: "c1",
@@ -28,11 +32,53 @@ describe("QueueRepository", () => {
 
     it("throws NotFoundException when the consultation does not exist in this tenant", async () => {
       const couchDBService = { getDatabase: jest.fn().mockResolvedValue({ insert: jest.fn() }) };
-      const repository = new QueueRepository(couchDBService as any, consultationsRepoStub(null) as any);
+      const repository = new QueueRepository(couchDBService as any, consultationsRepoStub(null) as any, notificationsRepositoryStub() as any);
 
       await expect(
         repository.appendEvent({ consultationId: "missing", patientId: "p1", eventType: "arrived", actorUserId: "u1", tenantId: "tenant-1" } as any)
       ).rejects.toThrow(NotFoundException);
+    });
+
+    it("notifies the assigned doctor when the patient arrives", async () => {
+      const db = { insert: jest.fn().mockResolvedValue({ ok: true, rev: "1-a" }) };
+      const couchDBService = { getDatabase: jest.fn().mockResolvedValue(db) };
+      const consultationsRepository = consultationsRepoStub();
+      const notificationsRepository = notificationsRepositoryStub();
+      const repository = new QueueRepository(couchDBService as any, consultationsRepository as any, notificationsRepository as any);
+
+      await repository.appendEvent({ consultationId: "c1", patientId: "p1", eventType: "arrived", actorUserId: "u1", tenantId: "tenant-1" } as any);
+
+      expect(notificationsRepository.notifyUser).toHaveBeenCalledWith({
+        tenantId: "tenant-1",
+        recipientUserId: "doctor-1",
+        notificationType: "queue_patient_ready",
+        data: { consultationNumber: "C-2026-0001" },
+        relatedEntity: { type: "consultation", id: "c1" },
+      });
+    });
+
+    it("notifies the assigned doctor when the patient is called", async () => {
+      const db = { insert: jest.fn().mockResolvedValue({ ok: true, rev: "1-a" }) };
+      const couchDBService = { getDatabase: jest.fn().mockResolvedValue(db) };
+      const consultationsRepository = consultationsRepoStub();
+      const notificationsRepository = notificationsRepositoryStub();
+      const repository = new QueueRepository(couchDBService as any, consultationsRepository as any, notificationsRepository as any);
+
+      await repository.appendEvent({ consultationId: "c1", patientId: "p1", eventType: "called", actorUserId: "u1", tenantId: "tenant-1" } as any);
+
+      expect(notificationsRepository.notifyUser).toHaveBeenCalledWith(expect.objectContaining({ notificationType: "queue_patient_ready" }));
+    });
+
+    it("does not notify for event types other than arrived/called", async () => {
+      const db = { insert: jest.fn().mockResolvedValue({ ok: true, rev: "1-a" }) };
+      const couchDBService = { getDatabase: jest.fn().mockResolvedValue(db) };
+      const consultationsRepository = consultationsRepoStub();
+      const notificationsRepository = notificationsRepositoryStub();
+      const repository = new QueueRepository(couchDBService as any, consultationsRepository as any, notificationsRepository as any);
+
+      await repository.appendEvent({ consultationId: "c1", patientId: "p1", eventType: "waiting", actorUserId: "u1", tenantId: "tenant-1" } as any);
+
+      expect(notificationsRepository.notifyUser).not.toHaveBeenCalled();
     });
   });
 
@@ -55,7 +101,8 @@ describe("QueueRepository", () => {
       };
       const repository = new QueueRepository(
         { getDatabase: jest.fn().mockResolvedValue(db) } as any,
-        consultationsRepoStub() as any
+        consultationsRepoStub() as any,
+        notificationsRepositoryStub() as any
       );
 
       const result = await repository.findById("event-1", "tenant-1");
@@ -74,7 +121,8 @@ describe("QueueRepository", () => {
       };
       const repository = new QueueRepository(
         { getDatabase: jest.fn().mockResolvedValue(db) } as any,
-        consultationsRepoStub() as any
+        consultationsRepoStub() as any,
+        notificationsRepositoryStub() as any
       );
 
       await expect(repository.findById("missing", "tenant-1")).resolves.toBeUndefined();
@@ -92,7 +140,7 @@ describe("QueueRepository", () => {
       ];
       const db = { find: jest.fn().mockResolvedValue({ docs }) };
       const couchDBService = { getDatabase: jest.fn().mockResolvedValue(db), ensureIndex: jest.fn().mockResolvedValue(undefined) };
-      const repository = new QueueRepository(couchDBService as any, consultationsRepoStub() as any);
+      const repository = new QueueRepository(couchDBService as any, consultationsRepoStub() as any, notificationsRepositoryStub() as any);
 
       const result = await repository.getEventsSince("tenant-1", new Date("2026-08-27T00:00:00.000Z"));
 
