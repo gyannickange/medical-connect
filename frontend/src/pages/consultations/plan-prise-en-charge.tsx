@@ -276,27 +276,29 @@ export default function PlanPriseEnCharge() {
   }
 
   return (
-    <div className="flex gap-6 items-start" data-testid="plan-prise-en-charge-page">
+    <div className="space-y-6" data-testid="plan-prise-en-charge-page">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <Button variant="link" size="sm" className="h-auto p-0 text-xs text-muted-foreground" onClick={() => setLocation(`/consultations/${consultationId}`)}>
+            {t("consultation")} {consultation.number ?? t("pendingSync")}
+          </Button>
+          <span className="text-xs text-muted-foreground">›</span>
+          <span className="text-xs font-medium text-primary">{t("carePlanTitle")}</span>
+        </div>
+        <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+          <Lock className="w-3.5 h-3.5" />
+          {t("secureRecordBadge")}
+        </div>
+      </div>
+
+      <div className="flex items-center gap-3">
+        <h1 className="text-2xl font-display font-bold text-foreground">{t("carePlanTitle")}</h1>
+        <Badge variant="success">{t("journeyStepCarePlan")} — 8/9</Badge>
+      </div>
+
+      <div className="flex gap-6 items-start">
       <ConsultationJourneySidebar steps={steps} />
       <div className="flex-1 min-w-0 space-y-6" data-testid="plan-prise-en-charge-form">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Button variant="link" size="sm" className="h-auto p-0 text-xs text-muted-foreground" onClick={() => setLocation(`/consultations/${consultationId}`)}>
-              {t("consultation")} {consultation.number ?? t("pendingSync")}
-            </Button>
-            <span className="text-xs text-muted-foreground">›</span>
-            <span className="text-xs font-medium text-primary">{t("carePlanTitle")}</span>
-          </div>
-          <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-            <Lock className="w-3.5 h-3.5" />
-            {t("secureRecordBadge")}
-          </div>
-        </div>
-
-        <div className="flex items-center gap-3">
-          <h1 className="text-2xl font-display font-bold text-foreground">{t("carePlanTitle")}</h1>
-          <Badge variant="success">{t("journeyStepCarePlan")} — 8/9</Badge>
-        </div>
 
         <div className="glass-card rounded-xl p-4 flex items-center justify-between gap-4 flex-wrap">
           <div className="flex items-center gap-3">
@@ -616,6 +618,7 @@ export default function PlanPriseEnCharge() {
             <ArrowRight className="w-4 h-4 ml-2" />
           </Button>
         </div>
+      </div>
       </div>
     </div>
   );

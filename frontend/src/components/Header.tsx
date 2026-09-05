@@ -44,7 +44,7 @@ export const Header: React.FC = () => {
       className="fixed top-0 right-0 left-20 z-30 h-[73px] border-x-0 border-b border-t-0 border-border bg-card px-4 py-4 lg:left-[260px] lg:px-8"
       data-testid="header">
       <div className="flex items-center justify-between">
-        <div className="text-xs text-muted-foreground">Medical Connect</div>
+        <div className="text-xs text-muted-foreground"></div>
 
         <div className="flex items-center gap-2">
           {/* Offline Indicator */}

@@ -108,7 +108,6 @@ export const Sidebar: React.FC = () => {
             <h1 className="text-base font-bold leading-5 text-foreground">
               Medical Connect
             </h1>
-            <p className="text-xs text-muted-foreground">Hospital OS</p>
           </div>
         </div>
       </div>
