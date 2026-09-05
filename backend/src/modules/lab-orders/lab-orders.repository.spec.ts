@@ -5,13 +5,17 @@ function consultationsRepoStub(consultation: any = { type: "consultation", tenan
   return { findExistingForCascade: jest.fn().mockResolvedValue(consultation) };
 }
 
+function notificationsRepositoryStub() {
+  return { notifyUser: jest.fn().mockResolvedValue(undefined) };
+}
+
 describe("LabOrdersRepository", () => {
   describe("create", () => {
     it("validates the consultation exists in the tenant and creates the lab order", async () => {
       const db = { insert: jest.fn().mockResolvedValue({ ok: true, rev: "1-a" }) };
       const couchDBService = { getDatabase: jest.fn().mockResolvedValue(db) };
       const consultationsRepository = consultationsRepoStub();
-      const repository = new LabOrdersRepository(couchDBService as any, consultationsRepository as any, {} as any);
+      const repository = new LabOrdersRepository(couchDBService as any, consultationsRepository as any, {} as any, notificationsRepositoryStub() as any);
 
       const result = await repository.create({
         tenantId: "tenant-1",
@@ -42,7 +46,7 @@ describe("LabOrdersRepository", () => {
     it("throws NotFoundException when the consultation does not exist in this tenant", async () => {
       const couchDBService = { getDatabase: jest.fn().mockResolvedValue({ insert: jest.fn() }) };
       const consultationsRepository = consultationsRepoStub(null);
-      const repository = new LabOrdersRepository(couchDBService as any, consultationsRepository as any, {} as any);
+      const repository = new LabOrdersRepository(couchDBService as any, consultationsRepository as any, {} as any, notificationsRepositoryStub() as any);
 
       await expect(
         repository.create({ tenantId: "tenant-1", consultationId: "missing", examLines: [{ examName: "NFS" }], requestedByUserId: "doctor-1" })
@@ -78,7 +82,8 @@ describe("LabOrdersRepository", () => {
     it("sets takenInChargeByUserId/At when status transitions to en_cours", async () => {
       const existing = existingLabOrder();
       const db = { get: jest.fn().mockResolvedValue(existing), insert: jest.fn().mockResolvedValue({ ok: true }) };
-      const repository = new LabOrdersRepository({ getDatabase: jest.fn().mockResolvedValue(db) } as any, consultationsRepoStub() as any, {} as any);
+      const notificationsRepository = notificationsRepositoryStub();
+      const repository = new LabOrdersRepository({ getDatabase: jest.fn().mockResolvedValue(db) } as any, consultationsRepoStub() as any, {} as any, notificationsRepository as any);
 
       const result = await repository.update("lo1", "tenant-1", { status: "en_cours" }, "labtech-1");
 
@@ -86,12 +91,14 @@ describe("LabOrdersRepository", () => {
         expect.objectContaining({ status: "en_cours", takenInChargeByUserId: "labtech-1", takenInChargeAt: expect.any(String) })
       );
       expect(result.takenInChargeAt).toBeInstanceOf(Date);
+      expect(notificationsRepository.notifyUser).not.toHaveBeenCalled();
     });
 
-    it("sets validatedByUserId/At and stores results when status transitions to termine", async () => {
+    it("sets validatedByUserId/At, stores results, and notifies the requesting doctor when status transitions to termine", async () => {
       const existing = existingLabOrder({ status: "en_cours", takenInChargeByUserId: "labtech-1", takenInChargeAt: "2026-08-27T09:05:00.000Z" });
       const db = { get: jest.fn().mockResolvedValue(existing), insert: jest.fn().mockResolvedValue({ ok: true }) };
-      const repository = new LabOrdersRepository({ getDatabase: jest.fn().mockResolvedValue(db) } as any, consultationsRepoStub() as any, {} as any);
+      const notificationsRepository = notificationsRepositoryStub();
+      const repository = new LabOrdersRepository({ getDatabase: jest.fn().mockResolvedValue(db) } as any, consultationsRepoStub() as any, {} as any, notificationsRepository as any);
 
       const examLines = [{ examName: "NFS", resultText: "Hémoglobine 13.2 g/dL, normale", parameters: [] }];
       const result = await repository.update("lo1", "tenant-1", { status: "termine", examLines }, "labtech-1");
@@ -100,12 +107,19 @@ describe("LabOrdersRepository", () => {
         expect.objectContaining({ status: "termine", examLines, validatedByUserId: "labtech-1", validatedAt: expect.any(String) })
       );
       expect(result.validatedAt).toBeInstanceOf(Date);
+      expect(notificationsRepository.notifyUser).toHaveBeenCalledWith({
+        tenantId: "tenant-1",
+        recipientUserId: "doctor-1",
+        notificationType: "lab_result_ready",
+        data: { examNames: "NFS" },
+        relatedEntity: { type: "labOrder", id: "lo1" },
+      });
     });
 
     it("does not re-stamp takenInChargeAt when already en_cours", async () => {
       const existing = existingLabOrder({ status: "en_cours", takenInChargeByUserId: "labtech-1", takenInChargeAt: "2026-08-27T09:05:00.000Z" });
       const db = { get: jest.fn().mockResolvedValue(existing), insert: jest.fn().mockResolvedValue({ ok: true }) };
-      const repository = new LabOrdersRepository({ getDatabase: jest.fn().mockResolvedValue(db) } as any, consultationsRepoStub() as any, {} as any);
+      const repository = new LabOrdersRepository({ getDatabase: jest.fn().mockResolvedValue(db) } as any, consultationsRepoStub() as any, {} as any, notificationsRepositoryStub() as any);
 
       await repository.update("lo1", "tenant-1", { status: "en_cours" }, "labtech-2");
 
@@ -114,7 +128,7 @@ describe("LabOrdersRepository", () => {
 
     it("throws NotFoundException when the lab order does not exist in this tenant", async () => {
       const db = { get: jest.fn().mockRejectedValue({ statusCode: 404 }) };
-      const repository = new LabOrdersRepository({ getDatabase: jest.fn().mockResolvedValue(db) } as any, consultationsRepoStub() as any, {} as any);
+      const repository = new LabOrdersRepository({ getDatabase: jest.fn().mockResolvedValue(db) } as any, consultationsRepoStub() as any, {} as any, notificationsRepositoryStub() as any);
 
       await expect(repository.update("missing", "tenant-1", { status: "en_cours" }, "labtech-1")).rejects.toThrow(NotFoundException);
     });
@@ -137,7 +151,7 @@ describe("LabOrdersRepository", () => {
         followUpRecordedAt: null,
       };
       const db = { get: jest.fn().mockResolvedValue(existing), insert: jest.fn().mockResolvedValue({ ok: true }) };
-      const repository = new LabOrdersRepository({ getDatabase: jest.fn().mockResolvedValue(db) } as any, consultationsRepoStub() as any, {} as any);
+      const repository = new LabOrdersRepository({ getDatabase: jest.fn().mockResolvedValue(db) } as any, consultationsRepoStub() as any, {} as any, notificationsRepositoryStub() as any);
 
       const result = await repository.recordFollowUp("lo1", "tenant-1", { followUpAction: "contacter_patient", followUpNote: "Rappeler demain" });
 
@@ -149,7 +163,7 @@ describe("LabOrdersRepository", () => {
 
     it("throws NotFoundException when the lab order does not exist in this tenant", async () => {
       const db = { get: jest.fn().mockRejectedValue({ statusCode: 404 }) };
-      const repository = new LabOrdersRepository({ getDatabase: jest.fn().mockResolvedValue(db) } as any, consultationsRepoStub() as any, {} as any);
+      const repository = new LabOrdersRepository({ getDatabase: jest.fn().mockResolvedValue(db) } as any, consultationsRepoStub() as any, {} as any, notificationsRepositoryStub() as any);
 
       await expect(repository.recordFollowUp("missing", "tenant-1", { followUpAction: "aucune_action" })).rejects.toThrow(NotFoundException);
     });
@@ -159,7 +173,7 @@ describe("LabOrdersRepository", () => {
     it("filters by consultationId, status, and priority when provided", async () => {
       const db = { find: jest.fn().mockResolvedValue({ docs: [] }) };
       const couchDBService = { getDatabase: jest.fn().mockResolvedValue(db), ensureIndex: jest.fn().mockResolvedValue(undefined) };
-      const repository = new LabOrdersRepository(couchDBService as any, consultationsRepoStub() as any, {} as any);
+      const repository = new LabOrdersRepository(couchDBService as any, consultationsRepoStub() as any, {} as any, notificationsRepositoryStub() as any);
 
       await repository.findByTenant("tenant-1", { consultationId: "c1", status: "demande", priority: "urgent" });
 
@@ -173,7 +187,7 @@ describe("LabOrdersRepository", () => {
     it("filters by patientId when provided", async () => {
       const db = { find: jest.fn().mockResolvedValue({ docs: [] }) };
       const couchDBService = { getDatabase: jest.fn().mockResolvedValue(db), ensureIndex: jest.fn().mockResolvedValue(undefined) };
-      const repository = new LabOrdersRepository(couchDBService as any, consultationsRepoStub() as any, {} as any);
+      const repository = new LabOrdersRepository(couchDBService as any, consultationsRepoStub() as any, {} as any, notificationsRepositoryStub() as any);
 
       await repository.findByTenant("tenant-1", { patientId: "patient-1" });
 

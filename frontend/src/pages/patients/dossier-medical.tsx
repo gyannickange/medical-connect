@@ -1,16 +1,17 @@
 import React, { useState } from "react";
-import { AlertTriangle, BookOpen, Clock, FileText, Sparkles, TrendingDown } from "lucide-react";
+import { AlertTriangle, BookOpen, Clock, FileText, Minus, Sparkles, TrendingDown, TrendingUp } from "lucide-react";
+import { CartesianGrid, Line, LineChart, XAxis } from "recharts";
 import { useQuery } from "@tanstack/react-query";
 import { useLocation, useParams } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { ChartContainer, ChartTooltip, ChartTooltipContent, type ChartConfig } from "@/components/ui/chart";
 import { useTranslation } from "../../lib/i18n";
 import { useTenant } from "../../contexts/TenantContext";
 import { calculateAge } from "@/lib/patientAge";
 import { buildPatientTimeline } from "@/lib/patientTimeline";
-import { buildSparklinePoints } from "@/lib/sparkline";
 import type { Consultation, LabOrder, Patient, Prescription, User } from "@shared/schema";
 
 export default function DossierMedical() {
@@ -86,8 +87,26 @@ export default function DossierMedical() {
     .slice(0, 6)
     .reverse();
   const systolicValues = vitalsSeries.map((c) => c.vitals!.bloodPressureSystolic!);
-  const sparklinePoints = buildSparklinePoints(systolicValues, 320, 80);
   const latestVitals = vitalsSeries[vitalsSeries.length - 1]?.vitals ?? null;
+  const vitalsTrend: "improving" | "worsening" | "stable" | null =
+    systolicValues.length < 2
+      ? null
+      : systolicValues[systolicValues.length - 1] < systolicValues[0]
+        ? "improving"
+        : systolicValues[systolicValues.length - 1] > systolicValues[0]
+          ? "worsening"
+          : "stable";
+  const vitalsTrendColor =
+    vitalsTrend === "worsening" ? "var(--chart-2)" : vitalsTrend === "improving" ? "var(--chart-1)" : "var(--chart-3)";
+  const vitalsChartData = vitalsSeries.map((c) => {
+    const date = new Date(c.createdAt).toLocaleDateString();
+    const systolic = c.vitals!.bloodPressureSystolic!;
+    const diastolic = c.vitals!.bloodPressureDiastolic ?? null;
+    return { date, systolic, diastolic, label: `${date} (${systolic}/${diastolic ?? "—"})` };
+  });
+  const vitalsChartConfig: ChartConfig = {
+    systolic: { label: t("bloodPressureSystolic"), color: vitalsTrendColor },
+  };
 
   const hospitalisations = sortedConsultations.filter((c) => c.carePlan?.orientation === "hospitalisation");
 
@@ -210,34 +229,89 @@ export default function DossierMedical() {
             </div>
 
             <div className="space-y-6">
-              <Card className="p-6 space-y-3">
+              <Card className="p-6 space-y-4">
                 <h2 className="font-semibold text-foreground flex items-center gap-2">
                   <TrendingDown className="w-4 h-4" />
                   {t("vitalsEvolutionTitle")}
                 </h2>
-                {systolicValues.length === 0 ? (
+                {systolicValues.length === 0 || !latestVitals ? (
                   <p className="text-sm text-muted-foreground">{t("noDataAvailable")}</p>
                 ) : (
                   <>
-                    <svg viewBox="0 0 320 80" className="w-full h-20" data-testid="svg-vitals-sparkline">
-                      <polyline points={sparklinePoints} fill="none" stroke="currentColor" strokeWidth="2" className="text-primary" />
-                    </svg>
-                    {latestVitals && (
-                      <div className="grid grid-cols-3 gap-2 pt-2 border-t border-border text-center">
-                        <div>
-                          <p className="text-xs text-muted-foreground">FC</p>
-                          <p className="text-sm font-medium">{latestVitals.heartRate ?? "—"}</p>
-                        </div>
-                        <div>
-                          <p className="text-xs text-muted-foreground">SpO₂</p>
-                          <p className="text-sm font-medium">{latestVitals.oxygenSaturation ?? "—"}%</p>
-                        </div>
-                        <div>
-                          <p className="text-xs text-muted-foreground">T°</p>
-                          <p className="text-sm font-medium">{latestVitals.temperature ?? "—"}°C</p>
-                        </div>
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <p className="text-2xl font-bold text-foreground" data-testid="text-vitals-current-bp">
+                          {latestVitals.bloodPressureSystolic}/{latestVitals.bloodPressureDiastolic ?? "—"}{" "}
+                          <span className="text-sm font-normal text-muted-foreground">mmHg</span>
+                        </p>
+                        <p className="text-xs text-muted-foreground">{t("vitalsTargetLabel")}</p>
                       </div>
-                    )}
+                      {vitalsTrend && (
+                        <Badge
+                          variant={vitalsTrend === "worsening" ? "danger" : vitalsTrend === "improving" ? "success" : "secondary"}
+                          className="flex items-center gap-1 shrink-0"
+                          data-testid="badge-vitals-trend"
+                        >
+                          {vitalsTrend === "worsening" ? (
+                            <TrendingUp className="w-3 h-3" />
+                          ) : vitalsTrend === "improving" ? (
+                            <TrendingDown className="w-3 h-3" />
+                          ) : (
+                            <Minus className="w-3 h-3" />
+                          )}
+                          {t(
+                            vitalsTrend === "worsening"
+                              ? "vitalsTrendWorsening"
+                              : vitalsTrend === "improving"
+                                ? "vitalsTrendImproving"
+                                : "vitalsTrendStable"
+                          )}
+                        </Badge>
+                      )}
+                    </div>
+
+                    <ChartContainer config={vitalsChartConfig} className="aspect-auto h-40 w-full" data-testid="chart-vitals-evolution">
+                      <LineChart data={vitalsChartData} margin={{ top: 8, right: 8, left: 8, bottom: 8 }}>
+                        <CartesianGrid vertical={false} strokeDasharray="3 3" />
+                        <XAxis dataKey="label" tickLine={false} axisLine={false} tickMargin={8} />
+                        <ChartTooltip
+                          content={
+                            <ChartTooltipContent
+                              indicator="dot"
+                              labelFormatter={(_, payload) => payload?.[0]?.payload?.date ?? ""}
+                              formatter={(value, _name, item) => (
+                                <span className="font-mono font-medium tabular-nums text-foreground">
+                                  {value}/{item.payload.diastolic ?? "—"} mmHg
+                                </span>
+                              )}
+                            />
+                          }
+                        />
+                        <Line
+                          type="monotone"
+                          dataKey="systolic"
+                          stroke={vitalsTrendColor}
+                          strokeWidth={2}
+                          dot={{ r: 4, fill: vitalsTrendColor, strokeWidth: 0 }}
+                          activeDot={{ r: 5 }}
+                        />
+                      </LineChart>
+                    </ChartContainer>
+
+                    <div className="grid grid-cols-3 gap-2 pt-2 border-t border-border">
+                      <div className="rounded-md bg-muted p-2 text-center">
+                        <p className="text-xs text-muted-foreground">{t("heartRateField")}</p>
+                        <p className="text-sm font-medium">{latestVitals.heartRate ?? "—"}</p>
+                      </div>
+                      <div className="rounded-md bg-muted p-2 text-center">
+                        <p className="text-xs text-muted-foreground">{t("oxygenSaturationField")}</p>
+                        <p className="text-sm font-medium">{latestVitals.oxygenSaturation ?? "—"}%</p>
+                      </div>
+                      <div className="rounded-md bg-muted p-2 text-center">
+                        <p className="text-xs text-muted-foreground">{t("temperatureField")}</p>
+                        <p className="text-sm font-medium">{latestVitals.temperature ?? "—"}°C</p>
+                      </div>
+                    </div>
                   </>
                 )}
               </Card>

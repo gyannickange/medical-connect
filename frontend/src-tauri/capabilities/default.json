@@ -3,6 +3,6 @@
   "identifier": "default",
   "description": "Minimal permissions for the Medical Connect desktop window",
   "windows": ["main"],
-  "permissions": ["core:default", "opener:default"]
+  "permissions": ["core:default", "opener:default", "notification:default"]
 }
 

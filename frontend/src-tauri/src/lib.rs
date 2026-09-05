@@ -6,7 +6,11 @@ mod mock_keyring;
 mod receipt_printer;
 
 use lan_agent::LanAgentState;
-use tauri::WebviewWindowBuilder;
+use tauri::{
+    menu::{Menu, MenuItem},
+    tray::TrayIconBuilder,
+    Manager, WebviewWindowBuilder, WindowEvent,
+};
 
 /// Desktop-simulator profiles (caisse1/caisse2) run the same compiled
 /// binary side by side on one machine, so macOS's WKWebView would
@@ -32,6 +36,7 @@ fn simulator_data_store_identifier(identifier: &str) -> Option<[u8; 16]> {
 pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
+        .plugin(tauri_plugin_notification::init())
         .manage(LanAgentState::default())
         .invoke_handler(tauri::generate_handler![
             lan_agent::lan_agent_start,
@@ -63,6 +68,29 @@ pub fn run() {
                         .build()?;
                 }
             }
+
+            let quit_item = MenuItem::with_id(app, "quit", "Quitter", true, None::<&str>)?;
+            let tray_menu = Menu::with_items(app, &[&quit_item])?;
+            TrayIconBuilder::new()
+                .menu(&tray_menu)
+                .icon(app.default_window_icon().unwrap().clone())
+                .on_menu_event(|app, event| {
+                    if event.id() == "quit" {
+                        app.exit(0);
+                    }
+                })
+                .build(app)?;
+
+            if let Some(window) = app.get_webview_window("main") {
+                let window_clone = window.clone();
+                window.on_window_event(move |event| {
+                    if let WindowEvent::CloseRequested { api, .. } = event {
+                        api.prevent_close();
+                        let _ = window_clone.hide();
+                    }
+                });
+            }
+
             Ok(())
         })
         .run(tauri::generate_context!())

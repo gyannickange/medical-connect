@@ -3,6 +3,7 @@ import { randomUUID } from "crypto";
 import type { DocumentScope } from "nano";
 import { CouchDBService } from "../../database/couchdb.service";
 import { ConsultationsRepository } from "../consultations/consultations.repository";
+import { NotificationsRepository } from "../notifications/notifications.repository";
 import type { InsertQueueEvent, QueueEvent, QueueEventType } from "@shared/schema";
 import { couchDocumentId, tenantDatabaseName } from "../../database/couchdb-naming";
 
@@ -18,7 +19,8 @@ export interface FoldedQueueEntry {
 export class QueueRepository {
   constructor(
     private readonly couchDBService: CouchDBService,
-    private readonly consultationsRepository: ConsultationsRepository
+    private readonly consultationsRepository: ConsultationsRepository,
+    private readonly notificationsRepository: NotificationsRepository
   ) {}
 
   async appendEvent(data: InsertQueueEvent): Promise<QueueEvent> {
@@ -45,10 +47,21 @@ export class QueueRepository {
 
     try {
       await db.insert({ ...event, type: "queue_event" as const, occurredAt: now.toISOString(), _id: couchDocumentId("queue_event", id) } as any);
-      return event;
     } catch (error) {
       throw this.unavailable(error);
     }
+
+    if ((event.eventType === "arrived" || event.eventType === "called") && consultation.assignedDoctorId) {
+      await this.notificationsRepository.notifyUser({
+        tenantId: data.tenantId,
+        recipientUserId: consultation.assignedDoctorId,
+        notificationType: "queue_patient_ready",
+        data: consultation.number ? { consultationNumber: consultation.number } : {},
+        relatedEntity: { type: "consultation", id: data.consultationId },
+      });
+    }
+
+    return event;
   }
 
   async findById(id: string, tenantId: string): Promise<QueueEvent | undefined> {

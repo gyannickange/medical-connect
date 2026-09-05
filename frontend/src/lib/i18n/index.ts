@@ -3,6 +3,7 @@ import type { Language, TranslationSection } from "./types";
 
 import { navigation } from "./navigation";
 import { dashboard } from "./dashboard";
+import { dashboardHome } from "./dashboardHome";
 import { validation } from "./validation";
 import { lan } from "./lan";
 import { messages } from "./messages";
@@ -20,6 +21,7 @@ import { prescriptions } from "./prescriptions";
 import { carePlan } from "./carePlan";
 import { rooms } from "./rooms";
 import { platform } from "./platform";
+import { notifications } from "./notifications";
 
 export type { Language } from "./types";
 
@@ -43,6 +45,8 @@ const sections: TranslationSection[] = [
   carePlan,
   rooms,
   platform,
+  notifications,
+  dashboardHome,
 ];
 
 const en: Record<string, string> = {};

@@ -157,28 +157,30 @@ export default function PreConsultationForm() {
   }
 
   return (
-    <div className="flex gap-6 items-start" data-testid="pre-consultation-page">
+    <div className="space-y-6" data-testid="pre-consultation-page">
+      <div className="flex items-center justify-between">
+        <Button variant="ghost" onClick={() => setLocation(`/consultations/${consultationId}`)}>
+          <ArrowLeft className="w-4 h-4 mr-2" />
+          {t("consultations")}
+        </Button>
+      </div>
+
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-display font-bold text-foreground">{t("preConsultationTitle")}</h1>
+          <p className="text-sm text-muted-foreground">{t("preConsultationSubtitle")}</p>
+        </div>
+        <div className="flex items-center gap-2 rounded-full bg-primary/10 px-3 py-1.5 shrink-0">
+          <span className="size-2 rounded-full bg-primary" />
+          <span className="text-xs font-semibold text-primary">
+            {t("vitalsRecordedAtLabel")} {new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+          </span>
+        </div>
+      </div>
+
+      <div className="flex gap-6 items-start">
       <ConsultationJourneySidebar steps={steps} />
       <div className="flex-1 min-w-0 space-y-6" data-testid="pre-consultation-form">
-        <div className="flex items-center justify-between">
-          <Button variant="ghost" onClick={() => setLocation(`/consultations/${consultationId}`)}>
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            {t("consultations")}
-          </Button>
-        </div>
-
-        <div className="flex items-start justify-between gap-4">
-          <div>
-            <h1 className="text-2xl font-display font-bold text-foreground">{t("preConsultationTitle")}</h1>
-            <p className="text-sm text-muted-foreground">{t("preConsultationSubtitle")}</p>
-          </div>
-          <div className="flex items-center gap-2 rounded-full bg-primary/10 px-3 py-1.5 shrink-0">
-            <span className="size-2 rounded-full bg-primary" />
-            <span className="text-xs font-semibold text-primary">
-              {t("vitalsRecordedAtLabel")} {new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-            </span>
-          </div>
-        </div>
 
         <Card className="p-5 flex flex-wrap items-center gap-6">
           <p className="font-bold text-foreground text-base">{patient.firstName} {patient.lastName}</p>
@@ -282,6 +284,7 @@ export default function PreConsultationForm() {
             {saveMutation.isPending ? t("saving") : t("validatePatientReady")}
           </Button>
         </div>
+      </div>
       </div>
     </div>
   );
