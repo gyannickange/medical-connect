@@ -3,15 +3,17 @@ import { BasePolicy } from "../auth/policies/base.policy";
 
 @Injectable()
 export class ServicesPolicy extends BasePolicy {
-  view(): boolean {
-    return this.isAdmin() || this.isManager() || this.isAccueil() || this.isInfirmier() || this.isMedecin();
+  protected readonly module = "services" as const;
+
+  view(): Promise<boolean> {
+    return this.can("view");
   }
 
-  create(): boolean {
-    return this.isAdminOrManager();
+  create(): Promise<boolean> {
+    return this.can("create");
   }
 
-  update(): boolean {
-    return this.isAdminOrManager();
+  update(): Promise<boolean> {
+    return this.can("update");
   }
 }

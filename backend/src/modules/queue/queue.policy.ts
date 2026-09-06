@@ -3,11 +3,13 @@ import { BasePolicy } from "../auth/policies/base.policy";
 
 @Injectable()
 export class QueuePolicy extends BasePolicy {
-  view(): boolean {
-    return this.isAdmin() || this.isManager() || this.isAccueil() || this.isInfirmier() || this.isMedecin();
+  protected readonly module = "queue" as const;
+
+  view(): Promise<boolean> {
+    return this.can("view");
   }
 
-  appendEvent(): boolean {
-    return this.view();
+  appendEvent(): Promise<boolean> {
+    return this.can("appendEvent");
   }
 }

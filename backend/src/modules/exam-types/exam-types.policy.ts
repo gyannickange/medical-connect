@@ -3,19 +3,21 @@ import { BasePolicy } from "../auth/policies/base.policy";
 
 @Injectable()
 export class ExamTypesPolicy extends BasePolicy {
-  view(): boolean {
-    return this.isAdmin() || this.isManager() || this.isMedecin() || this.isInfirmier() || this.isLaboratoire();
+  protected readonly module = "examTypes" as const;
+
+  view(): Promise<boolean> {
+    return this.can("view");
   }
 
-  create(): boolean {
-    return this.isAdminOrManager();
+  create(): Promise<boolean> {
+    return this.can("create");
   }
 
-  update(): boolean {
-    return this.isAdminOrManager();
+  update(): Promise<boolean> {
+    return this.can("update");
   }
 
-  delete(): boolean {
-    return this.isAdminOrManager();
+  delete(): Promise<boolean> {
+    return this.can("delete");
   }
 }
