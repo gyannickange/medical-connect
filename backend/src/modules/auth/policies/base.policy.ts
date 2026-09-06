@@ -1,12 +1,26 @@
 import { Injectable } from "@nestjs/common";
 import type { UserRole, RequestWithUser } from "./policy.types";
+import type { PermissionModule, Role } from "@shared/schema";
 
 @Injectable()
 export abstract class BasePolicy {
   protected user: RequestWithUser["user"];
+  protected readonly module?: PermissionModule;
+  private roleResolver?: (tenantId: string, roleId: string) => Promise<Role | null>;
 
   setUser(user: RequestWithUser["user"]) {
     this.user = user;
+  }
+
+  setRoleResolver(resolver: (tenantId: string, roleId: string) => Promise<Role | null>) {
+    this.roleResolver = resolver;
+  }
+
+  protected async can(action: string): Promise<boolean> {
+    if (this.user?.role === "admin") return true;
+    if (!this.module || !this.roleResolver || !this.user?.tenantId) return false;
+    const role = await this.roleResolver(this.user.tenantId, this.user.role);
+    return role?.permissions?.[this.module]?.[action] === true;
   }
 
   protected hasRole(role: UserRole): boolean {
@@ -17,44 +31,8 @@ export abstract class BasePolicy {
     return roles.includes(this.user?.role as UserRole);
   }
 
-  protected isAdmin(): boolean {
-    return this.hasRole("admin");
-  }
-
-  protected isManager(): boolean {
-    return this.hasRole("manager");
-  }
-
-  protected isCashier(): boolean {
-    return this.hasRole("cashier");
-  }
-
-  protected isAccueil(): boolean {
-    return this.hasRole("accueil");
-  }
-
-  protected isInfirmier(): boolean {
-    return this.hasRole("infirmier");
-  }
-
-  protected isMedecin(): boolean {
-    return this.hasRole("medecin");
-  }
-
-  protected isLaboratoire(): boolean {
-    return this.hasRole("laboratoire");
-  }
-
-  protected isPharmacien(): boolean {
-    return this.hasRole("pharmacien");
-  }
-
   protected isPlatformAdmin(): boolean {
     return this.hasRole("platform_admin");
-  }
-
-  protected isAdminOrManager(): boolean {
-    return this.hasAnyRole("admin", "manager");
   }
 }
 

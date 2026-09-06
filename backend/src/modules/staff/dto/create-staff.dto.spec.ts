@@ -38,21 +38,12 @@ describe("CreateStaffDto", () => {
     expect(errors).toHaveLength(0);
   });
 
-  it("accepts valid roles", async () => {
-    for (const role of ["admin", "manager", "cashier"] as const) {
+  it("accepts any role id string (validity against the tenant's Role registry is checked at the service layer, not here)", async () => {
+    for (const role of ["admin", "manager", "cashier", "custom-role-id"]) {
       const dto = plainToInstance(CreateStaffDto, { ...validBase, role });
       const errors = await validate(dto);
       expect(errors).toHaveLength(0);
     }
-  });
-
-  it("rejects invalid role", async () => {
-    const dto = plainToInstance(CreateStaffDto, {
-      ...validBase,
-      role: "invalid-role",
-    });
-    const errors = await validate(dto);
-    expect(errors.some((e) => e.property === "role")).toBe(true);
   });
 
   it("accepts optional isActive", async () => {
@@ -128,19 +119,17 @@ describe("CreateStaffDto", () => {
     expect(errors.some((e) => e.property === "email")).toBe(true);
   });
 
-  it("accepts the new optional service/specialty/matricule/fonction fields", async () => {
+  it("accepts the optional service/specialty fields", async () => {
     const dto = plainToInstance(CreateStaffDto, {
       ...validBase,
       service: "Cardiologie",
       specialty: "Cardiologie interventionnelle",
-      matricule: "MED-99382",
-      fonction: "Médecin Chef Adjoint",
     });
     const errors = await validate(dto);
     expect(errors).toHaveLength(0);
   });
 
-  it("stays valid without service/specialty/matricule/fonction (backward compatibility)", async () => {
+  it("stays valid without service/specialty (backward compatibility)", async () => {
     const dto = plainToInstance(CreateStaffDto, validBase);
     const errors = await validate(dto);
     expect(errors).toHaveLength(0);

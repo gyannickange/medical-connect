@@ -3,6 +3,7 @@ import * as bcrypt from "bcrypt";
 import type { Tenant, User } from "@shared/schema";
 import { TenantsService } from "../tenants/tenants.service";
 import { UsersRepository } from "../identity/users.repository";
+import { RolesService } from "../roles/roles.service";
 import { normalizeUsername } from "../../lib/exceptions";
 import { CreatePlatformTenantDto } from "./dto/create-platform-tenant.dto";
 
@@ -16,7 +17,8 @@ export interface CreateTenantWithAdminResult {
 export class PlatformService {
   constructor(
     private readonly tenantsService: TenantsService,
-    private readonly usersRepository: UsersRepository
+    private readonly usersRepository: UsersRepository,
+    private readonly rolesService: RolesService
   ) {}
 
   async createTenantWithAdmin(
@@ -38,6 +40,8 @@ export class PlatformService {
       settings: dto.settings ?? null,
       isActive: dto.isActive,
     });
+
+    await this.rolesService.seedSystemRoles(tenant.id);
 
     const hashedPassword = await bcrypt.hash(dto.adminPassword, 10);
     const adminUser = await this.usersRepository.create({

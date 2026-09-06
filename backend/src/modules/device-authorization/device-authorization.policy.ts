@@ -3,15 +3,17 @@ import { BasePolicy } from "../auth/policies/base.policy";
 
 @Injectable()
 export class DeviceAuthorizationPolicy extends BasePolicy {
-  list(): boolean {
-    return this.isAdminOrManager();
+  protected readonly module = "deviceAuthorization" as const;
+
+  list(): Promise<boolean> {
+    return this.can("list");
   }
 
-  approve(): boolean {
-    return this.isAdmin();
+  approve(): Promise<boolean> {
+    return this.can("approve");
   }
 
-  revoke(): boolean {
-    return this.isAdmin();
+  revoke(): Promise<boolean> {
+    return this.can("revoke");
   }
 }

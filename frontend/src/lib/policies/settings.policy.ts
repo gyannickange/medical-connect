@@ -1,23 +1,21 @@
 import { BasePolicy } from "./base.policy";
 
 export class SettingsPolicy extends BasePolicy {
+  protected readonly module = "settings" as const;
+
   canView(): boolean {
-    // Only admin and manager can view settings
-    return this.isAdminOrManager();
+    return this.can("view");
   }
 
   canCreate(): boolean {
-    // Only admin can create
-    return this.isAdmin();
+    return this.can("create");
   }
 
   canUpdate(): boolean {
-    // Only admin can update
-    return this.isAdmin();
+    return this.can("update");
   }
 
   canDelete(): boolean {
-    // Only admin can delete
-    return this.isAdmin();
+    return this.can("delete");
   }
 }

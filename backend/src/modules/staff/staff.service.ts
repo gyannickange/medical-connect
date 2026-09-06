@@ -1,13 +1,19 @@
-import { Injectable } from "@nestjs/common";
+import { ForbiddenException, Injectable } from "@nestjs/common";
 import type { PaginationOptions } from "../../lib/pagination";
 import type { User, InsertUser } from "@shared/schema";
 import { normalizeUsername } from "../../lib/exceptions";
 import * as bcrypt from "bcrypt";
 import { UsersRepository } from "../identity/users.repository";
+import { RolesService } from "../roles/roles.service";
+import { SequenceCounterService } from "../../lib/sequence-counter.service";
 
 @Injectable()
 export class StaffService {
-  constructor(private readonly usersRepository: UsersRepository) {}
+  constructor(
+    private readonly usersRepository: UsersRepository,
+    private readonly rolesService: RolesService,
+    private readonly sequenceCounterService: SequenceCounterService
+  ) {}
 
   async findByTenant(
     tenantId: string,
@@ -18,11 +24,16 @@ export class StaffService {
   }
 
   async create(data: InsertUser): Promise<Omit<User, "password">> {
+    if (data.role) {
+      await this.assertValidRole(data.role, data.tenantId);
+    }
     const hashedPassword = await bcrypt.hash(data.password, 10);
+    const matricule = await this.generateMatricule(data.tenantId);
     const user = await this.usersRepository.create({
       ...data,
       username: normalizeUsername(data.username),
       password: hashedPassword,
+      matricule,
     });
     return this.sanitizeUser(user);
   }
@@ -32,7 +43,10 @@ export class StaffService {
     tenantId: string,
     data: Partial<InsertUser>
   ): Promise<Omit<User, "password">> {
-    const { password, ...updates } = data;
+    if (data.role) {
+      await this.assertValidRole(data.role, tenantId);
+    }
+    const { password, matricule, ...updates } = data;
     const hashedPassword = password ? await bcrypt.hash(password, 10) : undefined;
     const user = await this.usersRepository.update(id, tenantId, {
       ...updates,
@@ -54,6 +68,17 @@ export class StaffService {
 
   getPhotoUrl(id: string, tenantId: string) {
     return this.usersRepository.getPhotoUrl(id, tenantId);
+  }
+
+  private async assertValidRole(role: string, tenantId: string): Promise<void> {
+    await this.rolesService.findById(role, tenantId).catch(() => {
+      throw new ForbiddenException(`Role "${role}" does not exist for this tenant`);
+    });
+  }
+
+  private async generateMatricule(tenantId: string): Promise<string> {
+    const sequence = await this.sequenceCounterService.next(tenantId, "staff");
+    return String(sequence).padStart(5, "0");
   }
 
   private sanitizeUser(user: User): Omit<User, "password"> {

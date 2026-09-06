@@ -53,10 +53,15 @@ const FileAttente = lazy(() => import("./pages/file-attente"));
 const QueueRegister = lazy(() => import("./pages/file-attente/new"));
 const QueueEntryDetails = lazy(() => import("./pages/file-attente/show"));
 const FileAttenteArchive = lazy(() => import("./pages/file-attente/archive"));
-const Staff = lazy(() => import("./pages/Staff"));
+const Staff = lazy(() => import("./pages/staff"));
+const NewStaff = lazy(() => import("./pages/staff/new"));
+const StaffDetails = lazy(() => import("./pages/staff/show"));
+const RolesPage = lazy(() => import("./pages/roles"));
 const Settings = lazy(() => import("./pages/Settings"));
 const ServicesManager = lazy(() => import("./pages/settings/services"));
 const ServiceForm = lazy(() => import("./pages/settings/service-form"));
+const SpecialtiesManager = lazy(() => import("./pages/settings/specialties"));
+const SpecialtyForm = lazy(() => import("./pages/settings/specialty-form"));
 const AuditLogs = lazy(() => import("./pages/AuditLogs"));
 const Login = lazy(() => import("./pages/Login"));
 const PlatformAdmin = lazy(() => import("./pages/PlatformAdmin"));
@@ -341,10 +346,31 @@ function Router() {
             </Layout>
           </ProtectedRoute>
         </Route>
+        <Route path="/staff/new">
+          <ProtectedRoute>
+            <Layout>
+              <NewStaff />
+            </Layout>
+          </ProtectedRoute>
+        </Route>
+        <Route path="/staff/:id">
+          <ProtectedRoute>
+            <Layout>
+              <StaffDetails />
+            </Layout>
+          </ProtectedRoute>
+        </Route>
         <Route path="/staff">
           <ProtectedRoute>
             <Layout>
               <Staff />
+            </Layout>
+          </ProtectedRoute>
+        </Route>
+        <Route path="/roles">
+          <ProtectedRoute>
+            <Layout>
+              <RolesPage />
             </Layout>
           </ProtectedRoute>
         </Route>
@@ -373,6 +399,27 @@ function Router() {
           <ProtectedRoute>
             <Layout>
               <ServiceForm />
+            </Layout>
+          </ProtectedRoute>
+        </Route>
+        <Route path="/settings/specialties">
+          <ProtectedRoute>
+            <Layout>
+              <SpecialtiesManager />
+            </Layout>
+          </ProtectedRoute>
+        </Route>
+        <Route path="/settings/specialties/new">
+          <ProtectedRoute>
+            <Layout>
+              <SpecialtyForm />
+            </Layout>
+          </ProtectedRoute>
+        </Route>
+        <Route path="/settings/specialties/:id/edit">
+          <ProtectedRoute>
+            <Layout>
+              <SpecialtyForm />
             </Layout>
           </ProtectedRoute>
         </Route>

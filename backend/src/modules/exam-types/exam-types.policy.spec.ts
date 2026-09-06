@@ -1,37 +1,27 @@
 import { ExamTypesPolicy } from "./exam-types.policy";
+import type { Role } from "@shared/schema";
 
-function policyFor(role: string): ExamTypesPolicy {
+function policyFor(role: string, permissions: Record<string, boolean>): ExamTypesPolicy {
   const policy = new ExamTypesPolicy();
+  policy.setRoleResolver(jest.fn().mockResolvedValue({ permissions: { examTypes: permissions } } as unknown as Role));
   policy.setUser({ id: "u1", username: "x", tenantId: "t1", role } as any);
   return policy;
 }
 
 describe("ExamTypesPolicy", () => {
-  it.each(["admin", "manager", "medecin", "infirmier", "laboratoire"])("%s can view", (role) => {
-    expect(policyFor(role).view()).toBe(true);
+  it("admin always passes regardless of the stored matrix", async () => {
+    const policy = policyFor("admin", { view: false, create: false, update: false, delete: false });
+    await expect(policy.view()).resolves.toBe(true);
+    await expect(policy.create()).resolves.toBe(true);
+    await expect(policy.update()).resolves.toBe(true);
+    await expect(policy.delete()).resolves.toBe(true);
   });
 
-  it.each(["accueil", "pharmacien", "cashier"])("%s cannot view", (role) => {
-    expect(policyFor(role).view()).toBe(false);
-  });
-
-  it.each(["admin", "manager"])("%s can create", (role) => {
-    expect(policyFor(role).create()).toBe(true);
-  });
-
-  it.each(["medecin", "infirmier", "laboratoire", "accueil"])("%s cannot create", (role) => {
-    expect(policyFor(role).create()).toBe(false);
-  });
-
-  it.each(["admin", "manager"])("%s can update", (role) => {
-    expect(policyFor(role).update()).toBe(true);
-  });
-
-  it.each(["admin", "manager"])("%s can delete", (role) => {
-    expect(policyFor(role).delete()).toBe(true);
-  });
-
-  it.each(["medecin", "infirmier", "laboratoire"])("%s cannot delete", (role) => {
-    expect(policyFor(role).delete()).toBe(false);
+  it("each method reads its own action entry independently", async () => {
+    const policy = policyFor("manager", { view: true, create: true, update: false, delete: false });
+    await expect(policy.view()).resolves.toBe(true);
+    await expect(policy.create()).resolves.toBe(true);
+    await expect(policy.update()).resolves.toBe(false);
+    await expect(policy.delete()).resolves.toBe(false);
   });
 });

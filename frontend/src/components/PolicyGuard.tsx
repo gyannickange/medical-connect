@@ -1,10 +1,10 @@
 import React, { ReactNode } from "react";
 import { usePolicy } from "@/hooks/usePolicy";
 import { BasePolicy } from "@/lib/policies/base.policy";
-import type { UserRole } from "@/lib/policies/policy.types";
+import type { PermissionsMatrix, UserRole } from "@/lib/policies/policy.types";
 
 interface PolicyGuardProps {
-  policy: new (userRole: UserRole | null) => BasePolicy;
+  policy: new (userRole: UserRole | null, permissions?: PermissionsMatrix | null) => BasePolicy;
   action: string;
   children: ReactNode;
   fallback?: ReactNode;

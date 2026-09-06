@@ -3,19 +3,21 @@ import { BasePolicy } from "../auth/policies/base.policy";
 
 @Injectable()
 export class LabOrdersPolicy extends BasePolicy {
-  view(): boolean {
-    return this.isAdmin() || this.isManager() || this.isMedecin() || this.isInfirmier() || this.isLaboratoire();
+  protected readonly module = "labOrders" as const;
+
+  view(): Promise<boolean> {
+    return this.can("view");
   }
 
-  create(): boolean {
-    return this.isAdmin() || this.isManager() || this.isMedecin();
+  create(): Promise<boolean> {
+    return this.can("create");
   }
 
-  update(): boolean {
-    return this.isAdmin() || this.isManager() || this.isLaboratoire();
+  update(): Promise<boolean> {
+    return this.can("update");
   }
 
-  recordFollowUp(): boolean {
-    return this.isAdmin() || this.isManager() || this.isMedecin();
+  recordFollowUp(): Promise<boolean> {
+    return this.can("recordFollowUp");
   }
 }

@@ -3,7 +3,7 @@ import { z } from "zod";
 type Money = string;
 type MoneyInput = string | number;
 
-export interface User { id: string; username: string; password: string; firstName: string; lastName: string; email: string | null; role: "admin" | "manager" | "cashier" | "accueil" | "infirmier" | "medecin" | "laboratoire" | "pharmacien" | "platform_admin"; tenantId: string | null; isActive: boolean; service: string | null; specialty: string | null; matricule: string | null; fonction: string | null; photoS3Key: string | null; createdAt: string }
+export interface User { id: string; username: string; password: string; firstName: string; lastName: string; email: string | null; role: string; tenantId: string | null; isActive: boolean; service: string | null; specialty: string | null; matricule: string | null; fonction: string | null; photoS3Key: string | null; createdAt: string }
 export interface InsertUser { id?: string; username: string; password: string; firstName: string; lastName: string; email?: string | null; role?: User["role"]; tenantId: string | null; isActive?: boolean; service?: string | null; specialty?: string | null; matricule?: string | null; fonction?: string | null }
 export interface Tenant { id: string; name: string; address: string | null; phone: string | null; email: string | null; settings: unknown; isActive: boolean; createdAt: string }
 export interface InsertTenant { id?: string; name: string; address?: string | null; phone?: string | null; email?: string | null; settings?: unknown; isActive?: boolean }
@@ -70,6 +70,41 @@ export type RoomEffectiveStatus = "occupee" | "reservee" | "disponible" | "en_ma
 export interface Room { id: string; tenantId: string; number: string; type: string; floor: string | null; capacity: number; equipment: string[]; notes: string | null; status: RoomStatus; createdAt: string; updatedAt: string }
 export interface InsertRoom { id?: string; number: string; type: string; floor?: string | null; capacity: number; equipment?: string[]; notes?: string | null; status?: RoomStatus; tenantId: string }
 
+export type PermissionModule =
+  | "patients"
+  | "consultations"
+  | "queue"
+  | "labOrders"
+  | "examTypes"
+  | "prescriptions"
+  | "rooms"
+  | "staff"
+  | "audit"
+  | "settings"
+  | "services"
+  | "specialties"
+  | "deviceAuthorization"
+  | "roles";
+
+export interface Role {
+  id: string;
+  tenantId: string;
+  name: string;
+  description: string | null;
+  isSystemRole: boolean;
+  permissions: Record<PermissionModule, Record<string, boolean>>;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface InsertRole {
+  id?: string;
+  name: string;
+  description?: string | null;
+  permissions: Record<PermissionModule, Record<string, boolean>>;
+  tenantId: string;
+}
+
 export type ExamTypeCategory = "laboratoire" | "imagerie" | "explorations_fonctionnelles" | "autre";
 export interface ExamTypeParameter { name: string; unit: string | null; referenceRange: string | null }
 export interface ExamType { id: string; tenantId: string; name: string; category: ExamTypeCategory; isActive: boolean; parameters: ExamTypeParameter[]; createdAt: string; updatedAt: string }
@@ -77,6 +112,9 @@ export interface InsertExamType { id?: string; name: string; category: ExamTypeC
 
 export interface Service { id: string; tenantId: string; name: string; isActive: boolean; createdAt: string; updatedAt: string }
 export interface InsertService { id?: string; name: string; isActive?: boolean; tenantId: string }
+
+export interface Specialty { id: string; tenantId: string; name: string; isActive: boolean; createdAt: string; updatedAt: string }
+export interface InsertSpecialty { id?: string; name: string; isActive?: boolean; tenantId: string }
 
 export interface Consultation { id: string; tenantId: string; number: string | null; patientId: string; scheduledAt: string; specialty: string; assignedDoctorId: string; roomId: string | null; priority: ConsultationPriority; reason: string; nurseNotes: string | null; symptoms: string | null; vitals: VitalSigns | null; vitalsRecordedAt: string | null; relevantHistory: string[]; presentIllnessHistory: string | null; physicalExam: PhysicalExam | null; diagnosisPrincipal: DiagnosisPrincipal | null; diagnosisSecondary: string[]; diagnosisHypothesis: string | null; medicalConsultationSavedAt: string | null; carePlan: CarePlan | null; carePlanSavedAt: string | null; examInterpretation: string | null; examDecision: string | null; examsReviewedAt: string | null; closedAt: string | null; status: ConsultationStatus; createdAt: string; updatedAt: string }
 export interface InsertConsultation { id?: string; patientId: string; scheduledAt: string; specialty: string; assignedDoctorId: string; roomId?: string | null; priority?: ConsultationPriority; reason: string; nurseNotes?: string | null; tenantId: string }
@@ -244,7 +282,7 @@ export interface AppNotification { id: string; tenantId: string; recipientUserId
 const id = z.string().uuid().optional();
 const money = z.union([z.string(), z.number()]);
 const nullableString = z.string().nullable().optional();
-export const insertUserSchema = z.object({ id, username: z.string().min(1), password: z.string().min(1), firstName: z.string().min(1), lastName: z.string().min(1), email: nullableString, role: z.enum(["admin", "manager", "cashier", "accueil", "infirmier", "medecin", "laboratoire", "pharmacien", "platform_admin"]).optional(), tenantId: z.string().nullable(), isActive: z.boolean().optional(), service: nullableString, specialty: nullableString, matricule: nullableString, fonction: nullableString });
+export const insertUserSchema = z.object({ id, username: z.string().min(1), password: z.string().min(1), firstName: z.string().min(1), lastName: z.string().min(1), email: nullableString, role: z.string().optional(), tenantId: z.string().nullable(), isActive: z.boolean().optional(), service: nullableString, specialty: nullableString, matricule: nullableString, fonction: nullableString });
 export const insertTenantSchema = z.object({ id, name: z.string().min(1), address: nullableString, phone: nullableString, email: nullableString, settings: z.unknown().optional(), isActive: z.boolean().optional() });
 export const insertCategorySchema = z.object({ id, name: z.string().min(1), description: nullableString, tenantId: z.string(), parentCategoryId: nullableString, taxRate: money.nullable().optional(), isDefault: z.boolean().optional() });
 export const insertRayonSchema = z.object({ id, name: z.string().trim().min(1), description: nullableString, tenantId: z.string() });
@@ -252,8 +290,10 @@ const emergencyContactSchema = z.object({ name: z.string().min(1), relation: z.s
 const pediatricInfoSchema = z.object({ fatherName: nullableString, motherName: nullableString, legalGuardian: nullableString, guardianPhone: nullableString, guardianRelation: nullableString, guardianRelationOther: nullableString, weightKg: nullableString, heightCm: nullableString, birthInfo: nullableString, vaccinations: nullableString }).nullable().optional();
 export const insertPatientSchema = z.object({ id, lastName: z.string().min(1), firstName: z.string().min(1), dateOfBirth: z.string().min(1), sex: z.enum(["M", "F"]), primaryPhone: z.string().min(1), residenceAddress: z.string().min(1), usualName: nullableString, birthPlace: nullableString, nationality: nullableString, profession: nullableString, maritalStatus: nullableString, idDocumentType: z.enum(["cni", "passeport", "permis", "anip", "autre"]).nullable().optional(), idDocumentTypeOther: nullableString, idDocumentNumber: nullableString, idDocumentExpiry: nullableString, email: nullableString, secondaryPhone: nullableString, residenceZone: nullableString, fullAddress: nullableString, emergencyContact: emergencyContactSchema, bloodGroup: nullableString, allergyKnowledge: z.enum(["aucune_connue", "allergies_connues", "non_renseigne"]).optional(), allergyDetails: nullableString, medicalHistory: nullableString, surgicalHistory: nullableString, chronicDiseases: nullableString, currentTreatments: nullableString, disabilities: nullableString, facilityService: nullableString, referringDoctorId: nullableString, patientType: z.enum(["externe", "hospitalise", "urgence"]).optional(), paymentMode: z.enum(["assurance", "mutuelle", "tiers_payant", "comptant"]).nullable().optional(), insuranceName: nullableString, insuranceNumber: nullableString, financiallyResponsible: nullableString, pediatricInfo: pediatricInfoSchema, tenantId: z.string() });
 export const insertServiceSchema = z.object({ id, name: z.string().min(1), isActive: z.boolean().optional(), tenantId: z.string() });
+export const insertSpecialtySchema = z.object({ id, name: z.string().min(1), isActive: z.boolean().optional(), tenantId: z.string() });
 export const insertConsultationSchema = z.object({ id, patientId: z.string().min(1), scheduledAt: z.union([z.date(), z.string()]), specialty: z.string().min(1), assignedDoctorId: z.string().min(1), roomId: nullableString, priority: z.enum(["normal", "urgent", "tres_urgent"]).optional(), reason: z.string().min(1), nurseNotes: nullableString, tenantId: z.string() });
 export const insertRoomSchema = z.object({ id, number: z.string().min(1), type: z.string().min(1), floor: nullableString, capacity: z.number().int().min(1), equipment: z.array(z.string()).optional(), notes: nullableString, status: z.enum(["disponible", "en_maintenance"]).optional(), tenantId: z.string() });
+export const insertRoleSchema = z.object({ id, name: z.string().min(1), description: nullableString, permissions: z.record(z.string(), z.record(z.string(), z.boolean())), tenantId: z.string() });
 export const insertProductSchema = z.object({ id, name: z.string().min(1), description: nullableString, price: money, cost: money, barcode: nullableString, qrCode: nullableString, categoryId: nullableString, supplierId: nullableString, rayonId: nullableString, tenantId: z.string(), minStockAlert: z.number().int().optional(), isActive: z.boolean().optional() });
 export const insertSupplierSchema = z.object({ id, name: z.string().min(1), contactName: nullableString, phone: nullableString, email: nullableString, tenantId: z.string(), isActive: z.boolean().optional() });
 export const insertCustomerSchema = z.object({ id, firstName: z.string().min(1), lastName: z.string().min(1), phone: nullableString, email: nullableString, address: nullableString, tenantId: z.string(), totalPurchases: money.optional() });

@@ -3,24 +3,21 @@ import { BasePolicy } from "../auth/policies/base.policy";
 
 @Injectable()
 export class StaffPolicy extends BasePolicy {
-  view(): boolean {
-    // Admin and manager can view
-    return this.isAdminOrManager();
+  protected readonly module = "staff" as const;
+
+  view(): Promise<boolean> {
+    return this.can("view");
   }
 
-  create(): boolean {
-    // Only admin can create
-    return this.isAdmin();
+  create(): Promise<boolean> {
+    return this.can("create");
   }
 
-  update(): boolean {
-    // Only admin can update
-    return this.isAdmin();
+  update(): Promise<boolean> {
+    return this.can("update");
   }
 
-  delete(): boolean {
-    // Only admin can delete
-    return this.isAdmin();
+  delete(): Promise<boolean> {
+    return this.can("delete");
   }
 }
-

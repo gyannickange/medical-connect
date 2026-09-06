@@ -7,8 +7,6 @@ import {
   Search,
   ChevronDown,
   ChevronUp,
-  Eye,
-  X,
 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
@@ -29,12 +27,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useTranslation } from "../lib/i18n";
@@ -49,8 +41,6 @@ export default function AuditLogs() {
   const { currentTenant } = useTenant();
   const auditPolicy = usePolicy(AuditPolicy);
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
-  const [showDetailModal, setShowDetailModal] = useState(false);
-  const [selectedLog, setSelectedLog] = useState<AuditLogWithPatient | null>(null);
 
   // Filters
   const [filters, setFilters] = useState({
@@ -84,11 +74,6 @@ export default function AuditLogs() {
       newExpanded.add(logId);
     }
     setExpandedRows(newExpanded);
-  };
-
-  const handleViewDetails = (log: AuditLogWithPatient) => {
-    setSelectedLog(log);
-    setShowDetailModal(true);
   };
 
   const filteredLogs = (auditLogs as AuditLogWithPatient[]).filter((log) => {
@@ -334,7 +319,6 @@ export default function AuditLogs() {
                     <TableHead>{t("entityId")}</TableHead>
                     <TableHead>{t("patientConcerned")}</TableHead>
                     <TableHead>{t("status")}</TableHead>
-                    <TableHead className="w-20"></TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -364,18 +348,10 @@ export default function AuditLogs() {
                         </TableCell>
                         <TableCell>{log.patientName ?? "-"}</TableCell>
                         <TableCell>{getStatusBadge(log.status)}</TableCell>
-                        <TableCell>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleViewDetails(log)}>
-                            <Eye className="w-4 h-4" />
-                          </Button>
-                        </TableCell>
                       </TableRow>
                       {expandedRows.has(log.id) && (
                         <TableRow>
-                          <TableCell colSpan={9} className="bg-muted/30">
+                          <TableCell colSpan={8} className="bg-muted/30">
                             <div className="p-4 space-y-2">
                               {log.errorMessage && (
                                 <div>
@@ -383,6 +359,30 @@ export default function AuditLogs() {
                                     {t("error")}:
                                   </strong>{" "}
                                   <span>{log.errorMessage}</span>
+                                </div>
+                              )}
+                              {log.requestBody != null && (
+                                <div className="text-xs">
+                                  <strong>{t("requestBody")}:</strong>
+                                  <pre className="mt-1 p-2 bg-background rounded overflow-auto">
+                                    {String(JSON.stringify(log.requestBody as any, null, 2) || "")}
+                                  </pre>
+                                </div>
+                              )}
+                              {Boolean(log.responseBody) && (
+                                <div className="text-xs">
+                                  <strong>{t("responseBody")}:</strong>
+                                  <pre className="mt-1 p-2 bg-background rounded overflow-auto">
+                                    {String(JSON.stringify(log.responseBody as any, null, 2) || "")}
+                                  </pre>
+                                </div>
+                              )}
+                              {log.changes != null && (
+                                <div className="text-xs">
+                                  <strong>{t("changes")}:</strong>
+                                  <pre className="mt-1 p-2 bg-background rounded overflow-auto">
+                                    {String(JSON.stringify(log.changes as any, null, 2) || "")}
+                                  </pre>
                                 </div>
                               )}
                               {log.metadata != null && (
@@ -411,142 +411,6 @@ export default function AuditLogs() {
           </CardContent>
         </Card>
 
-        {/* Detail Modal */}
-        <Dialog open={showDetailModal} onOpenChange={setShowDetailModal}>
-          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle className="flex items-center justify-between">
-                <span>{t("auditLogDetails")}</span>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setShowDetailModal(false)}>
-                  <X className="w-4 h-4" />
-                </Button>
-              </DialogTitle>
-            </DialogHeader>
-            {selectedLog && (
-              <div className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="text-sm font-medium">ID</label>
-                    <p className="font-mono text-xs">{selectedLog.id}</p>
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium">
-                      {t("timestamp")}
-                    </label>
-                    <p>{formatDate(selectedLog.createdAt)}</p>
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium">
-                      {t("user")}
-                    </label>
-                    <p className="font-mono text-xs">{selectedLog.userId}</p>
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium">
-                      {t("action")}
-                    </label>
-                    <p>{getActionBadge(selectedLog.action)}</p>
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium">
-                      {t("entityType")}
-                    </label>
-                    <p>{selectedLog.entityType}</p>
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium">
-                      {t("entityId")}
-                    </label>
-                    <p className="font-mono text-xs">
-                      {selectedLog.entityId || "-"}
-                    </p>
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium">
-                      {t("status")}
-                    </label>
-                    <p>{getStatusBadge(selectedLog.status)}</p>
-                  </div>
-                  {selectedLog.errorMessage && (
-                    <div>
-                      <label className="text-sm font-medium text-destructive">
-                        {t("errorMessage")}
-                      </label>
-                      <p className="text-destructive">
-                        {selectedLog.errorMessage}
-                      </p>
-                    </div>
-                  )}
-                </div>
-
-                {selectedLog.requestBody != null && (
-                  <div>
-                    <label className="text-sm font-medium">
-                      {t("requestBody")}
-                    </label>
-                    <pre className="mt-1 p-3 bg-muted rounded overflow-auto text-xs">
-                      {String(
-                        JSON.stringify(
-                          selectedLog.requestBody as any,
-                          null,
-                          2
-                        ) || ""
-                      )}
-                    </pre>
-                  </div>
-                )}
-
-                {Boolean(selectedLog.responseBody) && (
-                  <div>
-                    <label className="text-sm font-medium">
-                      {t("responseBody")}
-                    </label>
-                    <pre className="mt-1 p-3 bg-muted rounded overflow-auto text-xs">
-                      {String(
-                        JSON.stringify(
-                          selectedLog.responseBody as any,
-                          null,
-                          2
-                        ) || ""
-                      )}
-                    </pre>
-                  </div>
-                )}
-
-                {selectedLog.changes != null && (
-                  <div>
-                    <label className="text-sm font-medium">
-                      {t("changes")}
-                    </label>
-                    <pre className="mt-1 p-3 bg-muted rounded overflow-auto text-xs">
-                      {String(
-                        JSON.stringify(selectedLog.changes as any, null, 2) ||
-                          ""
-                      )}
-                    </pre>
-                  </div>
-                )}
-
-                {selectedLog.metadata != null && (
-                  <div>
-                    <label className="text-sm font-medium">
-                      {t("metadata")}
-                    </label>
-                    <pre className="mt-1 p-3 bg-muted rounded overflow-auto text-xs">
-                      {String(
-                        JSON.stringify(selectedLog.metadata as any, null, 2) ||
-                          ""
-                      )}
-                    </pre>
-                  </div>
-                )}
-              </div>
-            )}
-          </DialogContent>
-        </Dialog>
       </div>
     </PolicyGuard>
   );

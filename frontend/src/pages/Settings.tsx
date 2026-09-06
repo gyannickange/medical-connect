@@ -26,6 +26,7 @@ import { useSettings } from "@/hooks/useSettings";
 import { usePolicy } from "@/hooks/usePolicy";
 import { SettingsPolicy } from "@/lib/policies/settings.policy";
 import { ServicesPolicy } from "@/lib/policies/services.policy";
+import { SpecialtiesPolicy } from "@/lib/policies/specialties.policy";
 import { PolicyGuard } from "@/components/PolicyGuard";
 import { useLocation } from "wouter";
 import {
@@ -362,6 +363,24 @@ export default function Settings() {
             <p className="text-sm text-muted-foreground">{t("manageServicesCardDescription")}</p>
             <Button variant="outline" onClick={() => setLocation("/settings/services")} data-testid="button-manage-services">
               {t("manageServicesAction")}
+            </Button>
+          </CardContent>
+        </Card>
+      </PolicyGuard>
+
+      {/* Medical Specialties */}
+      <PolicyGuard policy={SpecialtiesPolicy} action="canView">
+        <Card className="glass-card">
+          <CardHeader>
+            <CardTitle className="flex items-center">
+              <Building2 className="w-5 h-5 mr-2 text-primary" />
+              {t("manageSpecialtiesCardTitle")}
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="flex items-center justify-between gap-4">
+            <p className="text-sm text-muted-foreground">{t("manageSpecialtiesCardDescription")}</p>
+            <Button variant="outline" onClick={() => setLocation("/settings/specialties")} data-testid="button-manage-specialties">
+              {t("manageSpecialtiesAction")}
             </Button>
           </CardContent>
         </Card>

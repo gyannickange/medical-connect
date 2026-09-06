@@ -7,10 +7,12 @@ import { ConsultationsModule } from "./modules/consultations/consultations.modul
 import { LabOrdersModule } from "./modules/lab-orders/lab-orders.module";
 import { ExamTypesModule } from "./modules/exam-types/exam-types.module";
 import { ServicesModule } from "./modules/services/services.module";
+import { SpecialtiesModule } from "./modules/specialties/specialties.module";
 import { PrescriptionsModule } from "./modules/prescriptions/prescriptions.module";
 import { QueueModule } from "./modules/queue/queue.module";
 import { StaffModule } from "./modules/staff/staff.module";
 import { RoomsModule } from "./modules/rooms/rooms.module";
+import { RolesModule } from "./modules/roles/roles.module";
 import { SettingsModule } from "./modules/settings/settings.module";
 import { SyncModule } from "./modules/sync/sync.module";
 import { PeersModule } from "./modules/peers/peers.module";
@@ -35,10 +37,12 @@ import { AuditInterceptor } from "./common/interceptors/audit.interceptor";
     LabOrdersModule,
     ExamTypesModule,
     ServicesModule,
+    SpecialtiesModule,
     PrescriptionsModule,
     QueueModule,
     StaffModule,
     RoomsModule,
+    RolesModule,
     SettingsModule,
     SyncModule,
     PeersModule,

@@ -3,8 +3,9 @@ import { BasePolicy } from "../auth/policies/base.policy";
 
 @Injectable()
 export class AuditPolicy extends BasePolicy {
-  view(): boolean {
-    // Only admin can view audit logs
-    return this.isAdmin();
+  protected readonly module = "audit" as const;
+
+  view(): Promise<boolean> {
+    return this.can("view");
   }
 }

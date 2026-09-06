@@ -1,11 +1,13 @@
 import { BasePolicy } from "./base.policy";
 
 export class QueuePolicy extends BasePolicy {
+  protected readonly module = "queue" as const;
+
   canView(): boolean {
-    return this.isAdmin() || this.isManager() || this.isAccueil() || this.isInfirmier() || this.isMedecin();
+    return this.can("view");
   }
 
   canAppendEvent(): boolean {
-    return this.canView();
+    return this.can("appendEvent");
   }
 }

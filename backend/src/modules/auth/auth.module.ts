@@ -9,11 +9,13 @@ import { PolicyGuard } from "./guards/policy.guard";
 import { PolicyService } from "./policies/policy.service";
 import { CouchProxyAuthService } from "./couch-proxy-auth.service";
 import { IdentityModule } from "../identity/identity.module";
+import { RolesRepositoryModule } from "../roles/roles.repository.module";
 
 @Module({
   imports: [
     PassportModule,
     IdentityModule,
+    RolesRepositoryModule,
     JwtModule.register({
       secret: process.env.JWT_SECRET || "your-secret-key-change-in-production",
       signOptions: {

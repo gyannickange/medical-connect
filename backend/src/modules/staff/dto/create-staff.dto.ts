@@ -4,7 +4,6 @@ import {
   IsOptional,
   IsBoolean,
   IsEmail,
-  IsIn,
   IsUUID,
 } from "class-validator";
 
@@ -35,8 +34,7 @@ export class CreateStaffDto {
 
   @IsString()
   @IsOptional()
-  @IsIn(["admin", "manager", "cashier", "accueil", "infirmier", "medecin", "laboratoire", "pharmacien"])
-  role?: "admin" | "manager" | "cashier" | "accueil" | "infirmier" | "medecin" | "laboratoire" | "pharmacien";
+  role?: string;
 
   @IsString()
   @IsNotEmpty()
@@ -53,12 +51,4 @@ export class CreateStaffDto {
   @IsString()
   @IsOptional()
   specialty?: string;
-
-  @IsString()
-  @IsOptional()
-  matricule?: string;
-
-  @IsString()
-  @IsOptional()
-  fonction?: string;
 }
