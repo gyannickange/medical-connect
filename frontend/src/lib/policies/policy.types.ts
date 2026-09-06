@@ -1,3 +1,5 @@
+import type { PermissionModule } from "@shared/schema";
+
 export type UserRole =
   | "admin"
   | "manager"
@@ -11,3 +13,4 @@ export type UserRole =
 
 export type PolicyAction = string;
 
+export type PermissionsMatrix = Record<PermissionModule, Record<string, boolean>>;

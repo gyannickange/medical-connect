@@ -1,10 +1,20 @@
-import type { UserRole } from "./policy.types";
+import type { PermissionsMatrix, UserRole } from "./policy.types";
+import type { PermissionModule } from "@shared/schema";
 
 export abstract class BasePolicy {
   protected userRole: UserRole | null;
+  protected permissions: PermissionsMatrix | null;
+  protected readonly module?: PermissionModule;
 
-  constructor(userRole: UserRole | null) {
+  constructor(userRole: UserRole | null, permissions: PermissionsMatrix | null = null) {
     this.userRole = userRole;
+    this.permissions = permissions;
+  }
+
+  protected can(action: string): boolean {
+    if (this.userRole === "admin") return true;
+    if (!this.module || !this.permissions) return false;
+    return this.permissions[this.module]?.[action] === true;
   }
 
   protected hasRole(role: UserRole): boolean {
@@ -17,37 +27,5 @@ export abstract class BasePolicy {
 
   protected isAdmin(): boolean {
     return this.hasRole("admin");
-  }
-
-  protected isManager(): boolean {
-    return this.hasRole("manager");
-  }
-
-  protected isCashier(): boolean {
-    return this.hasRole("cashier");
-  }
-
-  protected isAccueil(): boolean {
-    return this.hasRole("accueil");
-  }
-
-  protected isInfirmier(): boolean {
-    return this.hasRole("infirmier");
-  }
-
-  protected isMedecin(): boolean {
-    return this.hasRole("medecin");
-  }
-
-  protected isLaboratoire(): boolean {
-    return this.hasRole("laboratoire");
-  }
-
-  protected isPharmacien(): boolean {
-    return this.hasRole("pharmacien");
-  }
-
-  protected isAdminOrManager(): boolean {
-    return this.hasAnyRole("admin", "manager");
   }
 }
