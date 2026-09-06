@@ -4,6 +4,7 @@ import {
   UserCheck,
   ClipboardList,
   Settings,
+  ShieldCheck,
   Store,
   Check,
   ChevronsUpDown,
@@ -28,6 +29,7 @@ import { QueuePolicy } from "@/lib/policies/queue.policy";
 import { LabOrdersPolicy } from "@/lib/policies/labOrders.policy";
 import { PrescriptionsPolicy } from "@/lib/policies/prescriptions.policy";
 import { RoomsPolicy } from "@/lib/policies/rooms.policy";
+import { RolesPolicy } from "@/lib/policies/roles.policy";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -50,8 +52,9 @@ export const Sidebar: React.FC = () => {
   const labOrdersPolicy = usePolicy(LabOrdersPolicy);
   const prescriptionsPolicy = usePolicy(PrescriptionsPolicy);
   const roomsPolicy = usePolicy(RoomsPolicy);
+  const rolesPolicy = usePolicy(RolesPolicy);
 
-  const menuItems = [
+  const mainItems = [
     { icon: LayoutDashboard, label: t("dashboardNavLabel"), path: "/" },
     ...(patientsPolicy.canView()
       ? [{ icon: Users, label: t("patients"), path: "/patients" }]
@@ -71,9 +74,15 @@ export const Sidebar: React.FC = () => {
     ...(roomsPolicy.canView()
       ? [{ icon: DoorOpen, label: t("salles"), path: "/salles" }]
       : []),
+  ];
+
+  const adminItems = [
     // Only show staff menu if user can view staff
     ...(staffPolicy.canView()
       ? [{ icon: UserCheck, label: t("staff"), path: "/staff" }]
+      : []),
+    ...(rolesPolicy.canView()
+      ? [{ icon: ShieldCheck, label: t("rolesAndPermissions"), path: "/roles" }]
       : []),
     // Only show settings menu if user can view settings
     ...(settingsPolicy.canView()
@@ -117,7 +126,7 @@ export const Sidebar: React.FC = () => {
         className="flex-1 overflow-y-auto px-3 py-5 lg:px-4"
         data-testid="navigation-menu">
         <div className="space-y-1">
-          {menuItems.map((item) => {
+          {mainItems.map((item) => {
             const Icon = item.icon;
             const active = isActive(item.path);
 
@@ -137,6 +146,33 @@ export const Sidebar: React.FC = () => {
             );
           })}
         </div>
+
+        {adminItems.length > 0 && (
+          <div className="space-y-1 mt-5">
+            <p className="hidden lg:block px-3 pb-1 text-[11px] font-semibold text-muted-foreground">
+              {t("administrationSectionLabel")}
+            </p>
+            {adminItems.map((item) => {
+              const Icon = item.icon;
+              const active = isActive(item.path);
+
+              return (
+                <Link
+                  key={item.path}
+                  href={item.path}
+                  className={`nav-item min-h-[42px] flex items-center gap-3 text-sm ${
+                    active ? "active" : ""
+                  }`}
+                  data-testid={`nav-${item.path.slice(1) || "dashboard"}`}>
+                  <Icon className="w-4 h-4" />
+                  <span className="hidden lg:block font-medium">
+                    {item.label}
+                  </span>
+                </Link>
+              );
+            })}
+          </div>
+        )}
       </nav>
 
       {/* Account switcher */}
