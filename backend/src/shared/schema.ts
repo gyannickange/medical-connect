@@ -7,7 +7,7 @@ export interface CouchDocument {
   tenantId: string;
 }
 
-export interface User { id: string; username: string; password: string; firstName: string; lastName: string; email: string | null; role: "admin" | "manager" | "cashier" | "accueil" | "infirmier" | "medecin" | "laboratoire" | "pharmacien" | "platform_admin"; tenantId: string | null; isActive: boolean; service: string | null; specialty: string | null; matricule: string | null; fonction: string | null; photoS3Key: string | null; createdAt: Date }
+export interface User { id: string; username: string; password: string; firstName: string; lastName: string; email: string | null; role: string; tenantId: string | null; isActive: boolean; service: string | null; specialty: string | null; matricule: string | null; fonction: string | null; photoS3Key: string | null; createdAt: Date }
 export interface InsertUser { id?: string; username: string; password: string; firstName: string; lastName: string; email?: string | null; role?: User["role"]; tenantId: string | null; isActive?: boolean; service?: string | null; specialty?: string | null; matricule?: string | null; fonction?: string | null }
 
 export interface Tenant { id: string; name: string; address: string | null; phone: string | null; email: string | null; settings: unknown; isActive: boolean; createdAt: Date }
@@ -70,6 +70,40 @@ export type RoomEffectiveStatus = "occupee" | "reservee" | "disponible" | "en_ma
 
 export interface Room { id: string; tenantId: string; number: string; type: string; floor: string | null; capacity: number; equipment: string[]; notes: string | null; status: RoomStatus; createdAt: Date; updatedAt: Date }
 export interface InsertRoom { id?: string; number: string; type: string; floor?: string | null; capacity: number; equipment?: string[]; notes?: string | null; status?: RoomStatus; tenantId: string }
+
+export type PermissionModule =
+  | "patients"
+  | "consultations"
+  | "queue"
+  | "labOrders"
+  | "examTypes"
+  | "prescriptions"
+  | "rooms"
+  | "staff"
+  | "audit"
+  | "settings"
+  | "services"
+  | "deviceAuthorization"
+  | "roles";
+
+export interface Role {
+  id: string;
+  tenantId: string;
+  name: string;
+  description: string | null;
+  isSystemRole: boolean;
+  permissions: Record<PermissionModule, Record<string, boolean>>;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface InsertRole {
+  id?: string;
+  name: string;
+  description?: string | null;
+  permissions: Record<PermissionModule, Record<string, boolean>>;
+  tenantId: string;
+}
 
 export type ExamTypeCategory = "laboratoire" | "imagerie" | "explorations_fonctionnelles" | "autre";
 export interface ExamTypeParameter { name: string; unit: string | null; referenceRange: string | null }
@@ -257,7 +291,7 @@ export interface InsertAuditLog extends Omit<AuditLog, "id" | "createdAt" | "ent
 const id = z.string().uuid().optional();
 const nullableString = z.string().nullable().optional();
 
-export const insertUserSchema = z.object({ id, username: z.string().min(1), password: z.string().min(1), firstName: z.string().min(1), lastName: z.string().min(1), email: nullableString, role: z.enum(["admin", "manager", "cashier", "accueil", "infirmier", "medecin", "laboratoire", "pharmacien", "platform_admin"]).optional(), tenantId: z.string().nullable(), isActive: z.boolean().optional(), service: nullableString, specialty: nullableString, matricule: nullableString, fonction: nullableString });
+export const insertUserSchema = z.object({ id, username: z.string().min(1), password: z.string().min(1), firstName: z.string().min(1), lastName: z.string().min(1), email: nullableString, role: z.string().optional(), tenantId: z.string().nullable(), isActive: z.boolean().optional(), service: nullableString, specialty: nullableString, matricule: nullableString, fonction: nullableString });
 export const insertTenantSchema = z.object({ id, name: z.string().min(1), address: nullableString, phone: nullableString, email: nullableString, settings: z.unknown().optional(), isActive: z.boolean().optional() });
 const emergencyContactSchema = z.object({ name: z.string().min(1), relation: z.string().min(1), relationOther: nullableString, phone: z.string().min(1), address: nullableString, isPriority: z.boolean().optional().default(false) }).nullable().optional();
 const pediatricInfoSchema = z.object({ fatherName: nullableString, motherName: nullableString, legalGuardian: nullableString, guardianPhone: nullableString, guardianRelation: nullableString, guardianRelationOther: nullableString, weightKg: nullableString, heightCm: nullableString, birthInfo: nullableString, vaccinations: nullableString }).nullable().optional();
@@ -265,6 +299,7 @@ export const insertPatientSchema = z.object({ id, lastName: z.string().min(1), f
 export const insertServiceSchema = z.object({ id, name: z.string().min(1), isActive: z.boolean().optional(), tenantId: z.string() });
 export const insertConsultationSchema = z.object({ id, patientId: z.string().min(1), scheduledAt: z.union([z.date(), z.string()]), specialty: z.string().min(1), assignedDoctorId: z.string().min(1), roomId: nullableString, priority: z.enum(["normal", "urgent", "tres_urgent"]).optional(), reason: z.string().min(1), nurseNotes: nullableString, tenantId: z.string() });
 export const insertRoomSchema = z.object({ id, number: z.string().min(1), type: z.string().min(1), floor: nullableString, capacity: z.number().int().min(1), equipment: z.array(z.string()).optional(), notes: nullableString, status: z.enum(["disponible", "en_maintenance"]).optional(), tenantId: z.string() });
+export const insertRoleSchema = z.object({ id, name: z.string().min(1), description: nullableString, permissions: z.record(z.string(), z.record(z.string(), z.boolean())), tenantId: z.string() });
 export const insertSyncStatusSchema = z.object({ id, tenantId: z.string(), deviceId: z.string(), lastSync: z.union([z.date(), z.string()]).nullable().optional(), status: z.enum(["online", "offline", "syncing", "error"]).optional(), pendingChanges: z.number().int().optional() });
 export const insertSettingSchema = z.object({ id, tenantId: z.string().optional(), key: z.string().min(1), value: z.string(), category: z.string().optional(), dataType: z.string().optional(), isEncrypted: z.boolean().optional() });
 export const insertAuditLogSchema = z.object({ id, userId: z.string(), tenantId: z.string(), action: z.enum(["CREATE", "UPDATE", "DELETE", "PATCH"]), entityType: z.string(), entityId: nullableString, requestBody: z.unknown().optional(), responseBody: z.unknown().optional(), changes: z.unknown().optional(), metadata: z.unknown(), status: z.enum(["SUCCESS", "FAILED"]), errorMessage: nullableString });
