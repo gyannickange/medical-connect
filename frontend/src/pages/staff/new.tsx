@@ -9,7 +9,7 @@ import { useTenant } from "@/contexts/TenantContext";
 import { useToast } from "@/hooks/use-toast";
 import { offlineApiRequest } from "@/lib/offlineApiRequest";
 import { showApiErrorToast } from "@/lib/errorHandler";
-import { insertUserSchema, type InsertUser, type Role } from "@shared/schema";
+import { insertUserSchema, type InsertUser, type Role, type Service, type Specialty } from "@shared/schema";
 import { StaffForm } from "./StaffForm";
 
 function fileToBase64(file: File): Promise<string> {
@@ -38,12 +38,22 @@ export default function NewStaff() {
     enabled: !!currentTenant?.id,
   });
 
+  const { data: services = [] } = useQuery<Service[]>({
+    queryKey: ["/api/services", currentTenant?.id],
+    enabled: !!currentTenant?.id,
+  });
+
+  const { data: specialties = [] } = useQuery<Specialty[]>({
+    queryKey: ["/api/specialties", currentTenant?.id],
+    enabled: !!currentTenant?.id,
+  });
+
   const form = useForm<InsertUser>({
     resolver: zodResolver(insertUserSchema),
     defaultValues: {
       username: "", password: "", firstName: "", lastName: "", email: "",
       role: "", tenantId: currentTenant?.id || "", isActive: true,
-      service: "", specialty: "", matricule: "", fonction: "",
+      service: "", specialty: "",
     },
   });
 
@@ -82,7 +92,7 @@ export default function NewStaff() {
       <h1 className="text-2xl font-display font-bold text-foreground">{t("addNewStaffMember")}</h1>
 
       <form onSubmit={form.handleSubmit((data) => saveMutation.mutate(data))} className="space-y-6" data-testid="form-staff-new">
-        <StaffForm form={form} roles={roles} isEditing={false} pendingPhoto={pendingPhoto} onPhotoSelected={setPendingPhoto} />
+        <StaffForm form={form} roles={roles} services={services} specialties={specialties} isEditing={false} pendingPhoto={pendingPhoto} onPhotoSelected={setPendingPhoto} />
         <div className="flex justify-end gap-3">
           <Button type="button" variant="outline" onClick={() => setLocation("/staff")}>{t("cancel")}</Button>
           <Button type="submit" disabled={saveMutation.isPending} data-testid="button-save-staff">

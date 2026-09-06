@@ -82,6 +82,7 @@ export type PermissionModule =
   | "audit"
   | "settings"
   | "services"
+  | "specialties"
   | "deviceAuthorization"
   | "roles";
 
@@ -111,6 +112,9 @@ export interface InsertExamType { id?: string; name: string; category: ExamTypeC
 
 export interface Service { id: string; tenantId: string; name: string; isActive: boolean; createdAt: string; updatedAt: string }
 export interface InsertService { id?: string; name: string; isActive?: boolean; tenantId: string }
+
+export interface Specialty { id: string; tenantId: string; name: string; isActive: boolean; createdAt: string; updatedAt: string }
+export interface InsertSpecialty { id?: string; name: string; isActive?: boolean; tenantId: string }
 
 export interface Consultation { id: string; tenantId: string; number: string | null; patientId: string; scheduledAt: string; specialty: string; assignedDoctorId: string; roomId: string | null; priority: ConsultationPriority; reason: string; nurseNotes: string | null; symptoms: string | null; vitals: VitalSigns | null; vitalsRecordedAt: string | null; relevantHistory: string[]; presentIllnessHistory: string | null; physicalExam: PhysicalExam | null; diagnosisPrincipal: DiagnosisPrincipal | null; diagnosisSecondary: string[]; diagnosisHypothesis: string | null; medicalConsultationSavedAt: string | null; carePlan: CarePlan | null; carePlanSavedAt: string | null; examInterpretation: string | null; examDecision: string | null; examsReviewedAt: string | null; closedAt: string | null; status: ConsultationStatus; createdAt: string; updatedAt: string }
 export interface InsertConsultation { id?: string; patientId: string; scheduledAt: string; specialty: string; assignedDoctorId: string; roomId?: string | null; priority?: ConsultationPriority; reason: string; nurseNotes?: string | null; tenantId: string }
@@ -286,6 +290,7 @@ const emergencyContactSchema = z.object({ name: z.string().min(1), relation: z.s
 const pediatricInfoSchema = z.object({ fatherName: nullableString, motherName: nullableString, legalGuardian: nullableString, guardianPhone: nullableString, guardianRelation: nullableString, guardianRelationOther: nullableString, weightKg: nullableString, heightCm: nullableString, birthInfo: nullableString, vaccinations: nullableString }).nullable().optional();
 export const insertPatientSchema = z.object({ id, lastName: z.string().min(1), firstName: z.string().min(1), dateOfBirth: z.string().min(1), sex: z.enum(["M", "F"]), primaryPhone: z.string().min(1), residenceAddress: z.string().min(1), usualName: nullableString, birthPlace: nullableString, nationality: nullableString, profession: nullableString, maritalStatus: nullableString, idDocumentType: z.enum(["cni", "passeport", "permis", "anip", "autre"]).nullable().optional(), idDocumentTypeOther: nullableString, idDocumentNumber: nullableString, idDocumentExpiry: nullableString, email: nullableString, secondaryPhone: nullableString, residenceZone: nullableString, fullAddress: nullableString, emergencyContact: emergencyContactSchema, bloodGroup: nullableString, allergyKnowledge: z.enum(["aucune_connue", "allergies_connues", "non_renseigne"]).optional(), allergyDetails: nullableString, medicalHistory: nullableString, surgicalHistory: nullableString, chronicDiseases: nullableString, currentTreatments: nullableString, disabilities: nullableString, facilityService: nullableString, referringDoctorId: nullableString, patientType: z.enum(["externe", "hospitalise", "urgence"]).optional(), paymentMode: z.enum(["assurance", "mutuelle", "tiers_payant", "comptant"]).nullable().optional(), insuranceName: nullableString, insuranceNumber: nullableString, financiallyResponsible: nullableString, pediatricInfo: pediatricInfoSchema, tenantId: z.string() });
 export const insertServiceSchema = z.object({ id, name: z.string().min(1), isActive: z.boolean().optional(), tenantId: z.string() });
+export const insertSpecialtySchema = z.object({ id, name: z.string().min(1), isActive: z.boolean().optional(), tenantId: z.string() });
 export const insertConsultationSchema = z.object({ id, patientId: z.string().min(1), scheduledAt: z.union([z.date(), z.string()]), specialty: z.string().min(1), assignedDoctorId: z.string().min(1), roomId: nullableString, priority: z.enum(["normal", "urgent", "tres_urgent"]).optional(), reason: z.string().min(1), nurseNotes: nullableString, tenantId: z.string() });
 export const insertRoomSchema = z.object({ id, number: z.string().min(1), type: z.string().min(1), floor: nullableString, capacity: z.number().int().min(1), equipment: z.array(z.string()).optional(), notes: nullableString, status: z.enum(["disponible", "en_maintenance"]).optional(), tenantId: z.string() });
 export const insertRoleSchema = z.object({ id, name: z.string().min(1), description: nullableString, permissions: z.record(z.string(), z.record(z.string(), z.boolean())), tenantId: z.string() });

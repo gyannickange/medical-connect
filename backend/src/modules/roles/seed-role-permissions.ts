@@ -1,7 +1,7 @@
 import type { PermissionModule } from "@shared/schema";
 
 export const SEEDABLE_ROLES = [
-  "admin", "manager", "cashier", "accueil", "infirmier", "medecin", "laboratoire", "pharmacien",
+  "admin", "manager", "accueil", "infirmier", "medecin", "laboratoire", "pharmacien",
 ] as const;
 export type SeedableRole = (typeof SEEDABLE_ROLES)[number];
 
@@ -17,6 +17,7 @@ const ACTIONS_BY_MODULE: Record<PermissionModule, string[]> = {
   audit: ["view"],
   settings: ["view", "create", "update", "delete"],
   services: ["view", "create", "update"],
+  specialties: ["view", "create", "update"],
   deviceAuthorization: ["list", "approve", "revoke"],
   roles: ["view", "create", "update", "delete"],
 };
@@ -81,6 +82,11 @@ const ALLOWED_ROLES: { [K in PermissionModule]: Record<string, SeedableRole[]> }
     delete: ["admin"],
   },
   services: {
+    view: ["admin", "manager", "accueil", "infirmier", "medecin"],
+    create: ["admin", "manager"],
+    update: ["admin", "manager"],
+  },
+  specialties: {
     view: ["admin", "manager", "accueil", "infirmier", "medecin"],
     create: ["admin", "manager"],
     update: ["admin", "manager"],

@@ -41,12 +41,4 @@ export class UpdateStaffDto {
   @IsString()
   @IsOptional()
   specialty?: string;
-
-  @IsString()
-  @IsOptional()
-  matricule?: string;
-
-  @IsString()
-  @IsOptional()
-  fonction?: string;
 }

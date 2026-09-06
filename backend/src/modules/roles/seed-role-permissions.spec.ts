@@ -14,6 +14,7 @@ describe("buildSeedRolePermissions", () => {
       audit: { view: true },
       settings: { view: true, create: true, update: true, delete: true },
       services: { view: true, create: true, update: true },
+      specialties: { view: true, create: true, update: true },
       deviceAuthorization: { list: true, approve: true, revoke: true },
       roles: { view: true, create: true, update: true, delete: true },
     });
@@ -32,18 +33,10 @@ describe("buildSeedRolePermissions", () => {
       audit: { view: false },
       settings: { view: true, create: false, update: false, delete: false },
       services: { view: true, create: true, update: true },
+      specialties: { view: true, create: true, update: true },
       deviceAuthorization: { list: true, approve: false, revoke: false },
       roles: { view: false, create: false, update: false, delete: false },
     });
-  });
-
-  it("cashier: never referenced by any policy, everything false", () => {
-    const result = buildSeedRolePermissions("cashier");
-    for (const module of Object.values(result)) {
-      for (const allowed of Object.values(module)) {
-        expect(allowed).toBe(false);
-      }
-    }
   });
 
   it("accueil: matches isAccueil() OR-branches exactly", () => {
@@ -59,6 +52,7 @@ describe("buildSeedRolePermissions", () => {
       audit: { view: false },
       settings: { view: false, create: false, update: false, delete: false },
       services: { view: true, create: false, update: false },
+      specialties: { view: true, create: false, update: false },
       deviceAuthorization: { list: false, approve: false, revoke: false },
       roles: { view: false, create: false, update: false, delete: false },
     });
@@ -77,6 +71,7 @@ describe("buildSeedRolePermissions", () => {
       audit: { view: false },
       settings: { view: false, create: false, update: false, delete: false },
       services: { view: true, create: false, update: false },
+      specialties: { view: true, create: false, update: false },
       deviceAuthorization: { list: false, approve: false, revoke: false },
       roles: { view: false, create: false, update: false, delete: false },
     });
@@ -95,6 +90,7 @@ describe("buildSeedRolePermissions", () => {
       audit: { view: false },
       settings: { view: false, create: false, update: false, delete: false },
       services: { view: true, create: false, update: false },
+      specialties: { view: true, create: false, update: false },
       deviceAuthorization: { list: false, approve: false, revoke: false },
       roles: { view: false, create: false, update: false, delete: false },
     });
@@ -113,6 +109,7 @@ describe("buildSeedRolePermissions", () => {
       audit: { view: false },
       settings: { view: false, create: false, update: false, delete: false },
       services: { view: false, create: false, update: false },
+      specialties: { view: false, create: false, update: false },
       deviceAuthorization: { list: false, approve: false, revoke: false },
       roles: { view: false, create: false, update: false, delete: false },
     });
@@ -131,6 +128,7 @@ describe("buildSeedRolePermissions", () => {
       audit: { view: false },
       settings: { view: false, create: false, update: false, delete: false },
       services: { view: false, create: false, update: false },
+      specialties: { view: false, create: false, update: false },
       deviceAuthorization: { list: false, approve: false, revoke: false },
       roles: { view: false, create: false, update: false, delete: false },
     });

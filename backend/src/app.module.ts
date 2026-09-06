@@ -7,6 +7,7 @@ import { ConsultationsModule } from "./modules/consultations/consultations.modul
 import { LabOrdersModule } from "./modules/lab-orders/lab-orders.module";
 import { ExamTypesModule } from "./modules/exam-types/exam-types.module";
 import { ServicesModule } from "./modules/services/services.module";
+import { SpecialtiesModule } from "./modules/specialties/specialties.module";
 import { PrescriptionsModule } from "./modules/prescriptions/prescriptions.module";
 import { QueueModule } from "./modules/queue/queue.module";
 import { StaffModule } from "./modules/staff/staff.module";
@@ -36,6 +37,7 @@ import { AuditInterceptor } from "./common/interceptors/audit.interceptor";
     LabOrdersModule,
     ExamTypesModule,
     ServicesModule,
+    SpecialtiesModule,
     PrescriptionsModule,
     QueueModule,
     StaffModule,

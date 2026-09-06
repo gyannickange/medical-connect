@@ -5,9 +5,10 @@ import { StaffPolicy } from "./staff.policy";
 import { AuthModule } from "../auth/auth.module";
 import { IdentityModule } from "../identity/identity.module";
 import { RolesModule } from "../roles/roles.module";
+import { SequenceCounterModule } from "../../lib/sequence-counter.module";
 
 @Module({
-  imports: [AuthModule, IdentityModule, RolesModule],
+  imports: [AuthModule, IdentityModule, RolesModule, SequenceCounterModule],
   controllers: [StaffController],
   providers: [StaffService, StaffPolicy],
   exports: [StaffService],

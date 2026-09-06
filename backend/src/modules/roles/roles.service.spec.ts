@@ -78,13 +78,13 @@ describe("RolesService", () => {
   });
 
   describe("seedSystemRoles", () => {
-    it("creates all 8 seedable roles with id === role name and isSystemRole true", async () => {
+    it("creates all 7 seedable roles with id === role name and isSystemRole true", async () => {
       const rolesRepository = { create: jest.fn().mockImplementation((data) => Promise.resolve({ ...data, createdAt: new Date(), updatedAt: new Date() })) };
       const service = new RolesService(rolesRepository as any, {} as any);
 
       const result = await service.seedSystemRoles("tenant-9");
 
-      expect(result).toHaveLength(8);
+      expect(result).toHaveLength(7);
       expect(rolesRepository.create).toHaveBeenCalledWith(expect.objectContaining({ id: "admin", isSystemRole: true, tenantId: "tenant-9" }));
       expect(rolesRepository.create).toHaveBeenCalledWith(expect.objectContaining({ id: "pharmacien", isSystemRole: true, tenantId: "tenant-9" }));
       const adminCall = rolesRepository.create.mock.calls.find((call) => call[0].id === "admin")![0];

@@ -15,7 +15,7 @@ export type RoleWithUserCount = Role & { activeUserCount: number };
 
 const EMPTY_PERMISSIONS: Record<PermissionModule, Record<string, boolean>> = {
   patients: {}, consultations: {}, queue: {}, labOrders: {}, examTypes: {},
-  prescriptions: {}, rooms: {}, staff: {}, audit: {}, settings: {}, services: {},
+  prescriptions: {}, rooms: {}, staff: {}, audit: {}, settings: {}, services: {}, specialties: {},
   deviceAuthorization: {}, roles: {},
 };
 
@@ -31,6 +31,7 @@ const MODULE_ACTIONS: Record<PermissionModule, string[]> = {
   audit: ["view"],
   settings: ["view", "create", "update", "delete"],
   services: ["view", "create", "update"],
+  specialties: ["view", "create", "update"],
   deviceAuthorization: ["list", "approve", "revoke"],
   roles: ["view", "create", "update", "delete"],
 };
@@ -47,6 +48,7 @@ const MODULE_LABEL_KEYS: Record<PermissionModule, string> = {
   audit: "auditModuleLabel",
   settings: "settingsModuleLabel",
   services: "servicesModuleLabel",
+  specialties: "specialtiesModuleLabel",
   deviceAuthorization: "deviceAuthorizationModuleLabel",
   roles: "rolesModuleLabel",
 };

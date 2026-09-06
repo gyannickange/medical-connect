@@ -20,7 +20,8 @@ describe("StaffService username uniqueness", () => {
       update: jest.fn().mockResolvedValue(stored),
     };
     const rolesService = { findById: jest.fn().mockResolvedValue({ id: "admin" }) };
-    const service = new StaffService(storage as any, rolesService as any);
+    const sequenceCounterService = { next: jest.fn().mockResolvedValue(1) };
+    const service = new StaffService(storage as any, rolesService as any, sequenceCounterService as any);
 
     await service.create({ ...stored, username: "  Alice  " } as any);
     await service.update("user-1", "tenant-1", { username: " ALICE " });
@@ -53,7 +54,8 @@ describe("StaffService username uniqueness", () => {
       update: jest.fn().mockResolvedValue(stored),
     };
     const rolesService = { findById: jest.fn().mockResolvedValue({ id: "admin" }) };
-    const service = new StaffService(storage as any, rolesService as any);
+    const sequenceCounterService = { next: jest.fn().mockResolvedValue(1) };
+    const service = new StaffService(storage as any, rolesService as any, sequenceCounterService as any);
 
     await service.create({ ...stored, password: "create-secret" } as any);
     await service.update("user-1", "tenant-1", { password: "updated-secret" });
@@ -87,7 +89,8 @@ describe("StaffService username uniqueness", () => {
       update: jest.fn().mockResolvedValue(stored),
     };
     const rolesService = { findById: jest.fn().mockResolvedValue({ id: "admin" }) };
-    const service = new StaffService(storage as any, rolesService as any);
+    const sequenceCounterService = { next: jest.fn().mockResolvedValue(1) };
+    const service = new StaffService(storage as any, rolesService as any, sequenceCounterService as any);
 
     await service.update("user-1", "tenant-1", { firstName: "Alicia" });
 

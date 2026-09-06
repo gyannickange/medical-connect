@@ -51,12 +51,4 @@ export class CreateStaffDto {
   @IsString()
   @IsOptional()
   specialty?: string;
-
-  @IsString()
-  @IsOptional()
-  matricule?: string;
-
-  @IsString()
-  @IsOptional()
-  fonction?: string;
 }

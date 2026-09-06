@@ -4,22 +4,30 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useTranslation } from "@/lib/i18n";
-import type { InsertUser, Role } from "@shared/schema";
+import type { InsertUser, Role, Service, Specialty } from "@shared/schema";
 
 export function StaffForm({
   form,
   roles,
+  services,
+  specialties,
   isEditing,
+  matricule,
   pendingPhoto,
   onPhotoSelected,
 }: {
   form: UseFormReturn<InsertUser>;
   roles: Role[];
+  services: Service[];
+  specialties: Specialty[];
   isEditing: boolean;
+  matricule?: string | null;
   pendingPhoto: File | null;
   onPhotoSelected: (file: File) => void;
 }) {
   const { t } = useTranslation();
+  const activeServices = services.filter((service) => service.isActive);
+  const activeSpecialties = specialties.filter((specialty) => specialty.isActive);
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -84,21 +92,41 @@ export function StaffForm({
           {form.formState.errors.role && <p className="text-sm text-destructive">{form.formState.errors.role.message}</p>}
         </div>
         <div className="space-y-2">
-          <Label htmlFor="service">{t("staffService")}</Label>
-          <Input id="service" {...form.register("service")} data-testid="input-service" />
+          <Label>{t("staffService")}</Label>
+          <Select value={form.watch("service") ?? ""} onValueChange={(value) => form.setValue("service", value)} disabled={activeServices.length === 0}>
+            <SelectTrigger data-testid="select-service">
+              <SelectValue placeholder={activeServices.length === 0 ? t("noServicesAvailable") : t("selectServicePlaceholder")} />
+            </SelectTrigger>
+            <SelectContent>
+              {activeServices.map((service) => (
+                <SelectItem key={service.id} value={service.name}>
+                  {service.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
         <div className="space-y-2">
-          <Label htmlFor="specialty">{t("staffSpecialty")}</Label>
-          <Input id="specialty" {...form.register("specialty")} data-testid="input-specialty" />
+          <Label>{t("staffSpecialty")}</Label>
+          <Select value={form.watch("specialty") ?? ""} onValueChange={(value) => form.setValue("specialty", value)} disabled={activeSpecialties.length === 0}>
+            <SelectTrigger data-testid="select-specialty">
+              <SelectValue placeholder={activeSpecialties.length === 0 ? t("noSpecialtiesAvailable") : t("selectSpecialtyPlaceholder")} />
+            </SelectTrigger>
+            <SelectContent>
+              {activeSpecialties.map((specialty) => (
+                <SelectItem key={specialty.id} value={specialty.name}>
+                  {specialty.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
-        <div className="space-y-2">
-          <Label htmlFor="matricule">{t("staffMatricule")}</Label>
-          <Input id="matricule" {...form.register("matricule")} data-testid="input-matricule" />
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="fonction">{t("staffFonction")}</Label>
-          <Input id="fonction" {...form.register("fonction")} data-testid="input-fonction" />
-        </div>
+        {isEditing && (
+          <div className="space-y-2">
+            <Label>{t("staffMatricule")}</Label>
+            <Input value={matricule ?? ""} disabled data-testid="text-matricule" />
+          </div>
+        )}
       </div>
     </div>
   );

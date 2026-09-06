@@ -20,7 +20,7 @@ async function main() {
     const missing = SEEDABLE_ROLES.filter((role) => !existingIds.has(role));
 
     if (missing.length === 0) {
-      console.log(`Tenant ${tenant.name} (${tenant.id}): already has all 8 roles, skipping.`);
+      console.log(`Tenant ${tenant.name} (${tenant.id}): already has all ${SEEDABLE_ROLES.length} roles, skipping.`);
       continue;
     }
 

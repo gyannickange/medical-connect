@@ -60,6 +60,8 @@ const RolesPage = lazy(() => import("./pages/roles"));
 const Settings = lazy(() => import("./pages/Settings"));
 const ServicesManager = lazy(() => import("./pages/settings/services"));
 const ServiceForm = lazy(() => import("./pages/settings/service-form"));
+const SpecialtiesManager = lazy(() => import("./pages/settings/specialties"));
+const SpecialtyForm = lazy(() => import("./pages/settings/specialty-form"));
 const AuditLogs = lazy(() => import("./pages/AuditLogs"));
 const Login = lazy(() => import("./pages/Login"));
 const PlatformAdmin = lazy(() => import("./pages/PlatformAdmin"));
@@ -397,6 +399,27 @@ function Router() {
           <ProtectedRoute>
             <Layout>
               <ServiceForm />
+            </Layout>
+          </ProtectedRoute>
+        </Route>
+        <Route path="/settings/specialties">
+          <ProtectedRoute>
+            <Layout>
+              <SpecialtiesManager />
+            </Layout>
+          </ProtectedRoute>
+        </Route>
+        <Route path="/settings/specialties/new">
+          <ProtectedRoute>
+            <Layout>
+              <SpecialtyForm />
+            </Layout>
+          </ProtectedRoute>
+        </Route>
+        <Route path="/settings/specialties/:id/edit">
+          <ProtectedRoute>
+            <Layout>
+              <SpecialtyForm />
             </Layout>
           </ProtectedRoute>
         </Route>

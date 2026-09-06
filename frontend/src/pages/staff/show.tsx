@@ -9,7 +9,7 @@ import { useTenant } from "@/contexts/TenantContext";
 import { useToast } from "@/hooks/use-toast";
 import { offlineApiRequest } from "@/lib/offlineApiRequest";
 import { showApiErrorToast } from "@/lib/errorHandler";
-import { insertUserSchema, type InsertUser, type Role, type User } from "@shared/schema";
+import { insertUserSchema, type InsertUser, type Role, type Service, type Specialty, type User } from "@shared/schema";
 import { StaffForm } from "./StaffForm";
 
 function fileToBase64(file: File): Promise<string> {
@@ -46,12 +46,22 @@ export default function StaffDetails() {
     enabled: !!currentTenant?.id,
   });
 
+  const { data: services = [] } = useQuery<Service[]>({
+    queryKey: ["/api/services", currentTenant?.id],
+    enabled: !!currentTenant?.id,
+  });
+
+  const { data: specialties = [] } = useQuery<Specialty[]>({
+    queryKey: ["/api/specialties", currentTenant?.id],
+    enabled: !!currentTenant?.id,
+  });
+
   const form = useForm<InsertUser>({
     resolver: zodResolver(insertUserSchema),
     defaultValues: {
       username: "", password: "", firstName: "", lastName: "", email: "",
       role: "", tenantId: currentTenant?.id || "", isActive: true,
-      service: "", specialty: "", matricule: "", fonction: "",
+      service: "", specialty: "",
     },
   });
 
@@ -61,7 +71,6 @@ export default function StaffDetails() {
         username: member.username, password: "", firstName: member.firstName, lastName: member.lastName,
         email: member.email || "", role: member.role, tenantId: member.tenantId || currentTenant?.id || "",
         isActive: member.isActive, service: member.service || "", specialty: member.specialty || "",
-        matricule: member.matricule || "", fonction: member.fonction || "",
       });
       setInitialized(true);
     }
@@ -111,7 +120,7 @@ export default function StaffDetails() {
       <h1 className="text-2xl font-display font-bold text-foreground">{t("editStaffMember")}</h1>
 
       <form onSubmit={form.handleSubmit((data) => saveMutation.mutate(data))} className="space-y-6" data-testid="form-staff-edit">
-        <StaffForm form={form} roles={roles} isEditing pendingPhoto={pendingPhoto} onPhotoSelected={setPendingPhoto} />
+        <StaffForm form={form} roles={roles} services={services} specialties={specialties} isEditing matricule={member.matricule} pendingPhoto={pendingPhoto} onPhotoSelected={setPendingPhoto} />
         <div className="flex justify-end gap-3">
           <Button type="button" variant="outline" onClick={() => setLocation("/staff")}>{t("cancel")}</Button>
           <Button type="submit" disabled={saveMutation.isPending} data-testid="button-save-staff">
