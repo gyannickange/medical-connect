@@ -5,9 +5,10 @@ import { PlatformPolicy } from "./platform.policy";
 import { AuthModule } from "../auth/auth.module";
 import { IdentityModule } from "../identity/identity.module";
 import { TenantsModule } from "../tenants/tenants.module";
+import { RolesModule } from "../roles/roles.module";
 
 @Module({
-  imports: [AuthModule, IdentityModule, TenantsModule],
+  imports: [AuthModule, IdentityModule, TenantsModule, RolesModule],
   controllers: [PlatformController],
   providers: [PlatformService, PlatformPolicy],
 })

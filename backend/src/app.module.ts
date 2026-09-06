@@ -11,6 +11,7 @@ import { PrescriptionsModule } from "./modules/prescriptions/prescriptions.modul
 import { QueueModule } from "./modules/queue/queue.module";
 import { StaffModule } from "./modules/staff/staff.module";
 import { RoomsModule } from "./modules/rooms/rooms.module";
+import { RolesModule } from "./modules/roles/roles.module";
 import { SettingsModule } from "./modules/settings/settings.module";
 import { SyncModule } from "./modules/sync/sync.module";
 import { PeersModule } from "./modules/peers/peers.module";
@@ -39,6 +40,7 @@ import { AuditInterceptor } from "./common/interceptors/audit.interceptor";
     QueueModule,
     StaffModule,
     RoomsModule,
+    RolesModule,
     SettingsModule,
     SyncModule,
     PeersModule,

@@ -33,7 +33,8 @@ describe("PlatformService.createTenantWithAdmin", () => {
         createdAt: new Date(),
       }),
     };
-    const service = new PlatformService(tenantsService as any, usersRepository as any);
+    const rolesService = { seedSystemRoles: jest.fn().mockResolvedValue([]) };
+    const service = new PlatformService(tenantsService as any, usersRepository as any, rolesService as any);
 
     const result = await service.createTenantWithAdmin(dto);
 
@@ -41,6 +42,7 @@ describe("PlatformService.createTenantWithAdmin", () => {
     expect(tenantsService.create).toHaveBeenCalledWith(
       expect.objectContaining({ name: "Clinique du Nord" })
     );
+    expect(rolesService.seedSystemRoles).toHaveBeenCalledWith("tenant-9");
     expect(usersRepository.create).toHaveBeenCalledWith(
       expect.objectContaining({
         role: "admin",
@@ -48,6 +50,7 @@ describe("PlatformService.createTenantWithAdmin", () => {
         username: "nord-admin",
       })
     );
+    expect(rolesService.seedSystemRoles.mock.invocationCallOrder[0]).toBeLessThan(usersRepository.create.mock.invocationCallOrder[0]);
     expect(result.adminUser).not.toHaveProperty("password");
     expect(result.provisioningSecret).toBe("AAAA-BBBB-CCCC");
   });
@@ -58,7 +61,8 @@ describe("PlatformService.createTenantWithAdmin", () => {
       findByUsername: jest.fn().mockResolvedValue({ id: "existing" }),
       create: jest.fn(),
     };
-    const service = new PlatformService(tenantsService as any, usersRepository as any);
+    const rolesService = { seedSystemRoles: jest.fn() };
+    const service = new PlatformService(tenantsService as any, usersRepository as any, rolesService as any);
 
     await expect(service.createTenantWithAdmin(dto)).rejects.toThrow(ConflictException);
     expect(tenantsService.create).not.toHaveBeenCalled();
