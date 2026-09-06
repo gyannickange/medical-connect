@@ -22,6 +22,7 @@ import { carePlan } from "./carePlan";
 import { rooms } from "./rooms";
 import { platform } from "./platform";
 import { notifications } from "./notifications";
+import { roles } from "./roles";
 
 export type { Language } from "./types";
 
@@ -47,6 +48,7 @@ const sections: TranslationSection[] = [
   platform,
   notifications,
   dashboardHome,
+  roles,
 ];
 
 const en: Record<string, string> = {};
