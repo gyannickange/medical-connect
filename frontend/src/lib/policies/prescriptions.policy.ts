@@ -1,15 +1,17 @@
 import { BasePolicy } from "./base.policy";
 
 export class PrescriptionsPolicy extends BasePolicy {
+  protected readonly module = "prescriptions" as const;
+
   canView(): boolean {
-    return this.isAdmin() || this.isManager() || this.isMedecin() || this.isInfirmier() || this.isPharmacien();
+    return this.can("view");
   }
 
   canCreate(): boolean {
-    return this.isAdmin() || this.isManager() || this.isMedecin();
+    return this.can("create");
   }
 
   canUpdate(): boolean {
-    return this.isAdmin() || this.isManager() || this.isPharmacien();
+    return this.can("update");
   }
 }

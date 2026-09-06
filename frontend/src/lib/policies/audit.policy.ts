@@ -1,8 +1,9 @@
 import { BasePolicy } from "./base.policy";
 
 export class AuditPolicy extends BasePolicy {
+  protected readonly module = "audit" as const;
+
   canView(): boolean {
-    // Only admin can view audit logs
-    return this.isAdmin();
+    return this.can("view");
   }
 }

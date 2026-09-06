@@ -1,19 +1,21 @@
 import { BasePolicy } from "./base.policy";
 
 export class LabOrdersPolicy extends BasePolicy {
+  protected readonly module = "labOrders" as const;
+
   canView(): boolean {
-    return this.isAdmin() || this.isManager() || this.isMedecin() || this.isInfirmier() || this.isLaboratoire();
+    return this.can("view");
   }
 
   canCreate(): boolean {
-    return this.isAdmin() || this.isManager() || this.isMedecin();
+    return this.can("create");
   }
 
   canUpdate(): boolean {
-    return this.isAdmin() || this.isManager() || this.isLaboratoire();
+    return this.can("update");
   }
 
   canRecordFollowUp(): boolean {
-    return this.isAdmin() || this.isManager() || this.isMedecin();
+    return this.can("recordFollowUp");
   }
 }

@@ -1,19 +1,17 @@
 import { BasePolicy } from "./base.policy";
 
 export class ServicesPolicy extends BasePolicy {
+  protected readonly module = "services" as const;
+
   canView(): boolean {
-    return this.isAdmin() || this.isManager() || this.isAccueil() || this.isInfirmier() || this.isMedecin();
+    return this.can("view");
   }
 
   canCreate(): boolean {
-    return this.isAdmin() || this.isManager();
+    return this.can("create");
   }
 
   canUpdate(): boolean {
-    return this.isAdmin() || this.isManager();
-  }
-
-  canDelete(): boolean {
-    return this.isAdmin() || this.isManager();
+    return this.can("update");
   }
 }

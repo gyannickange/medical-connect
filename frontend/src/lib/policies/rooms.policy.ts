@@ -1,15 +1,17 @@
 import { BasePolicy } from "./base.policy";
 
 export class RoomsPolicy extends BasePolicy {
+  protected readonly module = "rooms" as const;
+
   canView(): boolean {
-    return this.hasAnyRole("admin", "manager", "medecin", "infirmier", "accueil");
+    return this.can("view");
   }
 
   canCreate(): boolean {
-    return this.isAdminOrManager();
+    return this.can("create");
   }
 
   canUpdate(): boolean {
-    return this.isAdminOrManager();
+    return this.can("update");
   }
 }
