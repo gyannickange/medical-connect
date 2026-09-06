@@ -3,7 +3,6 @@ import {
   IsOptional,
   IsBoolean,
   IsEmail,
-  IsIn,
 } from "class-validator";
 
 export class UpdateStaffDto {
@@ -29,8 +28,7 @@ export class UpdateStaffDto {
 
   @IsString()
   @IsOptional()
-  @IsIn(["admin", "manager", "cashier", "accueil", "infirmier", "medecin", "laboratoire", "pharmacien"])
-  role?: "admin" | "manager" | "cashier" | "accueil" | "infirmier" | "medecin" | "laboratoire" | "pharmacien";
+  role?: string;
 
   @IsBoolean()
   @IsOptional()

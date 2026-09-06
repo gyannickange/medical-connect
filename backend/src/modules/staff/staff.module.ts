@@ -4,9 +4,10 @@ import { StaffService } from "./staff.service";
 import { StaffPolicy } from "./staff.policy";
 import { AuthModule } from "../auth/auth.module";
 import { IdentityModule } from "../identity/identity.module";
+import { RolesModule } from "../roles/roles.module";
 
 @Module({
-  imports: [AuthModule, IdentityModule],
+  imports: [AuthModule, IdentityModule, RolesModule],
   controllers: [StaffController],
   providers: [StaffService, StaffPolicy],
   exports: [StaffService],
