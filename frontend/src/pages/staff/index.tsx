@@ -10,6 +10,7 @@ import {
   Trash2,
 } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useLocation } from "wouter";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
@@ -38,8 +39,8 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { insertUserSchema, type InsertUser } from "@shared/schema";
-import { useTranslation } from "../lib/i18n";
-import { useTenant } from "../contexts/TenantContext";
+import { useTranslation } from "../../lib/i18n";
+import { useTenant } from "../../contexts/TenantContext";
 import { useToast } from "@/hooks/use-toast";
 import { offlineApiRequest } from "@/lib/offlineApiRequest";
 import { usePolicy } from "@/hooks/usePolicy";
@@ -72,12 +73,13 @@ export default function Staff() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const staffPolicy = usePolicy(StaffPolicy);
+  const [, setLocation] = useLocation();
   const installMode = getInstallMode();
   const [localRecoveryCode, setLocalRecoveryCode] = useState<string | null>(
     null
   );
-  const [showStaffModal, setShowStaffModal] = useState(false);
-  const [editingStaff, setEditingStaff] = useState<any>(null);
+  const [showLocalAccountModal, setShowLocalAccountModal] = useState(false);
+  const [editingLocalAccount, setEditingLocalAccount] = useState<any>(null);
   const [searchQuery, setSearchQuery] = useState("");
 
   const [pendingPhoto, setPendingPhoto] = useState<File | null>(null);
@@ -110,54 +112,27 @@ export default function Staff() {
         : undefined,
   });
 
-  // Create/Update staff mutation
+  // Create/Update local account mutation (local device install mode only —
+  // the online path lives at /staff/new and /staff/:id)
   const saveStaffMutation = useMutation({
-    mutationFn: async (data: any) => {
-      if (installMode === "local") {
-        if (editingStaff) {
-          await setLocalAccountRoleAndActive({
-            id: editingStaff.id,
-            role: data.role,
-          });
-          return {};
-        }
-        const result = await createLocalAccount({
-          username: data.username,
-          password: data.password,
+    mutationFn: async (data: any): Promise<{ _savedOffline?: boolean }> => {
+      if (editingLocalAccount) {
+        await setLocalAccountRoleAndActive({
+          id: editingLocalAccount.id,
           role: data.role,
-          firstName: data.firstName,
-          lastName: data.lastName,
-          email: data.email,
         });
-        setLocalRecoveryCode(result.recoveryCode);
         return {};
       }
-
-      const method = editingStaff ? "PUT" : "POST";
-      const url = editingStaff ? `/api/staff/${editingStaff.id}` : "/api/staff";
-
-      const response = await offlineApiRequest(
-        method,
-        url,
-        {
-          ...data,
-          tenantId: currentTenant?.id,
-        },
-        { collection: "staff" }
-      );
-
-      const saved = await response.json();
-      if (pendingPhoto && saved?.id) {
-        const photoBase64 = await fileToBase64(pendingPhoto);
-        await offlineApiRequest(
-          "PUT",
-          `/api/staff/${saved.id}/photo`,
-          { photoBase64, contentType: pendingPhoto.type === "image/png" ? "image/png" : "image/jpeg" },
-          { collection: "staff", entityId: saved.id }
-        );
-        setPendingPhoto(null);
-      }
-      return saved;
+      const result = await createLocalAccount({
+        username: data.username,
+        password: data.password,
+        role: data.role,
+        firstName: data.firstName,
+        lastName: data.lastName,
+        email: data.email,
+      });
+      setLocalRecoveryCode(result.recoveryCode);
+      return {};
     },
     onSuccess: (result) => {
       const isOffline = result?._savedOffline === true;
@@ -166,7 +141,7 @@ export default function Staff() {
         title: isOffline ? t("savedOffline") : t("success"),
         description: isOffline
           ? t("staffSavedOffline")
-          : editingStaff
+          : editingLocalAccount
           ? t("staffUpdatedSuccessfully")
           : t("staffCreatedSuccessfully"),
       });
@@ -252,8 +227,8 @@ export default function Staff() {
   });
 
   const handleCloseModal = () => {
-    setShowStaffModal(false);
-    setEditingStaff(null);
+    setShowLocalAccountModal(false);
+    setEditingLocalAccount(null);
     setPendingPhoto(null);
     form.reset({
       username: "",
@@ -272,7 +247,7 @@ export default function Staff() {
   };
 
   const handleEditStaff = (member: any) => {
-    setEditingStaff(member);
+    setEditingLocalAccount(member);
     form.reset({
       username: member.username,
       password: "", // Don't populate password for security
@@ -287,13 +262,13 @@ export default function Staff() {
       matricule: member.matricule || "",
       fonction: member.fonction || "",
     });
-    setShowStaffModal(true);
+    setShowLocalAccountModal(true);
   };
 
   const onSubmit = (data: InsertUser) => {
     // Remove password if editing and no new password provided
     let submitData: any = { ...data };
-    if (editingStaff && !data.password) {
+    if (editingLocalAccount && !data.password) {
       const { password, ...dataWithoutPassword } = data;
       submitData = dataWithoutPassword;
     }
@@ -372,8 +347,12 @@ export default function Staff() {
         <PolicyGuard policy={StaffPolicy} action="canCreate">
           <Button
             onClick={() => {
-              setEditingStaff(null);
-              setShowStaffModal(true);
+              if (installMode === "local") {
+                setEditingLocalAccount(null);
+                setShowLocalAccountModal(true);
+              } else {
+                setLocation("/staff/new");
+              }
             }}
             data-testid="button-add-staff">
             <Plus className="w-4 h-4 mr-2" />
@@ -426,7 +405,14 @@ export default function Staff() {
                     {!searchQuery && (
                       <Button
                         variant="outline"
-                        onClick={() => setShowStaffModal(true)}
+                        onClick={() => {
+                          if (installMode === "local") {
+                            setEditingLocalAccount(null);
+                            setShowLocalAccountModal(true);
+                          } else {
+                            setLocation("/staff/new");
+                          }
+                        }}
                         className="mt-2">
                         <Plus className="w-4 h-4 mr-2" />
                         {t("addFirstStaffMember")}
@@ -495,7 +481,13 @@ export default function Staff() {
                           <Button
                             size="sm"
                             variant="ghost"
-                            onClick={() => handleEditStaff(member)}
+                            onClick={() => {
+                              if (installMode === "local") {
+                                handleEditStaff(member);
+                              } else {
+                                setLocation(`/staff/${member.id}`);
+                              }
+                            }}
                             className="text-muted-foreground hover:text-foreground"
                             data-testid={`button-edit-${member.id}`}
                             title={t("editStaffMember")}>
@@ -524,13 +516,13 @@ export default function Staff() {
       </div>
 
       {/* Staff Modal */}
-      <Dialog open={showStaffModal} onOpenChange={handleCloseModal}>
+      <Dialog open={showLocalAccountModal} onOpenChange={handleCloseModal}>
         <DialogContent
           className="glass-card max-w-lg max-h-[90vh] overflow-y-auto"
           data-testid="staff-modal">
           <DialogHeader>
             <DialogTitle className="text-lg font-semibold text-foreground">
-              {editingStaff ? t("editStaffMember") : t("addNewStaffMember")}
+              {editingLocalAccount ? t("editStaffMember") : t("addNewStaffMember")}
             </DialogTitle>
           </DialogHeader>
 
@@ -540,7 +532,7 @@ export default function Staff() {
             data-testid="form-staff">
             {/* Hidden field for tenantId */}
             <input type="hidden" {...form.register("tenantId")} />
-            {!(installMode === "local" && editingStaff) && (
+            {!(installMode === "local" && editingLocalAccount) && (
               <>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
@@ -609,7 +601,7 @@ export default function Staff() {
                 htmlFor="password"
                 className="text-sm font-medium text-foreground">
                 {t("password")}{" "}
-                {editingStaff && (
+                {editingLocalAccount && (
                   <span className="text-muted-foreground">
                     ({t("leaveBlankToKeepCurrent")})
                   </span>
@@ -621,7 +613,7 @@ export default function Staff() {
                 {...form.register("password")}
                 className="rounded-xl"
                 placeholder={
-                  editingStaff ? t("leaveBlankToKeepCurrent") : t("password")
+                  editingLocalAccount ? t("leaveBlankToKeepCurrent") : t("password")
                 }
                 data-testid="input-password"
               />
@@ -698,7 +690,7 @@ export default function Staff() {
             </div>
               </>
             )}
-            {installMode === "local" && editingStaff && (
+            {installMode === "local" && editingLocalAccount && (
               <p className="text-xs text-muted-foreground">
                 {t("localEditRoleOnlyNotice")}
               </p>
