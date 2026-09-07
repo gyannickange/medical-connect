@@ -11,7 +11,7 @@ import { RoomsPolicy } from "@/lib/policies/rooms.policy";
 import { PolicyGuard } from "@/components/PolicyGuard";
 import type { Room, RoomEffectiveStatus } from "@shared/schema";
 
-type RoomWithStatus = Room & { effectiveStatus: RoomEffectiveStatus };
+type RoomWithStatus = Room & { effectiveStatus: RoomEffectiveStatus; assignedPatientName: string | null };
 
 const statusBadgeVariant: Record<RoomEffectiveStatus, "success" | "danger" | "warning" | "secondary"> = {
   disponible: "success",
@@ -103,6 +103,11 @@ export default function SallesIndex() {
                       {t(statusLabelKey[room.effectiveStatus])}
                     </Badge>
                   </div>
+                  {room.assignedPatientName && (
+                    <p className="text-sm text-foreground" data-testid={`text-assigned-patient-${room.id}`}>
+                      {room.assignedPatientName}
+                    </p>
+                  )}
                   <Link href={`/salles/${room.id}`}>
                     <Button variant="link" size="sm" className="h-auto p-0" data-testid={`link-room-${room.id}`}>
                       {t("viewRoomDetails")}
