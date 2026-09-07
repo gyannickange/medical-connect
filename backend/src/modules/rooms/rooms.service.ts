@@ -2,11 +2,19 @@ import { BadRequestException, ConflictException, Injectable } from "@nestjs/comm
 import type { CarePlanHospitalisation, Consultation, InsertRoom, Room } from "@shared/schema";
 import { ConsultationsRepository } from "../consultations/consultations.repository";
 import { PatientsRepository } from "../patients/patients.repository";
+import { UsersRepository } from "../identity/users.repository";
 import { RoomsRepository } from "./rooms.repository";
 import { computeRoomStatus, deriveRoomHistory, type RoomStatusResult } from "./room-status";
 
-export type RoomWithStatus = Room & RoomStatusResult & { assignedPatientName: string | null };
-export type RoomDetail = Room & RoomStatusResult & { assignedPatientName: string | null; recentHistory: Consultation[] };
+interface ResolvedNames {
+  assignedPatientName: string | null;
+  currentConsultationPatientName: string | null;
+  currentConsultationDoctorName: string | null;
+  nextReservationPatientName: string | null;
+}
+
+export type RoomWithStatus = Room & RoomStatusResult & ResolvedNames;
+export type RoomDetail = Room & RoomStatusResult & ResolvedNames & { recentHistory: Consultation[] };
 
 export interface PendingHospitalisation {
   consultationId: string;
@@ -22,7 +30,8 @@ export class RoomsService {
   constructor(
     private readonly roomsRepository: RoomsRepository,
     private readonly consultationsRepository: ConsultationsRepository,
-    private readonly patientsRepository: PatientsRepository
+    private readonly patientsRepository: PatientsRepository,
+    private readonly usersRepository: UsersRepository
   ) {}
 
   async findByTenant(tenantId: string): Promise<RoomWithStatus[]> {
@@ -34,11 +43,8 @@ export class RoomsService {
     return Promise.all(
       rooms.map(async (room) => {
         const roomConsultations = (consultations as Consultation[]).filter((c) => c.roomId === room.id);
-        return {
-          ...room,
-          ...computeRoomStatus(room, roomConsultations, now),
-          assignedPatientName: await this.resolveAssignedPatientName(room, tenantId),
-        };
+        const status = computeRoomStatus(room, roomConsultations, now);
+        return { ...room, ...status, ...(await this.resolveNames(room, status, tenantId)) };
       })
     );
   }
@@ -47,10 +53,11 @@ export class RoomsService {
     const room = await this.roomsRepository.findById(id, tenantId);
     const consultations = (await this.consultationsRepository.findByTenant(tenantId, { roomId: id })) as Consultation[];
     const now = new Date();
+    const status = computeRoomStatus(room, consultations, now);
     return {
       ...room,
-      ...computeRoomStatus(room, consultations, now),
-      assignedPatientName: await this.resolveAssignedPatientName(room, tenantId),
+      ...status,
+      ...(await this.resolveNames(room, status, tenantId)),
       recentHistory: deriveRoomHistory(consultations, 5),
     };
   }
@@ -114,9 +121,26 @@ export class RoomsService {
     );
   }
 
-  private async resolveAssignedPatientName(room: Room, tenantId: string): Promise<string | null> {
-    if (!room.assignedPatientId) return null;
-    const patient = await this.patientsRepository.findById(room.assignedPatientId, tenantId);
+  private async resolveNames(room: Room, status: RoomStatusResult, tenantId: string): Promise<ResolvedNames> {
+    const [assignedPatientName, currentConsultationPatientName, currentConsultationDoctorName, nextReservationPatientName] =
+      await Promise.all([
+        this.resolvePatientName(room.assignedPatientId, tenantId),
+        this.resolvePatientName(status.currentConsultation?.patientId ?? null, tenantId),
+        this.resolveDoctorName(status.currentConsultation?.assignedDoctorId ?? null),
+        this.resolvePatientName(status.upcomingConsultations[0]?.patientId ?? null, tenantId),
+      ]);
+    return { assignedPatientName, currentConsultationPatientName, currentConsultationDoctorName, nextReservationPatientName };
+  }
+
+  private async resolvePatientName(patientId: string | null, tenantId: string): Promise<string | null> {
+    if (!patientId) return null;
+    const patient = await this.patientsRepository.findById(patientId, tenantId);
     return `${patient.firstName} ${patient.lastName}`;
+  }
+
+  private async resolveDoctorName(doctorId: string | null): Promise<string | null> {
+    if (!doctorId) return null;
+    const doctor = await this.usersRepository.findById(doctorId);
+    return doctor ? `${doctor.firstName} ${doctor.lastName}` : null;
   }
 }
