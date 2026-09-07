@@ -13,8 +13,10 @@ interface ResolvedNames {
   nextReservationPatientName: string | null;
 }
 
+export type RoomHistoryEntry = Consultation & { patientName: string | null };
+
 export type RoomWithStatus = Room & RoomStatusResult & ResolvedNames;
-export type RoomDetail = Room & RoomStatusResult & ResolvedNames & { recentHistory: Consultation[] };
+export type RoomDetail = Room & RoomStatusResult & ResolvedNames & { recentHistory: RoomHistoryEntry[] };
 
 export interface PendingHospitalisation {
   consultationId: string;
@@ -54,11 +56,17 @@ export class RoomsService {
     const consultations = (await this.consultationsRepository.findByTenant(tenantId, { roomId: id })) as Consultation[];
     const now = new Date();
     const status = computeRoomStatus(room, consultations, now);
+    const recentHistory = await Promise.all(
+      deriveRoomHistory(consultations, 5).map(async (c) => ({
+        ...c,
+        patientName: await this.resolvePatientName(c.patientId, tenantId),
+      }))
+    );
     return {
       ...room,
       ...status,
       ...(await this.resolveNames(room, status, tenantId)),
-      recentHistory: deriveRoomHistory(consultations, 5),
+      recentHistory,
     };
   }
 

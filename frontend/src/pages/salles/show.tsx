@@ -13,14 +13,19 @@ import { offlineApiRequest } from "@/lib/offlineApiRequest";
 import { showApiErrorToast } from "@/lib/errorHandler";
 import { usePolicy } from "@/hooks/usePolicy";
 import { RoomsPolicy } from "@/lib/policies/rooms.policy";
+import { useDoctors } from "@/hooks/useStaffDirectory";
 import type { Consultation, Room, RoomEffectiveStatus } from "@shared/schema";
+
+type RoomHistoryEntry = Consultation & { patientName: string | null };
 
 type RoomDetail = Room & {
   effectiveStatus: RoomEffectiveStatus;
   currentConsultation: Consultation | null;
   upcomingConsultations: Consultation[];
-  recentHistory: Consultation[];
+  recentHistory: RoomHistoryEntry[];
   assignedPatientName: string | null;
+  currentConsultationPatientName: string | null;
+  currentConsultationDoctorName: string | null;
 };
 
 interface PendingHospitalisation {
@@ -53,6 +58,11 @@ export default function SalleDetails() {
   const queryClient = useQueryClient();
   const { currentTenant } = useTenant();
   const roomsPolicy = usePolicy(RoomsPolicy);
+  const doctors = useDoctors();
+  const doctorName = (doctorId: string) => {
+    const doctor = doctors.find((d) => d.id === doctorId);
+    return doctor ? `${doctor.firstName} ${doctor.lastName}` : null;
+  };
   const [reserveDialogOpen, setReserveDialogOpen] = useState(false);
 
   const { data: room, isLoading } = useQuery<RoomDetail>({
@@ -205,9 +215,20 @@ export default function SalleDetails() {
             </CardHeader>
             <CardContent>
               {room.currentConsultation ? (
-                <p className="text-sm text-foreground" data-testid="text-current-consultation">
-                  {room.currentConsultation.reason} — {new Date(room.currentConsultation.scheduledAt).toLocaleTimeString()}
-                </p>
+                <div data-testid="text-current-consultation">
+                  <div className="flex items-center gap-2 text-sm font-medium text-success">
+                    <User className="w-4 h-4" />
+                    {room.currentConsultationPatientName ?? room.currentConsultation.reason}
+                  </div>
+                  {room.currentConsultationDoctorName && (
+                    <p className="text-xs text-muted-foreground pl-6">
+                      {t("assignedToDoctorLabel").replace("{name}", room.currentConsultationDoctorName)}
+                    </p>
+                  )}
+                  <p className="text-xs text-muted-foreground pl-6">
+                    {new Date(room.currentConsultation.scheduledAt).toLocaleTimeString()}
+                  </p>
+                </div>
               ) : room.assignedPatientName ? (
                 <div className="flex items-center gap-2 text-sm font-medium text-success" data-testid="text-assigned-patient">
                   <User className="w-4 h-4" />
@@ -232,7 +253,9 @@ export default function SalleDetails() {
                 room.upcomingConsultations.map((c) => (
                   <div key={c.id} className="flex justify-between text-sm" data-testid={`row-upcoming-${c.id}`}>
                     <span>{new Date(c.scheduledAt).toLocaleTimeString()}</span>
-                    <span className="text-muted-foreground">{c.reason}</span>
+                    <span className="text-muted-foreground">
+                      {c.reason}{doctorName(c.assignedDoctorId) ? ` — Dr. ${doctorName(c.assignedDoctorId)}` : ""}
+                    </span>
                   </div>
                 ))
               )}
@@ -249,7 +272,10 @@ export default function SalleDetails() {
               ) : (
                 room.recentHistory.map((c) => (
                   <div key={c.id} className="flex justify-between text-sm" data-testid={`row-history-${c.id}`}>
-                    <span>{c.reason}</span>
+                    <div>
+                      <p className="font-medium text-foreground">{c.patientName ?? c.reason}</p>
+                      {c.patientName && <p className="text-xs text-muted-foreground">{c.reason}</p>}
+                    </div>
                     <span className="text-muted-foreground">{new Date(c.scheduledAt).toLocaleDateString()}</span>
                   </div>
                 ))

@@ -122,18 +122,18 @@ describe("RoomsService", () => {
   });
 
   describe("findById", () => {
-    it("scopes the consultations query to this room and includes recent history", async () => {
+    it("scopes the consultations query to this room and includes recent history with patient names", async () => {
       const roomsRepository = { findById: jest.fn().mockResolvedValue(room()) };
-      const terminee = consultation({ id: "c-old", status: "terminee", scheduledAt: new Date("2026-08-01") });
+      const terminee = consultation({ id: "c-old", status: "terminee", patientId: "patient-1", scheduledAt: new Date("2026-08-01") });
       const consultationsRepository = { findByTenant: jest.fn().mockResolvedValue([terminee]) };
-      const patientsRepository = { findById: jest.fn() };
+      const patientsRepository = { findById: jest.fn().mockResolvedValue(patient()) };
       const usersRepository = { findById: jest.fn() };
       const service = new RoomsService(roomsRepository as any, consultationsRepository as any, patientsRepository as any, usersRepository as any);
 
       const result = await service.findById("room-1", "tenant-1");
 
       expect(consultationsRepository.findByTenant).toHaveBeenCalledWith("tenant-1", { roomId: "room-1" });
-      expect(result.recentHistory).toEqual([terminee]);
+      expect(result.recentHistory).toEqual([{ ...terminee, patientName: "Jean Dupont" }]);
       expect(result.effectiveStatus).toBe("disponible");
       expect(result.assignedPatientName).toBeNull();
     });

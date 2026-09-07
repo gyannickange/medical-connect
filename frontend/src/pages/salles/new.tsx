@@ -8,13 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useTranslation } from "../../lib/i18n";
 import { useTenant } from "../../contexts/TenantContext";
 import { useToast } from "@/hooks/use-toast";
@@ -78,6 +72,7 @@ export default function NewSalle() {
     <div className="p-6 space-y-6">
       <div>
         <h1 className="text-2xl font-display font-bold text-foreground">{t("addRoom")}</h1>
+        <p className="text-sm text-muted-foreground">{t("addRoomSubtitle")}</p>
       </div>
 
       <form
@@ -108,7 +103,7 @@ export default function NewSalle() {
 
         <div className="space-y-2">
           <Label>{t("roomEquipment")}</Label>
-          <div className="grid grid-cols-2 gap-2">
+          <div className="grid grid-cols-3 gap-2">
             {EQUIPMENT_OPTIONS.map((item) => (
               <label key={item} className="flex items-center gap-2 text-sm">
                 <Checkbox
@@ -132,15 +127,19 @@ export default function NewSalle() {
 
         <div className="space-y-2">
           <Label>{t("roomInitialStatus")}</Label>
-          <Select value={form.watch("status")} onValueChange={(value) => form.setValue("status", value as InsertRoom["status"])}>
-            <SelectTrigger data-testid="select-room-status">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="disponible">{t("roomStatusDisponible")}</SelectItem>
-              <SelectItem value="en_maintenance">{t("roomStatusEnMaintenance")}</SelectItem>
-            </SelectContent>
-          </Select>
+          <RadioGroup
+            className="flex gap-6 items-center pt-1"
+            value={form.watch("status")}
+            onValueChange={(value) => form.setValue("status", value as InsertRoom["status"])}>
+            <div className="flex gap-2 items-center">
+              <RadioGroupItem value="disponible" id="room-status-disponible" data-testid="radio-room-status-disponible" />
+              <Label htmlFor="room-status-disponible" className="font-normal">{t("roomStatusDisponible")}</Label>
+            </div>
+            <div className="flex gap-2 items-center">
+              <RadioGroupItem value="en_maintenance" id="room-status-maintenance" data-testid="radio-room-status-maintenance" />
+              <Label htmlFor="room-status-maintenance" className="font-normal">{t("roomStatusEnMaintenance")}</Label>
+            </div>
+          </RadioGroup>
         </div>
 
         <div className="flex justify-end gap-3 pt-2 border-t border-border">
