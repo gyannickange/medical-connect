@@ -12,7 +12,7 @@ export function computeRoomStatus(room: Room, roomConsultations: Consultation[],
     return { effectiveStatus: "occupee", currentConsultation: current, upcomingConsultations: [] };
   }
 
-  if (room.assignedPatientId) {
+  if (room.assignments.length >= room.capacity) {
     return { effectiveStatus: "occupee", currentConsultation: null, upcomingConsultations: [] };
   }
 

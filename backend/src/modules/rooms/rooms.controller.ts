@@ -3,6 +3,7 @@ import { RoomsService } from "./rooms.service";
 import { CreateRoomDto } from "./dto/create-room.dto";
 import { UpdateRoomDto } from "./dto/update-room.dto";
 import { AssignRoomDto } from "./dto/assign-room.dto";
+import { ReleaseRoomDto } from "./dto/release-room.dto";
 import { JwtAuthGuard } from "../auth/jwt-auth.guard";
 import { PolicyGuard } from "../auth/guards/policy.guard";
 import { CheckPolicy } from "../auth/decorators/check-policy.decorator";
@@ -52,8 +53,8 @@ export class RoomsController {
 
   @Put(":id/release")
   @CheckPolicy(RoomsPolicy, "release")
-  async release(@Param("id") id: string, @Request() req: any) {
-    return this.roomsService.release(id, this.tenantId(req));
+  async release(@Param("id") id: string, @Body() dto: ReleaseRoomDto, @Request() req: any) {
+    return this.roomsService.release(id, this.tenantId(req), dto.consultationId);
   }
 
   private tenantId(req: any, legacyTenantId?: string): string {

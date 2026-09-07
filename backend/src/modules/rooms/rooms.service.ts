@@ -7,7 +7,7 @@ import { RoomsRepository } from "./rooms.repository";
 import { computeRoomStatus, deriveRoomHistory, type RoomStatusResult } from "./room-status";
 
 interface ResolvedNames {
-  assignedPatientName: string | null;
+  assignedPatientNames: string[];
   currentConsultationPatientName: string | null;
   currentConsultationDoctorName: string | null;
   nextReservationPatientName: string | null;
@@ -77,7 +77,7 @@ export class RoomsService {
   async update(id: string, tenantId: string, data: Partial<InsertRoom>): Promise<Room> {
     if (data.status === "en_maintenance") {
       const current = await this.roomsRepository.findById(id, tenantId);
-      if (current.assignedPatientId) {
+      if (current.assignments.length > 0) {
         throw new BadRequestException("Cannot mark a room assigned to a patient as under maintenance");
       }
     }
@@ -90,13 +90,15 @@ export class RoomsService {
       throw new ConflictException("Room is not available");
     }
     return this.roomsRepository.update(id, tenantId, {
-      assignedPatientId: data.patientId,
-      assignedConsultationId: data.consultationId,
+      assignments: [...current.assignments, { patientId: data.patientId, consultationId: data.consultationId }],
     });
   }
 
-  release(id: string, tenantId: string): Promise<Room> {
-    return this.roomsRepository.update(id, tenantId, { assignedPatientId: null, assignedConsultationId: null });
+  async release(id: string, tenantId: string, consultationId: string): Promise<Room> {
+    const current = await this.roomsRepository.findById(id, tenantId);
+    return this.roomsRepository.update(id, tenantId, {
+      assignments: current.assignments.filter((a) => a.consultationId !== consultationId),
+    });
   }
 
   async findPendingHospitalisations(tenantId: string): Promise<PendingHospitalisation[]> {
@@ -104,9 +106,7 @@ export class RoomsService {
       this.consultationsRepository.findByTenant(tenantId, {}),
       this.roomsRepository.findByTenant(tenantId),
     ]);
-    const assignedConsultationIds = new Set(
-      rooms.filter((r) => r.assignedConsultationId).map((r) => r.assignedConsultationId as string)
-    );
+    const assignedConsultationIds = new Set(rooms.flatMap((r) => r.assignments.map((a) => a.consultationId)));
 
     const pending = (consultations as Consultation[]).filter(
       (c): c is Consultation & { carePlan: CarePlanHospitalisation } =>
@@ -130,14 +130,19 @@ export class RoomsService {
   }
 
   private async resolveNames(room: Room, status: RoomStatusResult, tenantId: string): Promise<ResolvedNames> {
-    const [assignedPatientName, currentConsultationPatientName, currentConsultationDoctorName, nextReservationPatientName] =
+    const [assignedPatientNames, currentConsultationPatientName, currentConsultationDoctorName, nextReservationPatientName] =
       await Promise.all([
-        this.resolvePatientName(room.assignedPatientId, tenantId),
+        Promise.all(room.assignments.map((a) => this.resolvePatientName(a.patientId, tenantId))),
         this.resolvePatientName(status.currentConsultation?.patientId ?? null, tenantId),
         this.resolveDoctorName(status.currentConsultation?.assignedDoctorId ?? null),
         this.resolvePatientName(status.upcomingConsultations[0]?.patientId ?? null, tenantId),
       ]);
-    return { assignedPatientName, currentConsultationPatientName, currentConsultationDoctorName, nextReservationPatientName };
+    return {
+      assignedPatientNames: assignedPatientNames.filter((name): name is string => name !== null),
+      currentConsultationPatientName,
+      currentConsultationDoctorName,
+      nextReservationPatientName,
+    };
   }
 
   private async resolvePatientName(patientId: string | null, tenantId: string): Promise<string | null> {

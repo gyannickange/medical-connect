@@ -12,8 +12,7 @@ function room(overrides: Record<string, unknown> = {}) {
     equipment: [],
     notes: null,
     status: "disponible",
-    assignedPatientId: null,
-    assignedConsultationId: null,
+    assignments: [],
     createdAt: new Date(),
     updatedAt: new Date(),
     ...overrides,
@@ -45,7 +44,7 @@ function doctor(overrides: Record<string, unknown> = {}) {
 describe("RoomsService", () => {
   describe("findByTenant", () => {
     it("groups consultations by roomId and attaches computed status per room", async () => {
-      const roomsRepository = { findByTenant: jest.fn().mockResolvedValue([room({ id: "room-1" }), room({ id: "room-2", status: "disponible" })]) };
+      const roomsRepository = { findByTenant: jest.fn().mockResolvedValue([room({ id: "room-1", capacity: 1 }), room({ id: "room-2" })]) };
       const occupied = consultation({ roomId: "room-1", status: "en_cours" });
       const consultationsRepository = { findByTenant: jest.fn().mockResolvedValue([occupied]) };
       const patientsRepository = { findById: jest.fn().mockResolvedValue(patient()) };
@@ -59,8 +58,12 @@ describe("RoomsService", () => {
       expect(result.find((r) => r.id === "room-2")?.effectiveStatus).toBe("disponible");
     });
 
-    it("resolves assignedPatientName for a room occupied by an assignment", async () => {
-      const roomsRepository = { findByTenant: jest.fn().mockResolvedValue([room({ id: "room-1", assignedPatientId: "patient-1", assignedConsultationId: "c-old" })]) };
+    it("resolves assignedPatientNames for each assignment, and stays disponible with a free bed remaining", async () => {
+      const roomsRepository = {
+        findByTenant: jest.fn().mockResolvedValue([
+          room({ id: "room-1", capacity: 2, assignments: [{ patientId: "patient-1", consultationId: "c-old" }] }),
+        ]),
+      };
       const consultationsRepository = { findByTenant: jest.fn().mockResolvedValue([]) };
       const patientsRepository = { findById: jest.fn().mockResolvedValue(patient()) };
       const usersRepository = { findById: jest.fn() };
@@ -69,7 +72,8 @@ describe("RoomsService", () => {
       const result = await service.findByTenant("tenant-1");
 
       expect(patientsRepository.findById).toHaveBeenCalledWith("patient-1", "tenant-1");
-      expect(result[0].assignedPatientName).toBe("Jean Dupont");
+      expect(result[0].assignedPatientNames).toEqual(["Jean Dupont"]);
+      expect(result[0].effectiveStatus).toBe("disponible");
     });
 
     it("resolves the patient and doctor name for a room occupied by an active exam", async () => {
@@ -103,7 +107,7 @@ describe("RoomsService", () => {
       expect(result[0].nextReservationPatientName).toBe("Marc Dubois");
     });
 
-    it("leaves the resolved names null when the room is simply disponible", async () => {
+    it("leaves the resolved names empty/null when the room is simply disponible", async () => {
       const roomsRepository = { findByTenant: jest.fn().mockResolvedValue([room({ id: "room-1" })]) };
       const consultationsRepository = { findByTenant: jest.fn().mockResolvedValue([]) };
       const patientsRepository = { findById: jest.fn() };
@@ -112,7 +116,7 @@ describe("RoomsService", () => {
 
       const result = await service.findByTenant("tenant-1");
 
-      expect(result[0].assignedPatientName).toBeNull();
+      expect(result[0].assignedPatientNames).toEqual([]);
       expect(result[0].currentConsultationPatientName).toBeNull();
       expect(result[0].currentConsultationDoctorName).toBeNull();
       expect(result[0].nextReservationPatientName).toBeNull();
@@ -135,7 +139,7 @@ describe("RoomsService", () => {
       expect(consultationsRepository.findByTenant).toHaveBeenCalledWith("tenant-1", { roomId: "room-1" });
       expect(result.recentHistory).toEqual([{ ...terminee, patientName: "Jean Dupont" }]);
       expect(result.effectiveStatus).toBe("disponible");
-      expect(result.assignedPatientName).toBeNull();
+      expect(result.assignedPatientNames).toEqual([]);
     });
   });
 
@@ -159,7 +163,7 @@ describe("RoomsService", () => {
     });
 
     it("allows marking en_maintenance when no patient is assigned", async () => {
-      const roomsRepository = { findById: jest.fn().mockResolvedValue(room({ assignedPatientId: null })), update: jest.fn().mockResolvedValue(room({ status: "en_maintenance" })) };
+      const roomsRepository = { findById: jest.fn().mockResolvedValue(room({ assignments: [] })), update: jest.fn().mockResolvedValue(room({ status: "en_maintenance" })) };
       const service = new RoomsService(roomsRepository as any, {} as any, {} as any, {} as any);
 
       await service.update("room-1", "tenant-1", { status: "en_maintenance" });
@@ -167,8 +171,8 @@ describe("RoomsService", () => {
       expect(roomsRepository.update).toHaveBeenCalledWith("room-1", "tenant-1", { status: "en_maintenance" });
     });
 
-    it("rejects marking en_maintenance when a patient is currently assigned", async () => {
-      const roomsRepository = { findById: jest.fn().mockResolvedValue(room({ assignedPatientId: "patient-1" })), update: jest.fn() };
+    it("rejects marking en_maintenance when at least one patient is currently assigned", async () => {
+      const roomsRepository = { findById: jest.fn().mockResolvedValue(room({ assignments: [{ patientId: "patient-1", consultationId: "c-1" }] })), update: jest.fn() };
       const service = new RoomsService(roomsRepository as any, {} as any, {} as any, {} as any);
 
       await expect(service.update("room-1", "tenant-1", { status: "en_maintenance" })).rejects.toThrow(BadRequestException);
@@ -177,10 +181,30 @@ describe("RoomsService", () => {
   });
 
   describe("assign", () => {
-    it("assigns the patient and consultation when the room is disponible", async () => {
+    it("appends the assignment when the room has a free bed", async () => {
       const roomsRepository = {
-        findById: jest.fn().mockResolvedValue(room()),
-        update: jest.fn().mockResolvedValue(room({ assignedPatientId: "patient-1", assignedConsultationId: "c-1" })),
+        findById: jest.fn().mockResolvedValue(room({ capacity: 2, assignments: [{ patientId: "patient-existing", consultationId: "c-existing" }] })),
+        update: jest.fn().mockResolvedValue(room()),
+      };
+      const consultationsRepository = { findByTenant: jest.fn().mockResolvedValue([]) };
+      const patientsRepository = { findById: jest.fn().mockResolvedValue(patient()) };
+      const usersRepository = { findById: jest.fn() };
+      const service = new RoomsService(roomsRepository as any, consultationsRepository as any, patientsRepository as any, usersRepository as any);
+
+      await service.assign("room-1", "tenant-1", { patientId: "patient-1", consultationId: "c-1" });
+
+      expect(roomsRepository.update).toHaveBeenCalledWith("room-1", "tenant-1", {
+        assignments: [
+          { patientId: "patient-existing", consultationId: "c-existing" },
+          { patientId: "patient-1", consultationId: "c-1" },
+        ],
+      });
+    });
+
+    it("assigns the sole patient when the room starts empty", async () => {
+      const roomsRepository = {
+        findById: jest.fn().mockResolvedValue(room({ capacity: 1, assignments: [] })),
+        update: jest.fn().mockResolvedValue(room()),
       };
       const consultationsRepository = { findByTenant: jest.fn().mockResolvedValue([]) };
       const patientsRepository = { findById: jest.fn() };
@@ -189,11 +213,26 @@ describe("RoomsService", () => {
 
       await service.assign("room-1", "tenant-1", { patientId: "patient-1", consultationId: "c-1" });
 
-      expect(roomsRepository.update).toHaveBeenCalledWith("room-1", "tenant-1", { assignedPatientId: "patient-1", assignedConsultationId: "c-1" });
+      expect(roomsRepository.update).toHaveBeenCalledWith("room-1", "tenant-1", {
+        assignments: [{ patientId: "patient-1", consultationId: "c-1" }],
+      });
     });
 
-    it("rejects assigning a room that is not disponible", async () => {
-      const roomsRepository = { findById: jest.fn().mockResolvedValue(room({ status: "en_maintenance" })), update: jest.fn() };
+    it("rejects assigning a room whose beds are all taken", async () => {
+      const roomsRepository = {
+        findById: jest.fn().mockResolvedValue(room({ capacity: 1, assignments: [{ patientId: "patient-existing", consultationId: "c-existing" }] })),
+        update: jest.fn(),
+      };
+      const consultationsRepository = { findByTenant: jest.fn().mockResolvedValue([]) };
+      const patientsRepository = { findById: jest.fn().mockResolvedValue(patient()) };
+      const service = new RoomsService(roomsRepository as any, consultationsRepository as any, patientsRepository as any, {} as any);
+
+      await expect(service.assign("room-1", "tenant-1", { patientId: "patient-1", consultationId: "c-1" })).rejects.toThrow(ConflictException);
+      expect(roomsRepository.update).not.toHaveBeenCalled();
+    });
+
+    it("rejects assigning a room under maintenance", async () => {
+      const roomsRepository = { findById: jest.fn().mockResolvedValue(room({ status: "en_maintenance", assignments: [] })), update: jest.fn() };
       const consultationsRepository = { findByTenant: jest.fn().mockResolvedValue([]) };
       const service = new RoomsService(roomsRepository as any, consultationsRepository as any, {} as any, {} as any);
 
@@ -203,13 +242,25 @@ describe("RoomsService", () => {
   });
 
   describe("release", () => {
-    it("clears the assignment fields", async () => {
-      const roomsRepository = { update: jest.fn().mockResolvedValue(room()) };
+    it("removes only the matching assignment, keeping the rest", async () => {
+      const roomsRepository = {
+        findById: jest.fn().mockResolvedValue(
+          room({
+            assignments: [
+              { patientId: "patient-1", consultationId: "c-1" },
+              { patientId: "patient-2", consultationId: "c-2" },
+            ],
+          })
+        ),
+        update: jest.fn().mockResolvedValue(room()),
+      };
       const service = new RoomsService(roomsRepository as any, {} as any, {} as any, {} as any);
 
-      await service.release("room-1", "tenant-1");
+      await service.release("room-1", "tenant-1", "c-1");
 
-      expect(roomsRepository.update).toHaveBeenCalledWith("room-1", "tenant-1", { assignedPatientId: null, assignedConsultationId: null });
+      expect(roomsRepository.update).toHaveBeenCalledWith("room-1", "tenant-1", {
+        assignments: [{ patientId: "patient-2", consultationId: "c-2" }],
+      });
     });
   });
 
@@ -226,7 +277,7 @@ describe("RoomsService", () => {
       const notHospitalisation = consultation({ id: "c-other", status: "terminee", carePlan: { orientation: "retour_domicile" } });
       const stillOpen = consultation({ id: "c-open", status: "en_cours", carePlan: { orientation: "hospitalisation", targetService: "X", bedUrgentlyRequired: false } });
       const consultationsRepository = { findByTenant: jest.fn().mockResolvedValue([older, newer, notHospitalisation, stillOpen]) };
-      const roomsRepository = { findByTenant: jest.fn().mockResolvedValue([room({ assignedConsultationId: null })]) };
+      const roomsRepository = { findByTenant: jest.fn().mockResolvedValue([room({ assignments: [] })]) };
       const patientsRepository = { findById: jest.fn().mockImplementation((id: string) => Promise.resolve(patient({ id, firstName: id, lastName: "X" }))) };
       const service = new RoomsService(roomsRepository as any, consultationsRepository as any, patientsRepository as any, {} as any);
 
@@ -239,13 +290,22 @@ describe("RoomsService", () => {
       });
     });
 
-    it("excludes a consultation already assigned to a room", async () => {
+    it("excludes a consultation already assigned to a room, even alongside another assignment in the same room", async () => {
       const alreadyAssigned = consultation({
         id: "c-assigned", status: "terminee", closedAt: new Date(),
         carePlan: { orientation: "hospitalisation", targetService: "Cardiologie", bedUrgentlyRequired: false },
       });
       const consultationsRepository = { findByTenant: jest.fn().mockResolvedValue([alreadyAssigned]) };
-      const roomsRepository = { findByTenant: jest.fn().mockResolvedValue([room({ assignedConsultationId: "c-assigned" })]) };
+      const roomsRepository = {
+        findByTenant: jest.fn().mockResolvedValue([
+          room({
+            assignments: [
+              { patientId: "patient-other", consultationId: "c-other" },
+              { patientId: "patient-1", consultationId: "c-assigned" },
+            ],
+          }),
+        ]),
+      };
       const service = new RoomsService(roomsRepository as any, consultationsRepository as any, { findById: jest.fn() } as any, {} as any);
 
       const result = await service.findPendingHospitalisations("tenant-1");

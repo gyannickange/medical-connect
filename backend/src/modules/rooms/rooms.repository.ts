@@ -24,8 +24,7 @@ export class RoomsRepository {
       equipment: data.equipment ?? [],
       notes: data.notes ?? null,
       status: data.status ?? "disponible",
-      assignedPatientId: null,
-      assignedConsultationId: null,
+      assignments: [],
       createdAt: now,
       updatedAt: now,
     };
