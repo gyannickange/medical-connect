@@ -22,4 +22,10 @@ describe("RoomsPolicy", () => {
     await expect(policy.create()).resolves.toBe(false);
     await expect(policy.update()).resolves.toBe(false);
   });
+
+  it("assign/release read their own action entries independently, same as view/create/update", async () => {
+    const policy = policyFor("medecin", { view: true, create: false, update: false, assign: true, release: false });
+    await expect(policy.assign()).resolves.toBe(true);
+    await expect(policy.release()).resolves.toBe(false);
+  });
 });
