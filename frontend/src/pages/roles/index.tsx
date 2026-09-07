@@ -26,7 +26,7 @@ const MODULE_ACTIONS: Record<PermissionModule, string[]> = {
   labOrders: ["view", "create", "update", "recordFollowUp"],
   examTypes: ["view", "create", "update", "delete"],
   prescriptions: ["view", "create", "update"],
-  rooms: ["view", "create", "update"],
+  rooms: ["view", "create", "update", "assign", "release"],
   staff: ["view", "create", "update", "delete"],
   audit: ["view"],
   settings: ["view", "create", "update", "delete"],
@@ -64,6 +64,8 @@ const ACTION_LABEL_KEYS: Record<string, string> = {
   list: "actionList",
   approve: "actionApprove",
   revoke: "actionRevoke",
+  assign: "actionAssign",
+  release: "actionRelease",
 };
 
 export default function RolesPage() {

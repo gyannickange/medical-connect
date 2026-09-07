@@ -12,10 +12,10 @@ function expectNormalizedMutationErrors(relativePath: string) {
 }
 
 describe("scoped CRUD error handling", () => {
-  it("6. Staff save/delete uses normalized error toast", () => {
+  it("6. Staff save/archive uses normalized error toast", () => {
     const contents = source("../pages/staff/index.tsx");
     expectNormalizedMutationErrors("../pages/staff/index.tsx");
-    expect(contents).toContain("useOfflineDeleteMutation");
+    expect(contents).toContain("setStaffActiveMutation");
     expect(contents).not.toContain("console.log");
   });
 

@@ -38,4 +38,37 @@ describe("RoomsController", () => {
 
     expect(roomsService.update).toHaveBeenCalledWith("room-1", "tenant-1", { status: "en_maintenance" });
   });
+
+  it("assign scopes to the authenticated tenant", async () => {
+    const roomsService = { assign: jest.fn().mockResolvedValue({ id: "room-1" }) };
+    const controller = new RoomsController(roomsService as any);
+
+    await controller.assign("room-1", { patientId: "patient-1", consultationId: "c-1" } as any, req());
+
+    expect(roomsService.assign).toHaveBeenCalledWith("room-1", "tenant-1", { patientId: "patient-1", consultationId: "c-1" });
+  });
+
+  it("release scopes to the authenticated tenant", async () => {
+    const roomsService = { release: jest.fn().mockResolvedValue({ id: "room-1" }) };
+    const controller = new RoomsController(roomsService as any);
+
+    await controller.release("room-1", { consultationId: "c-1" } as any, req());
+
+    expect(roomsService.release).toHaveBeenCalledWith("room-1", "tenant-1", "c-1");
+  });
+
+  it("findPendingHospitalisations scopes to the authenticated tenant", async () => {
+    const roomsService = { findPendingHospitalisations: jest.fn().mockResolvedValue([]) };
+    const controller = new RoomsController(roomsService as any);
+
+    await controller.findPendingHospitalisations("tenant-1", req());
+
+    expect(roomsService.findPendingHospitalisations).toHaveBeenCalledWith("tenant-1");
+  });
+
+  it("findPendingHospitalisations rejects a tenantId param that does not match the authenticated user", async () => {
+    const controller = new RoomsController({ findPendingHospitalisations: jest.fn() } as any);
+
+    await expect(controller.findPendingHospitalisations("tenant-2", req("tenant-1"))).rejects.toThrow(ForbiddenException);
+  });
 });

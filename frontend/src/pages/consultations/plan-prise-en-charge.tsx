@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useTranslation } from "../../lib/i18n";
 import { useTenant } from "../../contexts/TenantContext";
 import { useToast } from "@/hooks/use-toast";
@@ -18,8 +19,10 @@ import { calculateAge } from "@/lib/patientAge";
 import { cn } from "@/lib/utils";
 import { ConsultationJourneySidebar } from "./ConsultationJourneySidebar";
 import { useConsultationJourney } from "./useConsultationJourney";
-import type { CarePlan, CarePlanOrientation, Consultation, Patient, Prescription } from "@shared/schema";
+import type { CarePlan, CarePlanOrientation, Consultation, Patient, Prescription, Room, RoomEffectiveStatus, Service } from "@shared/schema";
 import { GENERAL_STATE_OPTIONS, physicalExamLabel } from "@/lib/physicalExamOptions";
+
+type RoomWithStatus = Room & { effectiveStatus: RoomEffectiveStatus };
 
 const ORIENTATIONS: CarePlanOrientation[] = ["retour_domicile", "controle_suivi", "hospitalisation", "orientation_specialiste", "transfert_urgent", "autre"];
 
@@ -208,6 +211,26 @@ export default function PlanPriseEnCharge() {
     enabled: !!currentTenant?.id && !!consultationId,
   });
 
+  const { data: services = [] } = useQuery<Service[]>({
+    queryKey: ["/api/services", currentTenant?.id],
+    enabled: !!currentTenant?.id,
+  });
+  const activeServices = services.filter((service) => service.isActive);
+
+  const { data: rooms = [] } = useQuery<RoomWithStatus[]>({
+    queryKey: ["/api/rooms", currentTenant?.id],
+    queryFn: async () => {
+      const response = await fetch(`/api/rooms/${currentTenant?.id}`, { credentials: "include" });
+      return response.json();
+    },
+    enabled: !!currentTenant?.id,
+  });
+  const currentlyAssignedRoom = rooms.find((r) => r.assignments.some((a) => a.consultationId === consultationId));
+  const availableRooms = rooms.filter((r) => r.effectiveStatus === "disponible" || r.id === currentlyAssignedRoom?.id);
+
+  const [assignedRoomId, setAssignedRoomId] = useState("");
+  const [roomInitialized, setRoomInitialized] = useState(false);
+
   const steps = useConsultationJourney(consultation, patient);
 
   if (consultation?.carePlan && !initialized) {
@@ -222,6 +245,11 @@ export default function PlanPriseEnCharge() {
     setInitialized(true);
   }
 
+  if (currentlyAssignedRoom && !roomInitialized) {
+    setAssignedRoomId(currentlyAssignedRoom.id);
+    setRoomInitialized(true);
+  }
+
   function buildCarePlan(): CarePlan | null {
     if (!orientation) return null;
     if (orientation === "retour_domicile") return { orientation, ...retourDomicile };
@@ -232,6 +260,25 @@ export default function PlanPriseEnCharge() {
     return { orientation, ...autre };
   }
 
+  const assignRoomMutation = useMutation({
+    mutationFn: async (roomId: string) => {
+      const response = await offlineApiRequest(
+        "PUT",
+        `/api/rooms/${roomId}/assign`,
+        { patientId: consultation!.patientId, consultationId },
+        { collection: "rooms", entityId: roomId }
+      );
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/rooms", currentTenant?.id] });
+      toast({ title: t("success"), description: t("roomAssignedSuccessfully") });
+    },
+    onError: (error: unknown) => {
+      void showApiErrorToast(toast, error, t("error"), t("failedToAssignRoom"), t("networkRequestFailed"));
+    },
+  });
+
   const saveMutation = useMutation({
     mutationFn: async () => {
       const carePlan = buildCarePlan();
@@ -241,6 +288,9 @@ export default function PlanPriseEnCharge() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/consultations/detail", consultationId] });
       toast({ title: t("success"), description: t("carePlanSavedSuccessfully") });
+      if (orientation === "hospitalisation" && assignedRoomId && assignedRoomId !== currentlyAssignedRoom?.id) {
+        assignRoomMutation.mutate(assignedRoomId);
+      }
       setLocation(`/consultations/${consultationId}/resume-cloture`);
     },
     onError: (error: unknown) => {
@@ -432,12 +482,40 @@ export default function PlanPriseEnCharge() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <FieldLabel>{t("targetServiceField")}</FieldLabel>
-                    <Input value={hospitalisation.targetService} onChange={(e) => setHospitalisation((p) => ({ ...p, targetService: e.target.value }))} />
+                    <Select
+                      value={hospitalisation.targetService}
+                      onValueChange={(value) => setHospitalisation((p) => ({ ...p, targetService: value }))}
+                      disabled={activeServices.length === 0}>
+                      <SelectTrigger data-testid="select-target-service">
+                        <SelectValue placeholder={activeServices.length === 0 ? t("noServicesAvailable") : t("selectServicePlaceholder")} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {activeServices.map((service) => (
+                          <SelectItem key={service.id} value={service.name}>{service.name}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
                   <div>
                     <FieldLabel>{t("estimatedStayDurationField")}</FieldLabel>
                     <Input value={hospitalisation.estimatedStayDuration} onChange={(e) => setHospitalisation((p) => ({ ...p, estimatedStayDuration: e.target.value }))} />
                   </div>
+                </div>
+                <div>
+                  <FieldLabel>{t("hospitalisationRoomField")}</FieldLabel>
+                  <Select value={assignedRoomId} onValueChange={setAssignedRoomId} disabled={availableRooms.length === 0}>
+                    <SelectTrigger data-testid="select-hospitalisation-room">
+                      <SelectValue placeholder={availableRooms.length === 0 ? t("noRoomsAvailableForHospitalisation") : t("selectHospitalisationRoomPlaceholder")} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {availableRooms.map((room) => (
+                        <SelectItem key={room.id} value={room.id}>{room.number} — {room.type}</SelectItem>
+                      ))}
+                      {assignedRoomId && !availableRooms.some((r) => r.id === assignedRoomId) && (
+                        <SelectItem value={assignedRoomId} disabled>{assignedRoomId}</SelectItem>
+                      )}
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div>
                   <FieldLabel>{t("admissionReasonField")}</FieldLabel>

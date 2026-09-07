@@ -16,4 +16,12 @@ export class RoomsPolicy extends BasePolicy {
   update(): Promise<boolean> {
     return this.can("update");
   }
+
+  assign(): Promise<boolean> {
+    return this.can("assign");
+  }
+
+  release(): Promise<boolean> {
+    return this.can("release");
+  }
 }

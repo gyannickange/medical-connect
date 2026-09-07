@@ -303,5 +303,24 @@ describe("ConsultationsRepository", () => {
       const call = db.find.mock.calls[0][0];
       expect(call.selector.roomId).toBeUndefined();
     });
+
+    it("hydrates date fields on returned documents instead of leaving them as raw strings", async () => {
+      const doc = {
+        _id: "consultation:c1",
+        type: "consultation",
+        tenantId: "tenant-1",
+        scheduledAt: "2026-10-24T10:15:00.000Z",
+        createdAt: "2026-10-24T09:00:00.000Z",
+        updatedAt: "2026-10-24T09:00:00.000Z",
+      };
+      const db = { find: jest.fn().mockResolvedValue({ docs: [doc] }) };
+      const couchDBService = { getDatabase: jest.fn().mockResolvedValue(db), ensureIndex: jest.fn().mockResolvedValue(undefined) };
+      const repository = new ConsultationsRepository(couchDBService as any, { next: jest.fn() } as any, patientsRepoStub() as any);
+
+      const [result] = await repository.findByTenant("tenant-1", {});
+
+      expect(result.scheduledAt).toBeInstanceOf(Date);
+      expect(result.scheduledAt.getTime()).toBe(new Date("2026-10-24T10:15:00.000Z").getTime());
+    });
   });
 });

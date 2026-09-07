@@ -35,6 +35,16 @@ const EMPTY_PHYSICAL_EXAM: PhysicalExam = {
   systemFindings: EXAM_SYSTEMS.map((system) => ({ system, status: "non_examine", notes: null })),
 };
 
+function normalizePhysicalExam(physicalExam: PhysicalExam | null): PhysicalExam {
+  if (!physicalExam) return EMPTY_PHYSICAL_EXAM;
+  return {
+    ...physicalExam,
+    systemFindings: EXAM_SYSTEMS.map(
+      (system) => physicalExam.systemFindings.find((f) => f.system === system) ?? { system, status: "non_examine", notes: null }
+    ),
+  };
+}
+
 export default function ConsultationMedicaleForm() {
   const { t } = useTranslation();
   const { toast } = useToast();
@@ -96,7 +106,7 @@ export default function ConsultationMedicaleForm() {
   if (consultation && !initialized) {
     setRelevantHistory(consultation.relevantHistory ?? []);
     setPresentIllnessHistory(consultation.presentIllnessHistory ?? "");
-    setPhysicalExam(consultation.physicalExam ?? EMPTY_PHYSICAL_EXAM);
+    setPhysicalExam(normalizePhysicalExam(consultation.physicalExam));
     setDiagnosisPrincipal(consultation.diagnosisPrincipal ?? null);
     setDiagnosisSecondary(consultation.diagnosisSecondary ?? []);
     setDiagnosisHypothesis(consultation.diagnosisHypothesis ?? "");

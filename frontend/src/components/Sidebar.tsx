@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link, useLocation } from "wouter";
 import {
   UserCheck,
@@ -7,6 +7,7 @@ import {
   ShieldCheck,
   Store,
   Check,
+  ChevronDown,
   ChevronsUpDown,
   Users,
   CalendarCheck,
@@ -16,6 +17,11 @@ import {
   DoorOpen,
   LayoutDashboard,
 } from "lucide-react";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 import { BrandMark } from "./BrandMark";
 import { useTranslation } from "../lib/i18n";
 import { useTenant } from "../contexts/TenantContext";
@@ -38,9 +44,17 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
+import { Sheet, SheetContent } from "@/components/ui/sheet";
 
-export const Sidebar: React.FC = () => {
+interface NavItem {
+  icon: React.ComponentType<{ className?: string }>;
+  label: string;
+  path: string;
+}
+
+function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
   const [location] = useLocation();
+  const [isAdminSectionOpen, setIsAdminSectionOpen] = useState(false);
   const { t } = useTranslation();
   const { currentTenant, tenants, setCurrentTenant } = useTenant();
   const staffPolicy = usePolicy(StaffPolicy);
@@ -54,7 +68,7 @@ export const Sidebar: React.FC = () => {
   const roomsPolicy = usePolicy(RoomsPolicy);
   const rolesPolicy = usePolicy(RolesPolicy);
 
-  const mainItems = [
+  const mainItems: NavItem[] = [
     { icon: LayoutDashboard, label: t("dashboardNavLabel"), path: "/" },
     ...(patientsPolicy.canView()
       ? [{ icon: Users, label: t("patients"), path: "/patients" }]
@@ -76,7 +90,7 @@ export const Sidebar: React.FC = () => {
       : []),
   ];
 
-  const adminItems = [
+  const adminItems: NavItem[] = [
     // Only show staff menu if user can view staff
     ...(staffPolicy.canView()
       ? [{ icon: UserCheck, label: t("staff"), path: "/staff" }]
@@ -105,80 +119,72 @@ export const Sidebar: React.FC = () => {
     return location.startsWith(path);
   };
 
+  const renderNavLink = (item: NavItem) => {
+    const Icon = item.icon;
+    const active = isActive(item.path);
+
+    return (
+      <Link
+        key={item.path}
+        href={item.path}
+        onClick={onNavigate}
+        className={`nav-item min-h-[42px] flex items-center gap-3 text-sm ${
+          active ? "active" : ""
+        }`}
+        data-testid={`nav-${item.path.slice(1) || "dashboard"}`}>
+        <Icon className="w-4 h-4" />
+        <span className="font-medium">{item.label}</span>
+      </Link>
+    );
+  };
+
   return (
-    <aside
-      className="fixed left-0 top-0 z-40 flex h-screen w-20 flex-col border-r border-border bg-card lg:w-[260px]"
-      data-testid="sidebar">
+    <>
       {/* Logo */}
-      <div className="flex shrink-0 items-center border-b border-border p-4">
+      <div className="flex shrink-0 items-center border-b border-border px-4 py-[18px]">
         <div className="flex items-center gap-3">
           <BrandMark className="h-9 w-9 shrink-0" />
-          <div className="hidden lg:block">
-            <h1 className="text-base font-bold leading-5 text-foreground">
-              Medical Connect
-            </h1>
-          </div>
+          <h1 className="text-base font-bold leading-5 text-foreground">
+            Medical Connect
+          </h1>
         </div>
       </div>
 
       {/* Navigation Menu */}
       <nav
         className="flex-1 overflow-y-auto px-3 py-5 lg:px-4"
-        data-testid="navigation-menu">
-        <div className="space-y-1">
-          {mainItems.map((item) => {
-            const Icon = item.icon;
-            const active = isActive(item.path);
-
-            return (
-              <Link
-                key={item.path}
-                href={item.path}
-                className={`nav-item min-h-[42px] flex items-center gap-3 text-sm ${
-                  active ? "active" : ""
-                }`}
-                data-testid={`nav-${item.path.slice(1) || "dashboard"}`}>
-                <Icon className="w-4 h-4" />
-                <span className="hidden lg:block font-medium">
-                  {item.label}
-                </span>
-              </Link>
-            );
-          })}
-        </div>
+        data-testid="navigation-menu"
+      >
+        <div className="space-y-1">{mainItems.map(renderNavLink)}</div>
 
         {adminItems.length > 0 && (
-          <div className="space-y-1 mt-5">
-            <p className="hidden lg:block px-3 pb-1 text-[11px] font-semibold text-muted-foreground">
+          <Collapsible
+            open={isAdminSectionOpen}
+            onOpenChange={setIsAdminSectionOpen}
+            className="space-y-1 mt-5"
+          >
+            <CollapsibleTrigger
+              className="flex w-full items-center justify-between rounded-lg px-3 py-2 text-[11px] font-semibold capitalize text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+              data-testid="admin-section-toggle"
+            >
               {t("administrationSectionLabel")}
-            </p>
-            {adminItems.map((item) => {
-              const Icon = item.icon;
-              const active = isActive(item.path);
-
-              return (
-                <Link
-                  key={item.path}
-                  href={item.path}
-                  className={`nav-item min-h-[42px] flex items-center gap-3 text-sm ${
-                    active ? "active" : ""
-                  }`}
-                  data-testid={`nav-${item.path.slice(1) || "dashboard"}`}>
-                  <Icon className="w-4 h-4" />
-                  <span className="hidden lg:block font-medium">
-                    {item.label}
-                  </span>
-                </Link>
-              );
-            })}
-          </div>
+              <ChevronDown
+                className={`w-4 h-4 transition-transform ${
+                  isAdminSectionOpen ? "" : "-rotate-90"
+                }`}
+              />
+            </CollapsibleTrigger>
+            <CollapsibleContent className="space-y-1 pt-1">
+              {adminItems.map(renderNavLink)}
+            </CollapsibleContent>
+          </Collapsible>
         )}
       </nav>
 
       {/* Account switcher */}
       <div className="shrink-0 border-t border-border p-3 lg:p-4">
-        {currentTenant && (
-          tenants.length > 1 ? (
+        {currentTenant &&
+          (tenants.length > 1 ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button
@@ -186,9 +192,10 @@ export const Sidebar: React.FC = () => {
                   variant="ghost"
                   className="flex h-auto min-h-12 w-full items-center gap-2 rounded-lg border border-transparent p-2 text-left hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring lg:p-3"
                   aria-label={t("switchAccount")}
-                  data-testid="account-switcher">
+                  data-testid="account-switcher"
+                >
                   <Store className="h-5 w-5 shrink-0 text-accent-primary" />
-                  <span className="hidden min-w-0 flex-1 lg:block">
+                  <span className="min-w-0 flex-1">
                     <span className="block text-xs font-medium text-muted-foreground">
                       {t("currentTenant")}
                     </span>
@@ -196,7 +203,7 @@ export const Sidebar: React.FC = () => {
                       {currentTenant.name}
                     </span>
                   </span>
-                  <ChevronsUpDown className="hidden h-4 w-4 shrink-0 text-muted-foreground lg:block" />
+                  <ChevronsUpDown className="h-4 w-4 shrink-0 text-muted-foreground" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent
@@ -204,18 +211,25 @@ export const Sidebar: React.FC = () => {
                 align="end"
                 sideOffset={8}
                 className="w-60"
-                data-testid="account-switcher-menu">
+                data-testid="account-switcher-menu"
+              >
                 <DropdownMenuLabel>{t("availableAccounts")}</DropdownMenuLabel>
                 {tenants.map((tenant) => (
                   <DropdownMenuItem
                     key={tenant.id}
                     onSelect={() => setCurrentTenant(tenant)}
                     className="min-h-11 cursor-pointer"
-                    data-testid={`account-option-${tenant.id}`}>
+                    data-testid={`account-option-${tenant.id}`}
+                  >
                     <Store className="h-4 w-4 text-accent-primary" />
-                    <span className="min-w-0 flex-1 truncate">{tenant.name}</span>
+                    <span className="min-w-0 flex-1 truncate">
+                      {tenant.name}
+                    </span>
                     {tenant.id === currentTenant.id && (
-                      <Check className="h-4 w-4 text-primary" aria-hidden="true" />
+                      <Check
+                        className="h-4 w-4 text-primary"
+                        aria-hidden="true"
+                      />
                     )}
                   </DropdownMenuItem>
                 ))}
@@ -224,9 +238,10 @@ export const Sidebar: React.FC = () => {
           ) : (
             <div
               className="flex min-h-12 items-center gap-2 rounded-lg p-2 lg:p-3"
-              data-testid="current-account">
+              data-testid="current-account"
+            >
               <Store className="h-5 w-5 shrink-0 text-accent-primary" />
-              <div className="hidden min-w-0 lg:block">
+              <div className="min-w-0">
                 <p className="text-xs font-medium text-muted-foreground">
                   {t("currentTenant")}
                 </p>
@@ -235,9 +250,36 @@ export const Sidebar: React.FC = () => {
                 </p>
               </div>
             </div>
-          )
-        )}
+          ))}
       </div>
-    </aside>
+    </>
+  );
+}
+
+export interface SidebarProps {
+  isMobileMenuOpen: boolean;
+  onCloseMobileMenu: () => void;
+}
+
+export const Sidebar: React.FC<SidebarProps> = ({ isMobileMenuOpen, onCloseMobileMenu }) => {
+  return (
+    <>
+      {/* Desktop sidebar - always visible at lg+, fully hidden below it */}
+      <aside
+        className="fixed left-0 top-0 z-40 hidden h-screen w-[260px] flex-col border-r border-border bg-card lg:flex"
+        data-testid="sidebar">
+        <SidebarContent />
+      </aside>
+
+      {/* Mobile drawer - hidden by default, opened via the header's hamburger */}
+      <Sheet open={isMobileMenuOpen} onOpenChange={(open) => !open && onCloseMobileMenu()}>
+        <SheetContent
+          side="left"
+          className="flex w-[260px] max-w-[80vw] flex-col gap-0 p-0 lg:hidden"
+          data-testid="mobile-sidebar">
+          <SidebarContent onNavigate={onCloseMobileMenu} />
+        </SheetContent>
+      </Sheet>
+    </>
   );
 };

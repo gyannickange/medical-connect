@@ -12,6 +12,7 @@ function room(overrides: Partial<Room> = {}): Room {
     equipment: [],
     notes: null,
     status: "disponible",
+    assignments: [],
     createdAt: new Date("2026-08-01"),
     updatedAt: new Date("2026-08-01"),
     ...overrides,
@@ -68,6 +69,60 @@ describe("computeRoomStatus", () => {
     const inProgress = consultation({ status: "en_cours" });
     const result = computeRoomStatus(room({ status: "en_maintenance" }), [inProgress], now);
     expect(result.effectiveStatus).toBe("occupee");
+  });
+
+  it("returns occupee when every bed is assigned (assignments fill capacity)", () => {
+    const result = computeRoomStatus(
+      room({ capacity: 1, assignments: [{ patientId: "patient-1", consultationId: "c-old" }] }),
+      [],
+      now
+    );
+    expect(result.effectiveStatus).toBe("occupee");
+    expect(result.currentConsultation).toBeNull();
+  });
+
+  it("stays disponible when a multi-bed room still has a free bed", () => {
+    const result = computeRoomStatus(
+      room({ capacity: 2, assignments: [{ patientId: "patient-1", consultationId: "c-old" }] }),
+      [],
+      now
+    );
+    expect(result.effectiveStatus).toBe("disponible");
+  });
+
+  it("becomes occupee once assignments reach a multi-bed room's capacity", () => {
+    const result = computeRoomStatus(
+      room({
+        capacity: 2,
+        assignments: [
+          { patientId: "patient-1", consultationId: "c-old-1" },
+          { patientId: "patient-2", consultationId: "c-old-2" },
+        ],
+      }),
+      [],
+      now
+    );
+    expect(result.effectiveStatus).toBe("occupee");
+  });
+
+  it("a full room wins over a stored en_maintenance status", () => {
+    const result = computeRoomStatus(
+      room({ status: "en_maintenance", capacity: 1, assignments: [{ patientId: "patient-1", consultationId: "c-old" }] }),
+      [],
+      now
+    );
+    expect(result.effectiveStatus).toBe("occupee");
+  });
+
+  it("an active exam still wins over a full room", () => {
+    const inProgress = consultation({ status: "en_cours" });
+    const result = computeRoomStatus(
+      room({ capacity: 1, assignments: [{ patientId: "patient-1", consultationId: "c-old" }] }),
+      [inProgress],
+      now
+    );
+    expect(result.effectiveStatus).toBe("occupee");
+    expect(result.currentConsultation).toBe(inProgress);
   });
 
   it("returns en_maintenance when stored status is en_maintenance and no consultation is in progress", () => {

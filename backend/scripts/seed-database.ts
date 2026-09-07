@@ -5,6 +5,7 @@ import { TenantsRepository } from "../src/modules/identity/tenants.repository";
 import { UsersRepository } from "../src/modules/identity/users.repository";
 import { SettingsRepository } from "../src/modules/settings/settings.repository";
 import { ServicesRepository } from "../src/modules/services/services.repository";
+import { SpecialtiesRepository } from "../src/modules/specialties/specialties.repository";
 import { ExamTypesRepository } from "../src/modules/exam-types/exam-types.repository";
 import { S3Service } from "../src/lib/s3.service";
 
@@ -16,6 +17,7 @@ async function main() {
   const users = new UsersRepository(couch, s3);
   const settings = new SettingsRepository(couch);
   const services = new ServicesRepository(couch);
+  const specialties = new SpecialtiesRepository(couch);
   const examTypes = new ExamTypesRepository(couch);
 
   const TENANT_ID = "00000000-0000-4000-8000-000000000001";
@@ -56,6 +58,7 @@ async function main() {
     );
   }
   await services.seedDefaults(tenant.id);
+  await specialties.seedDefaults(tenant.id);
   await examTypes.seedDefaults(tenant.id);
   console.log(`Seeded tenant ${tenant.id}; login: admin`);
 }

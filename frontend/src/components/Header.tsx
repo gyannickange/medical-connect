@@ -1,6 +1,5 @@
 import React from "react";
-import { Globe, User, LogOut, Settings, Sun, Moon } from "lucide-react";
-import { useLocation } from "wouter";
+import { Globe, User, LogOut, Menu, Sun, Moon } from "lucide-react";
 import { useTranslation } from "../lib/i18n";
 import { useTheme } from "../contexts/ThemeContext";
 import { useAuth } from "../contexts/AuthContext";
@@ -17,9 +16,13 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { OfflineIndicator } from "./OfflineIndicator";
 import { NotificationBell } from "./NotificationBell";
+import { BrandMark } from "./BrandMark";
 
-export const Header: React.FC = () => {
-  const [, setLocation] = useLocation();
+export interface HeaderProps {
+  onOpenMobileMenu: () => void;
+}
+
+export const Header: React.FC<HeaderProps> = ({ onOpenMobileMenu }) => {
   const { t, language, changeLanguage } = useTranslation();
   const { theme, toggleTheme } = useTheme();
   const { user, logout } = useAuth();
@@ -41,10 +44,23 @@ export const Header: React.FC = () => {
 
   return (
     <header
-      className="fixed top-0 right-0 left-20 z-30 h-[73px] border-x-0 border-b border-t-0 border-border bg-card px-4 py-4 lg:left-[260px] lg:px-8"
+      className="fixed top-0 right-0 left-0 z-30 h-[73px] border-x-0 border-b border-t-0 border-border bg-card px-4 py-4 lg:left-[260px] lg:px-8"
       data-testid="header">
       <div className="flex items-center justify-between">
-        <div className="text-xs text-muted-foreground"></div>
+        <div className="flex items-center gap-3 lg:hidden">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="hover:bg-accent"
+            onClick={onOpenMobileMenu}
+            aria-label={t("openMenuLabel")}
+            data-testid="button-open-mobile-menu">
+            <Menu className="w-5 h-5" />
+          </Button>
+          <BrandMark className="h-7 w-7 shrink-0" />
+        </div>
+
+        <div className="hidden lg:block text-xs text-muted-foreground"></div>
 
         <div className="flex items-center gap-2">
           {/* Offline Indicator */}
@@ -70,10 +86,6 @@ export const Header: React.FC = () => {
             aria-label={t("toggleTheme")}
             data-testid="theme-toggle">
             {theme === "dark" ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
-          </Button>
-
-          <Button variant="ghost" size="icon" className="hover:bg-accent" aria-label={t("settings")} onClick={() => setLocation("/settings")} data-testid="settings-shortcut">
-            <Settings className="w-5 h-5" />
           </Button>
 
           {/* Profile */}

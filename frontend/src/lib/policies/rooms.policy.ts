@@ -14,4 +14,12 @@ export class RoomsPolicy extends BasePolicy {
   canUpdate(): boolean {
     return this.can("update");
   }
+
+  canAssign(): boolean {
+    return this.can("assign");
+  }
+
+  canRelease(): boolean {
+    return this.can("release");
+  }
 }

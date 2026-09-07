@@ -12,7 +12,7 @@ const ACTIONS_BY_MODULE: Record<PermissionModule, string[]> = {
   labOrders: ["view", "create", "update", "recordFollowUp"],
   examTypes: ["view", "create", "update", "delete"],
   prescriptions: ["view", "create", "update"],
-  rooms: ["view", "create", "update"],
+  rooms: ["view", "create", "update", "assign", "release"],
   staff: ["view", "create", "update", "delete"],
   audit: ["view"],
   settings: ["view", "create", "update", "delete"],
@@ -65,6 +65,8 @@ const ALLOWED_ROLES: { [K in PermissionModule]: Record<string, SeedableRole[]> }
     view: ["admin", "manager", "medecin", "infirmier", "accueil"],
     create: ["admin", "manager"],
     update: ["admin", "manager"],
+    assign: ["admin", "manager", "medecin", "infirmier"],
+    release: ["admin", "manager", "medecin", "infirmier"],
   },
   staff: {
     view: ["admin", "manager"],
