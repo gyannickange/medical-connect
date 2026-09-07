@@ -17,6 +17,7 @@
     "db:seed:demo": "tsx scripts/seed-demo-data.ts",
     "db:create-platform-admin": "tsx scripts/create-platform-admin.ts",
     "db:seed-roles": "tsx scripts/seed-roles-migration.ts",
+    "db:seed-specialties": "tsx scripts/seed-specialties-migration.ts",
     "db:fresh": "npm run db:reset && npm run db:seed:demo",
     "check:scripts": "tsc -p tsconfig.scripts.json",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",

@@ -5,6 +5,7 @@ import { TenantsRepository } from "../src/modules/identity/tenants.repository";
 import { UsersRepository } from "../src/modules/identity/users.repository";
 import { SettingsRepository } from "../src/modules/settings/settings.repository";
 import { ServicesRepository } from "../src/modules/services/services.repository";
+import { SpecialtiesRepository } from "../src/modules/specialties/specialties.repository";
 import { ExamTypesRepository } from "../src/modules/exam-types/exam-types.repository";
 import { RoomsRepository } from "../src/modules/rooms/rooms.repository";
 import { PatientsRepository } from "../src/modules/patients/patients.repository";
@@ -64,6 +65,7 @@ async function main() {
   const users = new UsersRepository(couch, s3);
   const settings = new SettingsRepository(couch);
   const services = new ServicesRepository(couch);
+  const specialties = new SpecialtiesRepository(couch);
   const examTypes = new ExamTypesRepository(couch);
   const rooms = new RoomsRepository(couch);
   const patients = new PatientsRepository(couch, sequences, s3);
@@ -93,6 +95,7 @@ async function main() {
   }
 
   await services.seedDefaults(tenant.id);
+  await specialties.seedDefaults(tenant.id);
   await examTypes.seedDefaults(tenant.id);
 
   // ---- Staff -------------------------------------------------------------

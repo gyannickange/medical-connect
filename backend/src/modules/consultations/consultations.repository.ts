@@ -128,7 +128,7 @@ export class ConsultationsRepository {
     return this.findExisting(db, id);
   }
 
-  async findByTenant(tenantId: string, filters?: ConsultationFilters, options?: PaginationOptions): Promise<any[]> {
+  async findByTenant(tenantId: string, filters?: ConsultationFilters, options?: PaginationOptions): Promise<Consultation[]> {
     const dbName = this.databaseName(tenantId);
     const db = await this.database(tenantId);
     await this.couchDBService.ensureIndex(dbName, "consultations_by_tenant_scheduled", ["tenantId", "type", "scheduledAt"]);
@@ -146,7 +146,7 @@ export class ConsultationsRepository {
     if (filters?.roomId) selector.roomId = filters.roomId;
 
     const result = await db.find({ selector, sort: [{ scheduledAt: "asc" }], limit, skip });
-    return (result.docs as any[]).map((doc) => ({ ...doc, id: doc.id ?? publicDocumentId(doc._id, "consultation") }));
+    return (result.docs as any[]).map((doc) => this.hydrate(doc));
   }
 
   private async findExisting(db: DocumentScope<unknown>, id: string): Promise<Record<string, any> | null> {
