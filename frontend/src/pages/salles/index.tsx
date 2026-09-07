@@ -15,7 +15,7 @@ import type { Room, RoomEffectiveStatus } from "@shared/schema";
 
 type RoomWithStatus = Room & {
   effectiveStatus: RoomEffectiveStatus;
-  assignedPatientName: string | null;
+  assignedPatientNames: string[];
   currentConsultationPatientName: string | null;
   currentConsultationDoctorName: string | null;
   nextReservationPatientName: string | null;
@@ -174,10 +174,21 @@ export default function SallesIndex() {
                         </p>
                       )}
                     </div>
-                  ) : room.assignedPatientName ? (
-                    <div className="flex items-center gap-1.5 text-sm font-medium text-success" data-testid={`text-assigned-patient-${room.id}`}>
-                      <User className="w-3.5 h-3.5" />
-                      {room.assignedPatientName}
+                  ) : room.assignedPatientNames.length > 0 ? (
+                    <div data-testid={`text-assigned-patient-${room.id}`}>
+                      {room.assignedPatientNames.map((name) => (
+                        <div key={name} className="flex items-center gap-1.5 text-sm font-medium text-success">
+                          <User className="w-3.5 h-3.5" />
+                          {name}
+                        </div>
+                      ))}
+                      {room.capacity > 1 && (
+                        <p className="text-xs text-muted-foreground pl-5">
+                          {t("bedsOccupiedCountLabel")
+                            .replace("{occupied}", String(room.assignedPatientNames.length))
+                            .replace("{total}", String(room.capacity))}
+                        </p>
+                      )}
                     </div>
                   ) : room.effectiveStatus === "reservee" && room.nextReservationPatientName ? (
                     <div data-testid={`text-reservation-${room.id}`}>

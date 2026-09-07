@@ -23,7 +23,7 @@ type RoomDetail = Room & {
   currentConsultation: Consultation | null;
   upcomingConsultations: Consultation[];
   recentHistory: RoomHistoryEntry[];
-  assignedPatientName: string | null;
+  assignedPatientNames: string[];
   currentConsultationPatientName: string | null;
   currentConsultationDoctorName: string | null;
 };
@@ -118,8 +118,8 @@ export default function SalleDetails() {
   });
 
   const releaseMutation = useMutation({
-    mutationFn: async () => {
-      const response = await offlineApiRequest("PUT", `/api/rooms/${id}/release`, undefined, { collection: "rooms", entityId: id });
+    mutationFn: async (consultationId: string) => {
+      const response = await offlineApiRequest("PUT", `/api/rooms/${id}/release`, { consultationId }, { collection: "rooms", entityId: id });
       return response.json();
     },
     onSuccess: () => {
@@ -152,18 +152,9 @@ export default function SalleDetails() {
             <Button
               variant="outline"
               onClick={() => maintenanceMutation.mutate(room.status === "en_maintenance" ? "disponible" : "en_maintenance")}
-              disabled={maintenanceMutation.isPending || !!room.assignedPatientId}
+              disabled={maintenanceMutation.isPending || room.assignments.length > 0}
               data-testid="button-toggle-maintenance">
               {room.status === "en_maintenance" ? t("markAvailable") : t("markInMaintenance")}
-            </Button>
-          )}
-          {roomsPolicy.canRelease() && room.assignedPatientId && (
-            <Button
-              variant="outline"
-              onClick={() => releaseMutation.mutate()}
-              disabled={releaseMutation.isPending}
-              data-testid="button-release-room">
-              {t("releaseRoom")}
             </Button>
           )}
           {roomsPolicy.canAssign() && room.effectiveStatus === "disponible" && (
@@ -229,10 +220,33 @@ export default function SalleDetails() {
                     {new Date(room.currentConsultation.scheduledAt).toLocaleTimeString()}
                   </p>
                 </div>
-              ) : room.assignedPatientName ? (
-                <div className="flex items-center gap-2 text-sm font-medium text-success" data-testid="text-assigned-patient">
-                  <User className="w-4 h-4" />
-                  {room.assignedPatientName}
+              ) : room.assignments.length > 0 ? (
+                <div className="space-y-3" data-testid="text-assigned-patient">
+                  {room.assignments.map((assignment, index) => (
+                    <div key={assignment.consultationId} className="flex items-center justify-between gap-2">
+                      <div className="flex items-center gap-2 text-sm font-medium text-success">
+                        <User className="w-4 h-4" />
+                        {room.assignedPatientNames[index]}
+                      </div>
+                      {roomsPolicy.canRelease() && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => releaseMutation.mutate(assignment.consultationId)}
+                          disabled={releaseMutation.isPending}
+                          data-testid={`button-release-${assignment.consultationId}`}>
+                          {t("releaseRoom")}
+                        </Button>
+                      )}
+                    </div>
+                  ))}
+                  {room.capacity > 1 && (
+                    <p className="text-xs text-muted-foreground">
+                      {t("bedsOccupiedCountLabel")
+                        .replace("{occupied}", String(room.assignments.length))
+                        .replace("{total}", String(room.capacity))}
+                    </p>
+                  )}
                 </div>
               ) : (
                 <p className="text-sm text-muted-foreground">{t("noCurrentOccupation")}</p>

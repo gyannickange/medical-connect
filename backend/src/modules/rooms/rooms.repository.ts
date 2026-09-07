@@ -110,6 +110,7 @@ export class RoomsRepository {
     return {
       ...doc,
       id: doc.id ?? publicDocumentId(doc._id, "room"),
+      assignments: doc.assignments ?? (doc.assignedPatientId ? [{ patientId: doc.assignedPatientId, consultationId: doc.assignedConsultationId }] : []),
       createdAt: new Date(doc.createdAt),
       updatedAt: new Date(doc.updatedAt),
     } as Room;

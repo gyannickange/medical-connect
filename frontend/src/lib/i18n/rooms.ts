@@ -60,6 +60,7 @@ export const rooms: TranslationSection = {
     activeReservationLabel: "Active reservation",
     reservationPatientLabel: "Patient: {name}",
     addRoomSubtitle: "Configure the settings for a new operating or consultation room.",
+    bedsOccupiedCountLabel: "{occupied}/{total} beds occupied",
   },
   fr: {
     salles: "Salles",
@@ -120,5 +121,6 @@ export const rooms: TranslationSection = {
     activeReservationLabel: "Réservation active",
     reservationPatientLabel: "Patient : {name}",
     addRoomSubtitle: "Configurez les paramètres d'une nouvelle salle d'opération ou de consultation.",
+    bedsOccupiedCountLabel: "{occupied}/{total} lits occupés",
   },
 };

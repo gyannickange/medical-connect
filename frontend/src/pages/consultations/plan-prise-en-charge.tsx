@@ -22,7 +22,7 @@ import { useConsultationJourney } from "./useConsultationJourney";
 import type { CarePlan, CarePlanOrientation, Consultation, Patient, Prescription, Room, RoomEffectiveStatus, Service } from "@shared/schema";
 import { GENERAL_STATE_OPTIONS, physicalExamLabel } from "@/lib/physicalExamOptions";
 
-type RoomWithStatus = Room & { effectiveStatus: RoomEffectiveStatus; assignedPatientName: string | null };
+type RoomWithStatus = Room & { effectiveStatus: RoomEffectiveStatus };
 
 const ORIENTATIONS: CarePlanOrientation[] = ["retour_domicile", "controle_suivi", "hospitalisation", "orientation_specialiste", "transfert_urgent", "autre"];
 
@@ -225,7 +225,7 @@ export default function PlanPriseEnCharge() {
     },
     enabled: !!currentTenant?.id,
   });
-  const currentlyAssignedRoom = rooms.find((r) => r.assignedConsultationId === consultationId);
+  const currentlyAssignedRoom = rooms.find((r) => r.assignments.some((a) => a.consultationId === consultationId));
   const availableRooms = rooms.filter((r) => r.effectiveStatus === "disponible" || r.id === currentlyAssignedRoom?.id);
 
   const [assignedRoomId, setAssignedRoomId] = useState("");

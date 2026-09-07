@@ -89,6 +89,22 @@ describe("RoomsRepository", () => {
         expect.objectContaining({ selector: { type: "room", tenantId: "tenant-1" }, sort: [{ number: "asc" }] })
       );
       expect(result[0].id).toBe("room-1");
+      expect(result[0].assignments).toEqual([]);
+    });
+
+    it("migrates a pre-existing document that still has the old single assignedPatientId/assignedConsultationId fields", async () => {
+      const docs = [{
+        _id: "room:room-1", type: "room", number: "101", tenantId: "tenant-1",
+        assignedPatientId: "patient-1", assignedConsultationId: "c-1",
+        createdAt: "2026-08-01T00:00:00.000Z", updatedAt: "2026-08-01T00:00:00.000Z",
+      }];
+      const db = { find: jest.fn().mockResolvedValue({ docs }) };
+      const couchDBService = { getDatabase: jest.fn().mockResolvedValue(db), ensureIndex: jest.fn().mockResolvedValue(undefined) };
+      const repository = new RoomsRepository(couchDBService as any);
+
+      const result = await repository.findByTenant("tenant-1");
+
+      expect(result[0].assignments).toEqual([{ patientId: "patient-1", consultationId: "c-1" }]);
     });
   });
 });
