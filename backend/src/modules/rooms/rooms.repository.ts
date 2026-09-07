@@ -24,6 +24,8 @@ export class RoomsRepository {
       equipment: data.equipment ?? [],
       notes: data.notes ?? null,
       status: data.status ?? "disponible",
+      assignedPatientId: null,
+      assignedConsultationId: null,
       createdAt: now,
       updatedAt: now,
     };
@@ -36,7 +38,7 @@ export class RoomsRepository {
     }
   }
 
-  async update(id: string, tenantId: string, data: Partial<InsertRoom>): Promise<Room> {
+  async update(id: string, tenantId: string, data: Partial<Room>): Promise<Room> {
     const db = await this.database(tenantId);
     const current = await this.findExisting(db, id);
     if (!current || current.type !== "room" || current.tenantId !== tenantId) {

@@ -12,6 +12,10 @@ export function computeRoomStatus(room: Room, roomConsultations: Consultation[],
     return { effectiveStatus: "occupee", currentConsultation: current, upcomingConsultations: [] };
   }
 
+  if (room.assignedPatientId) {
+    return { effectiveStatus: "occupee", currentConsultation: null, upcomingConsultations: [] };
+  }
+
   if (room.status === "en_maintenance") {
     return { effectiveStatus: "en_maintenance", currentConsultation: null, upcomingConsultations: [] };
   }
