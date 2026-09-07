@@ -2,6 +2,7 @@ import { Body, Controller, ForbiddenException, Get, Param, Post, Put, Request, U
 import { RoomsService } from "./rooms.service";
 import { CreateRoomDto } from "./dto/create-room.dto";
 import { UpdateRoomDto } from "./dto/update-room.dto";
+import { AssignRoomDto } from "./dto/assign-room.dto";
 import { JwtAuthGuard } from "../auth/jwt-auth.guard";
 import { PolicyGuard } from "../auth/guards/policy.guard";
 import { CheckPolicy } from "../auth/decorators/check-policy.decorator";
@@ -11,6 +12,12 @@ import { RoomsPolicy } from "./rooms.policy";
 @UseGuards(JwtAuthGuard, PolicyGuard)
 export class RoomsController {
   constructor(private readonly roomsService: RoomsService) {}
+
+  @Get("pending-hospitalisations/:tenantId")
+  @CheckPolicy(RoomsPolicy, "assign")
+  async findPendingHospitalisations(@Param("tenantId") tenantId: string, @Request() req: any) {
+    return this.roomsService.findPendingHospitalisations(this.tenantId(req, tenantId));
+  }
 
   @Get(":tenantId")
   @CheckPolicy(RoomsPolicy, "view")
@@ -35,6 +42,18 @@ export class RoomsController {
   @CheckPolicy(RoomsPolicy, "update")
   async update(@Param("id") id: string, @Body() dto: UpdateRoomDto, @Request() req: any) {
     return this.roomsService.update(id, this.tenantId(req), dto);
+  }
+
+  @Put(":id/assign")
+  @CheckPolicy(RoomsPolicy, "assign")
+  async assign(@Param("id") id: string, @Body() dto: AssignRoomDto, @Request() req: any) {
+    return this.roomsService.assign(id, this.tenantId(req), dto);
+  }
+
+  @Put(":id/release")
+  @CheckPolicy(RoomsPolicy, "release")
+  async release(@Param("id") id: string, @Request() req: any) {
+    return this.roomsService.release(id, this.tenantId(req));
   }
 
   private tenantId(req: any, legacyTenantId?: string): string {
