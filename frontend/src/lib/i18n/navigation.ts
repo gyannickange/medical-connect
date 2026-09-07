@@ -4,6 +4,10 @@ export const navigation: TranslationSection = {
   en: {
     // Navigation
     staff: "Staff",
+    servicesNavLabel: "Services",
+    specialtiesNavLabel: "Specialties",
+    openMenuLabel: "Open menu",
+    closeMenuLabel: "Close menu",
 
     // Pagination
     previous: "Previous",
@@ -15,6 +19,10 @@ export const navigation: TranslationSection = {
   fr: {
     // Navigation
     staff: "Personnel",
+    servicesNavLabel: "Services",
+    specialtiesNavLabel: "Spécialités",
+    openMenuLabel: "Ouvrir le menu",
+    closeMenuLabel: "Fermer le menu",
 
     // Pagination
     previous: "Précédent",
