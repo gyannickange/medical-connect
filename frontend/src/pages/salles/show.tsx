@@ -1,10 +1,12 @@
-import React from "react";
+import React, { useState } from "react";
 import { useParams } from "wouter";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useTranslation } from "../../lib/i18n";
+import { useTenant } from "../../contexts/TenantContext";
 import { useToast } from "@/hooks/use-toast";
 import { offlineApiRequest } from "@/lib/offlineApiRequest";
 import { showApiErrorToast } from "@/lib/errorHandler";
@@ -17,7 +19,17 @@ type RoomDetail = Room & {
   currentConsultation: Consultation | null;
   upcomingConsultations: Consultation[];
   recentHistory: Consultation[];
+  assignedPatientName: string | null;
 };
+
+interface PendingHospitalisation {
+  consultationId: string;
+  patientId: string;
+  patientName: string;
+  targetService: string;
+  bedUrgentlyRequired: boolean;
+  closedAt: string | null;
+}
 
 const statusLabelKey: Record<RoomEffectiveStatus, string> = {
   disponible: "roomStatusDisponible",
@@ -31,7 +43,9 @@ export default function SalleDetails() {
   const { t } = useTranslation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { currentTenant } = useTenant();
   const roomsPolicy = usePolicy(RoomsPolicy);
+  const [reserveDialogOpen, setReserveDialogOpen] = useState(false);
 
   const { data: room, isLoading } = useQuery<RoomDetail>({
     queryKey: ["/api/rooms/detail", id],
@@ -40,6 +54,15 @@ export default function SalleDetails() {
       return response.json();
     },
     enabled: !!id,
+  });
+
+  const { data: pendingHospitalisations = [] } = useQuery<PendingHospitalisation[]>({
+    queryKey: ["/api/rooms/pending-hospitalisations", currentTenant?.id],
+    queryFn: async () => {
+      const response = await fetch(`/api/rooms/pending-hospitalisations/${currentTenant?.id}`, { credentials: "include" });
+      return response.json();
+    },
+    enabled: reserveDialogOpen && !!currentTenant?.id,
   });
 
   const maintenanceMutation = useMutation({
@@ -56,6 +79,40 @@ export default function SalleDetails() {
     },
   });
 
+  const assignMutation = useMutation({
+    mutationFn: async (pending: PendingHospitalisation) => {
+      const response = await offlineApiRequest(
+        "PUT",
+        `/api/rooms/${id}/assign`,
+        { patientId: pending.patientId, consultationId: pending.consultationId },
+        { collection: "rooms", entityId: id }
+      );
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/rooms/detail", id] });
+      toast({ title: t("success"), description: t("roomAssignedSuccessfully") });
+      setReserveDialogOpen(false);
+    },
+    onError: (error: unknown) => {
+      void showApiErrorToast(toast, error, t("error"), t("failedToAssignRoom"), t("networkRequestFailed"));
+    },
+  });
+
+  const releaseMutation = useMutation({
+    mutationFn: async () => {
+      const response = await offlineApiRequest("PUT", `/api/rooms/${id}/release`, undefined, { collection: "rooms", entityId: id });
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/rooms/detail", id] });
+      toast({ title: t("success"), description: t("roomReleasedSuccessfully") });
+    },
+    onError: (error: unknown) => {
+      void showApiErrorToast(toast, error, t("error"), t("failedToReleaseRoom"), t("networkRequestFailed"));
+    },
+  });
+
   if (isLoading || !room) {
     return <div className="p-6 text-muted-foreground">{t("loading")}</div>;
   }
@@ -67,15 +124,31 @@ export default function SalleDetails() {
           <h1 className="text-2xl font-display font-bold text-foreground">{room.number}</h1>
           <Badge>{t(statusLabelKey[room.effectiveStatus])}</Badge>
         </div>
-        {roomsPolicy.canUpdate() && (
-          <Button
-            variant="outline"
-            onClick={() => maintenanceMutation.mutate(room.status === "en_maintenance" ? "disponible" : "en_maintenance")}
-            disabled={maintenanceMutation.isPending}
-            data-testid="button-toggle-maintenance">
-            {room.status === "en_maintenance" ? t("markAvailable") : t("markInMaintenance")}
-          </Button>
-        )}
+        <div className="flex items-center gap-2">
+          {roomsPolicy.canUpdate() && (
+            <Button
+              variant="outline"
+              onClick={() => maintenanceMutation.mutate(room.status === "en_maintenance" ? "disponible" : "en_maintenance")}
+              disabled={maintenanceMutation.isPending || !!room.assignedPatientId}
+              data-testid="button-toggle-maintenance">
+              {room.status === "en_maintenance" ? t("markAvailable") : t("markInMaintenance")}
+            </Button>
+          )}
+          {roomsPolicy.canRelease() && room.assignedPatientId && (
+            <Button
+              variant="outline"
+              onClick={() => releaseMutation.mutate()}
+              disabled={releaseMutation.isPending}
+              data-testid="button-release-room">
+              {t("releaseRoom")}
+            </Button>
+          )}
+          {roomsPolicy.canAssign() && room.effectiveStatus === "disponible" && (
+            <Button onClick={() => setReserveDialogOpen(true)} data-testid="button-reserve-room">
+              {t("reserveRoom")}
+            </Button>
+          )}
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -87,6 +160,10 @@ export default function SalleDetails() {
             {room.currentConsultation ? (
               <p className="text-sm text-foreground" data-testid="text-current-consultation">
                 {room.currentConsultation.reason} — {new Date(room.currentConsultation.scheduledAt).toLocaleTimeString()}
+              </p>
+            ) : room.assignedPatientName ? (
+              <p className="text-sm text-foreground" data-testid="text-assigned-patient">
+                {room.assignedPatientName}
               </p>
             ) : (
               <p className="text-sm text-muted-foreground">{t("noCurrentOccupation")}</p>
@@ -130,6 +207,41 @@ export default function SalleDetails() {
           </CardContent>
         </Card>
       </div>
+
+      <Dialog open={reserveDialogOpen} onOpenChange={setReserveDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{t("pendingHospitalisationsTitle")}</DialogTitle>
+          </DialogHeader>
+          {pendingHospitalisations.length === 0 ? (
+            <p className="text-sm text-muted-foreground">{t("noPendingHospitalisations")}</p>
+          ) : (
+            <div className="space-y-2">
+              {pendingHospitalisations.map((pending) => (
+                <div
+                  key={pending.consultationId}
+                  className="flex items-center justify-between border border-border rounded-md p-3"
+                  data-testid={`row-pending-${pending.consultationId}`}>
+                  <div>
+                    <p className="text-sm font-medium text-foreground">{pending.patientName}</p>
+                    <p className="text-xs text-muted-foreground">{pending.targetService}</p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {pending.bedUrgentlyRequired && <Badge variant="danger">{t("bedUrgentlyRequiredBadge")}</Badge>}
+                    <Button
+                      size="sm"
+                      onClick={() => assignMutation.mutate(pending)}
+                      disabled={assignMutation.isPending}
+                      data-testid={`button-assign-${pending.consultationId}`}>
+                      {t("assignRoomAction")}
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
