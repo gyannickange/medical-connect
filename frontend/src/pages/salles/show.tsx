@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useParams } from "wouter";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Check, User } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -36,6 +37,13 @@ const statusLabelKey: Record<RoomEffectiveStatus, string> = {
   occupee: "roomStatusOccupee",
   reservee: "roomStatusReservee",
   en_maintenance: "roomStatusEnMaintenance",
+};
+
+const statusBadgeVariant: Record<RoomEffectiveStatus, "success" | "danger" | "warning" | "secondary"> = {
+  disponible: "success",
+  occupee: "danger",
+  reservee: "warning",
+  en_maintenance: "secondary",
 };
 
 export default function SalleDetails() {
@@ -120,9 +128,14 @@ export default function SalleDetails() {
   return (
     <div className="p-6 space-y-6">
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <h1 className="text-2xl font-display font-bold text-foreground">{room.number}</h1>
-          <Badge>{t(statusLabelKey[room.effectiveStatus])}</Badge>
+        <div>
+          <div className="flex items-center gap-3">
+            <h1 className="text-2xl font-display font-bold text-foreground">{room.number}</h1>
+            <Badge variant={statusBadgeVariant[room.effectiveStatus]}>{t(statusLabelKey[room.effectiveStatus])}</Badge>
+          </div>
+          <p className="text-sm text-muted-foreground">
+            {room.floor ? `${room.floor} — ${room.type}` : room.type}
+          </p>
         </div>
         <div className="flex items-center gap-2">
           {roomsPolicy.canUpdate() && (
@@ -152,60 +165,98 @@ export default function SalleDetails() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card>
-          <CardHeader>
-            <CardTitle>{t("currentOccupation")}</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {room.currentConsultation ? (
-              <p className="text-sm text-foreground" data-testid="text-current-consultation">
-                {room.currentConsultation.reason} — {new Date(room.currentConsultation.scheduledAt).toLocaleTimeString()}
-              </p>
-            ) : room.assignedPatientName ? (
-              <p className="text-sm text-foreground" data-testid="text-assigned-patient">
-                {room.assignedPatientName}
-              </p>
-            ) : (
-              <p className="text-sm text-muted-foreground">{t("noCurrentOccupation")}</p>
-            )}
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>{t("todaysReservations")}</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-2">
-            {room.upcomingConsultations.length === 0 ? (
-              <p className="text-sm text-muted-foreground">{t("noCurrentOccupation")}</p>
-            ) : (
-              room.upcomingConsultations.map((c) => (
-                <div key={c.id} className="flex justify-between text-sm" data-testid={`row-upcoming-${c.id}`}>
-                  <span>{new Date(c.scheduledAt).toLocaleTimeString()}</span>
-                  <span className="text-muted-foreground">{c.reason}</span>
+        <div className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>{t("roomCharacteristicsTitle")}</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-muted-foreground">{t("roomTypeLabel")}</span>
+                <span className="font-semibold text-foreground">{room.type}</span>
+              </div>
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-muted-foreground">{t("roomFloor")}</span>
+                <span className="font-semibold text-foreground">{room.floor ?? "—"}</span>
+              </div>
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-muted-foreground">{t("roomCapacityLabel")}</span>
+                <span className="font-semibold text-foreground">
+                  {t("roomCapacityPatientsLabel").replace("{count}", String(room.capacity))}
+                </span>
+              </div>
+              {room.equipment.length > 0 && (
+                <div className="pt-3 border-t border-border space-y-2">
+                  <p className="text-sm font-semibold text-foreground">{t("roomEquipmentListedTitle")}</p>
+                  {room.equipment.map((item) => (
+                    <div key={item} className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <Check className="w-4 h-4 text-success" />
+                      {item}
+                    </div>
+                  ))}
                 </div>
-              ))
-            )}
-          </CardContent>
-        </Card>
+              )}
+            </CardContent>
+          </Card>
 
-        <Card className="lg:col-span-2">
-          <CardHeader>
-            <CardTitle>{t("recentUsageHistory")}</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-2">
-            {room.recentHistory.length === 0 ? (
-              <p className="text-sm text-muted-foreground">{t("noCurrentOccupation")}</p>
-            ) : (
-              room.recentHistory.map((c) => (
-                <div key={c.id} className="flex justify-between text-sm" data-testid={`row-history-${c.id}`}>
-                  <span>{c.reason}</span>
-                  <span className="text-muted-foreground">{new Date(c.scheduledAt).toLocaleDateString()}</span>
+          <Card>
+            <CardHeader>
+              <CardTitle>{t("currentOccupation")}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {room.currentConsultation ? (
+                <p className="text-sm text-foreground" data-testid="text-current-consultation">
+                  {room.currentConsultation.reason} — {new Date(room.currentConsultation.scheduledAt).toLocaleTimeString()}
+                </p>
+              ) : room.assignedPatientName ? (
+                <div className="flex items-center gap-2 text-sm font-medium text-success" data-testid="text-assigned-patient">
+                  <User className="w-4 h-4" />
+                  {room.assignedPatientName}
                 </div>
-              ))
-            )}
-          </CardContent>
-        </Card>
+              ) : (
+                <p className="text-sm text-muted-foreground">{t("noCurrentOccupation")}</p>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+
+        <div className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>{t("todaysReservations")}</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-2">
+              {room.upcomingConsultations.length === 0 ? (
+                <p className="text-sm text-muted-foreground">{t("noCurrentOccupation")}</p>
+              ) : (
+                room.upcomingConsultations.map((c) => (
+                  <div key={c.id} className="flex justify-between text-sm" data-testid={`row-upcoming-${c.id}`}>
+                    <span>{new Date(c.scheduledAt).toLocaleTimeString()}</span>
+                    <span className="text-muted-foreground">{c.reason}</span>
+                  </div>
+                ))
+              )}
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>{t("recentUsageHistory")}</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-2">
+              {room.recentHistory.length === 0 ? (
+                <p className="text-sm text-muted-foreground">{t("noCurrentOccupation")}</p>
+              ) : (
+                room.recentHistory.map((c) => (
+                  <div key={c.id} className="flex justify-between text-sm" data-testid={`row-history-${c.id}`}>
+                    <span>{c.reason}</span>
+                    <span className="text-muted-foreground">{new Date(c.scheduledAt).toLocaleDateString()}</span>
+                  </div>
+                ))
+              )}
+            </CardContent>
+          </Card>
+        </div>
       </div>
 
       <Dialog open={reserveDialogOpen} onOpenChange={setReserveDialogOpen}>

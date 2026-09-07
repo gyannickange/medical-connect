@@ -1,6 +1,7 @@
 import React from "react";
 import { Link } from "wouter";
 import { useQuery } from "@tanstack/react-query";
+import { BedDouble, User } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -103,10 +104,19 @@ export default function SallesIndex() {
                       {t(statusLabelKey[room.effectiveStatus])}
                     </Badge>
                   </div>
-                  {room.assignedPatientName && (
-                    <p className="text-sm text-foreground" data-testid={`text-assigned-patient-${room.id}`}>
+                  <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                    <BedDouble className="w-3.5 h-3.5" />
+                    {t("roomBedsCountLabel").replace("{count}", String(room.capacity))}
+                  </div>
+                  {room.assignedPatientName ? (
+                    <div className="flex items-center gap-1.5 text-sm font-medium text-success" data-testid={`text-assigned-patient-${room.id}`}>
+                      <User className="w-3.5 h-3.5" />
                       {room.assignedPatientName}
-                    </p>
+                    </div>
+                  ) : (
+                    room.effectiveStatus === "disponible" && (
+                      <p className="text-sm text-muted-foreground bg-muted rounded-md px-3 py-2">{t("noCurrentOccupation")}</p>
+                    )
                   )}
                   <Link href={`/salles/${room.id}`}>
                     <Button variant="link" size="sm" className="h-auto p-0" data-testid={`link-room-${room.id}`}>
