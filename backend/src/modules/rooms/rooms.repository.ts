@@ -18,7 +18,7 @@ export class RoomsRepository {
       id,
       tenantId: data.tenantId,
       number: data.number,
-      type: data.type,
+      roomType: data.roomType,
       floor: data.floor ?? null,
       capacity: data.capacity,
       equipment: data.equipment ?? [],

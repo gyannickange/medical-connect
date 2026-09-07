@@ -36,7 +36,7 @@ export default function NewSalle() {
     resolver: zodResolver(insertRoomSchema),
     defaultValues: {
       number: "",
-      type: "",
+      roomType: "",
       floor: "",
       capacity: 1,
       equipment: [],
@@ -86,7 +86,7 @@ export default function NewSalle() {
           </div>
           <div className="space-y-2">
             <Label>{t("roomType")}</Label>
-            <Input {...form.register("type")} data-testid="input-room-type" />
+            <Input {...form.register("roomType")} data-testid="input-room-type" />
           </div>
         </div>
 

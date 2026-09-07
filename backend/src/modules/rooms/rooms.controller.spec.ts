@@ -25,7 +25,7 @@ describe("RoomsController", () => {
     const roomsService = { create: jest.fn().mockResolvedValue({ id: "room-1" }) };
     const controller = new RoomsController(roomsService as any);
 
-    await controller.create({ number: "101", type: "Cardiologie", capacity: 2 } as any, req());
+    await controller.create({ number: "101", roomType: "Cardiologie", capacity: 2 } as any, req());
 
     expect(roomsService.create).toHaveBeenCalledWith(expect.objectContaining({ tenantId: "tenant-1" }));
   });

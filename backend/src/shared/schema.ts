@@ -69,8 +69,8 @@ export type RoomStatus = "disponible" | "en_maintenance";
 export interface RoomAssignment { patientId: string; consultationId: string }
 export type RoomEffectiveStatus = "occupee" | "reservee" | "disponible" | "en_maintenance";
 
-export interface Room { id: string; tenantId: string; number: string; type: string; floor: string | null; capacity: number; equipment: string[]; notes: string | null; status: RoomStatus; assignments: RoomAssignment[]; createdAt: Date; updatedAt: Date }
-export interface InsertRoom { id?: string; number: string; type: string; floor?: string | null; capacity: number; equipment?: string[]; notes?: string | null; status?: RoomStatus; tenantId: string }
+export interface Room { id: string; tenantId: string; number: string; roomType: string; floor: string | null; capacity: number; equipment: string[]; notes: string | null; status: RoomStatus; assignments: RoomAssignment[]; createdAt: Date; updatedAt: Date }
+export interface InsertRoom { id?: string; number: string; roomType: string; floor?: string | null; capacity: number; equipment?: string[]; notes?: string | null; status?: RoomStatus; tenantId: string }
 
 export type PermissionModule =
   | "patients"

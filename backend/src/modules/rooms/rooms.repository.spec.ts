@@ -10,7 +10,7 @@ describe("RoomsRepository", () => {
 
       const result = await repository.create({
         number: "101",
-        type: "Cardiologie",
+        roomType: "Cardiologie",
         capacity: 2,
         tenantId: "tenant-1",
       } as any);
@@ -24,6 +24,22 @@ describe("RoomsRepository", () => {
       );
       expect(result.status).toBe("disponible");
       expect(result.equipment).toEqual([]);
+    });
+
+    it("does not let the CouchDB document-kind discriminator (type: \"room\") clobber the room's own category field", async () => {
+      const db = { insert: jest.fn().mockResolvedValue({ ok: true }) };
+      const couchDBService = { getDatabase: jest.fn().mockResolvedValue(db) };
+      const repository = new RoomsRepository(couchDBService as any);
+
+      const result = await repository.create({
+        number: "Box U2",
+        roomType: "Urgences",
+        capacity: 2,
+        tenantId: "tenant-1",
+      } as any);
+
+      expect(db.insert).toHaveBeenCalledWith(expect.objectContaining({ type: "room", roomType: "Urgences" }));
+      expect(result.roomType).toBe("Urgences");
     });
   });
 
@@ -59,6 +75,7 @@ describe("RoomsRepository", () => {
 
       expect(db.insert).toHaveBeenCalledWith(expect.objectContaining({ status: "en_maintenance" }));
       expect(result.status).toBe("en_maintenance");
+      expect(result.roomType).toBe("Cardiologie");
     });
 
     it("throws NotFoundException when the room does not exist", async () => {

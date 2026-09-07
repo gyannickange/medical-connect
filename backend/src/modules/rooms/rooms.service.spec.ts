@@ -6,7 +6,7 @@ function room(overrides: Record<string, unknown> = {}) {
     id: "room-1",
     tenantId: "tenant-1",
     number: "101",
-    type: "Cardiologie",
+    roomType: "Cardiologie",
     floor: null,
     capacity: 2,
     equipment: [],
@@ -148,9 +148,9 @@ describe("RoomsService", () => {
       const roomsRepository = { create: jest.fn().mockResolvedValue(room()) };
       const service = new RoomsService(roomsRepository as any, { findByTenant: jest.fn() } as any, {} as any, {} as any);
 
-      await service.create({ number: "101", type: "Cardiologie", capacity: 2, tenantId: "tenant-1" } as any);
+      await service.create({ number: "101", roomType: "Cardiologie", capacity: 2, tenantId: "tenant-1" } as any);
 
-      expect(roomsRepository.create).toHaveBeenCalledWith({ number: "101", type: "Cardiologie", capacity: 2, tenantId: "tenant-1" });
+      expect(roomsRepository.create).toHaveBeenCalledWith({ number: "101", roomType: "Cardiologie", capacity: 2, tenantId: "tenant-1" });
     });
 
     it("delegates a non-maintenance update to RoomsRepository", async () => {

@@ -61,9 +61,9 @@ export default function SallesIndex() {
     { disponible: 0, occupee: 0, reservee: 0 }
   );
 
-  const roomTypes = Array.from(new Set(rooms.map((room) => room.type))).sort();
+  const roomTypes = Array.from(new Set(rooms.map((room) => room.roomType))).sort();
   const filteredRooms = rooms.filter(
-    (room) => (typeFilter === "all" || room.type === typeFilter) && (statusFilter === "all" || room.effectiveStatus === statusFilter)
+    (room) => (typeFilter === "all" || room.roomType === typeFilter) && (statusFilter === "all" || room.effectiveStatus === statusFilter)
   );
 
   return (
@@ -152,7 +152,7 @@ export default function SallesIndex() {
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="font-bold text-foreground">{room.number}</p>
-                      <p className="text-sm text-muted-foreground">{room.type}</p>
+                      <p className="text-sm text-muted-foreground">{room.roomType}</p>
                     </div>
                     <Badge variant={statusBadgeVariant[room.effectiveStatus]}>
                       {t(statusLabelKey[room.effectiveStatus])}

@@ -8,7 +8,7 @@ export class UpdateRoomDto {
 
   @IsString()
   @IsOptional()
-  type?: string;
+  roomType?: string;
 
   @IsString()
   @IsOptional()

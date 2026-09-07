@@ -158,14 +158,14 @@ async function main() {
 
   // ---- Rooms ---------------------------------------------------------------
   const ROOM_SPECS = [
-    { number: "101", type: "Consultation générale", floor: "1", capacity: 1, equipment: ["Table d'examen", "Tensiomètre", "Pèse-personne"], notes: "Salle standard de consultation, équipée pour les examens de routine.", status: "disponible" as const },
-    { number: "102", type: "Consultation générale", floor: "1", capacity: 1, equipment: ["Table d'examen", "Tensiomètre"], status: "en_maintenance" as const, notes: "Climatisation en panne, intervention technicien prévue." },
-    { number: "103", type: "Cardiologie", floor: "1", capacity: 1, equipment: ["ECG", "Tensiomètre", "Stéthoscope", "Moniteur cardiaque"], notes: "Salle dédiée aux consultations et bilans cardiovasculaires.", status: "disponible" as const },
-    { number: "Box U1", type: "Urgences", floor: "RDC", capacity: 2, equipment: ["Chariot d'urgence", "Oxygène", "Défibrillateur", "Moniteur multiparamétrique"], notes: "Box de déchocage, premier box mobilisé aux urgences.", status: "disponible" as const },
-    { number: "Box U2", type: "Urgences", floor: "RDC", capacity: 2, equipment: ["Chariot d'urgence", "Oxygène", "Brancard"], notes: "Second box d'urgence, utilisé en cas d'afflux de patients.", status: "disponible" as const },
-    { number: "201", type: "Pédiatrie", floor: "2", capacity: 1, equipment: ["Table de pesée bébé", "Toise", "Tensiomètre pédiatrique"], notes: "Salle décorée et adaptée à l'accueil des enfants.", status: "disponible" as const },
-    { number: "Salle d'attente A", type: "Salle d'attente", floor: "RDC", capacity: 25, equipment: ["Chaises", "Téléviseur", "Distributeur d'eau"], notes: "Salle d'attente principale, proche de l'accueil.", status: "disponible" as const },
-    { number: "Bloc Imagerie", type: "Imagerie", floor: "RDC", capacity: 1, equipment: ["Échographe", "Table d'examen"], status: "en_maintenance" as const, notes: "Maintenance de l'échographe prévue, retour en service estimé sous 48h." },
+    { number: "101", roomType: "Consultation générale", floor: "1", capacity: 1, equipment: ["Table d'examen", "Tensiomètre", "Pèse-personne"], notes: "Salle standard de consultation, équipée pour les examens de routine.", status: "disponible" as const },
+    { number: "102", roomType: "Consultation générale", floor: "1", capacity: 1, equipment: ["Table d'examen", "Tensiomètre"], status: "en_maintenance" as const, notes: "Climatisation en panne, intervention technicien prévue." },
+    { number: "103", roomType: "Cardiologie", floor: "1", capacity: 1, equipment: ["ECG", "Tensiomètre", "Stéthoscope", "Moniteur cardiaque"], notes: "Salle dédiée aux consultations et bilans cardiovasculaires.", status: "disponible" as const },
+    { number: "Box U1", roomType: "Urgences", floor: "RDC", capacity: 2, equipment: ["Chariot d'urgence", "Oxygène", "Défibrillateur", "Moniteur multiparamétrique"], notes: "Box de déchocage, premier box mobilisé aux urgences.", status: "disponible" as const },
+    { number: "Box U2", roomType: "Urgences", floor: "RDC", capacity: 2, equipment: ["Chariot d'urgence", "Oxygène", "Brancard"], notes: "Second box d'urgence, utilisé en cas d'afflux de patients.", status: "disponible" as const },
+    { number: "201", roomType: "Pédiatrie", floor: "2", capacity: 1, equipment: ["Table de pesée bébé", "Toise", "Tensiomètre pédiatrique"], notes: "Salle décorée et adaptée à l'accueil des enfants.", status: "disponible" as const },
+    { number: "Salle d'attente A", roomType: "Salle d'attente", floor: "RDC", capacity: 25, equipment: ["Chaises", "Téléviseur", "Distributeur d'eau"], notes: "Salle d'attente principale, proche de l'accueil.", status: "disponible" as const },
+    { number: "Bloc Imagerie", roomType: "Imagerie", floor: "RDC", capacity: 1, equipment: ["Échographe", "Table d'examen"], status: "en_maintenance" as const, notes: "Maintenance de l'échographe prévue, retour en service estimé sous 48h." },
   ];
   const createdRooms = [];
   for (const [index, r] of ROOM_SPECS.entries()) {

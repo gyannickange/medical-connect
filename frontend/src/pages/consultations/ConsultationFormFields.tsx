@@ -270,7 +270,7 @@ export default function ConsultationFormFields({ consultationId: editingId }: Co
               <SelectContent>
                 {rooms.map((room) => (
                   <SelectItem key={room.id} value={room.id}>
-                    {room.number} — {room.type}
+                    {room.number} — {room.roomType}
                   </SelectItem>
                 ))}
                 {form.watch("roomId") && !rooms.some((r) => r.id === form.watch("roomId")) && (

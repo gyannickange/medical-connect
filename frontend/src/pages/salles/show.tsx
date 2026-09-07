@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useParams } from "wouter";
+import { useParams, useLocation } from "wouter";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Check, User } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -53,6 +53,7 @@ const statusBadgeVariant: Record<RoomEffectiveStatus, "success" | "danger" | "wa
 
 export default function SalleDetails() {
   const { id } = useParams<{ id: string }>();
+  const [, setLocation] = useLocation();
   const { t } = useTranslation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -137,6 +138,14 @@ export default function SalleDetails() {
 
   return (
     <div className="p-6 space-y-6">
+      <div className="flex items-center gap-2">
+        <Button variant="link" size="sm" className="h-auto p-0 text-xs text-muted-foreground" onClick={() => setLocation("/salles")} data-testid="button-back-to-salles">
+          {t("salles")}
+        </Button>
+        <span className="text-xs text-muted-foreground">›</span>
+        <span className="text-xs font-medium text-primary">{room.number}</span>
+      </div>
+
       <div className="flex items-center justify-between">
         <div>
           <div className="flex items-center gap-3">
@@ -144,7 +153,7 @@ export default function SalleDetails() {
             <Badge variant={statusBadgeVariant[room.effectiveStatus]}>{t(statusLabelKey[room.effectiveStatus])}</Badge>
           </div>
           <p className="text-sm text-muted-foreground">
-            {room.floor ? `${room.floor} — ${room.type}` : room.type}
+            {room.floor ? `${room.floor} — ${room.roomType}` : room.roomType}
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -174,7 +183,7 @@ export default function SalleDetails() {
             <CardContent className="space-y-3">
               <div className="flex items-center justify-between text-sm">
                 <span className="text-muted-foreground">{t("roomTypeLabel")}</span>
-                <span className="font-semibold text-foreground">{room.type}</span>
+                <span className="font-semibold text-foreground">{room.roomType}</span>
               </div>
               <div className="flex items-center justify-between text-sm">
                 <span className="text-muted-foreground">{t("roomFloor")}</span>
@@ -249,7 +258,7 @@ export default function SalleDetails() {
                   )}
                 </div>
               ) : (
-                <p className="text-sm text-muted-foreground">{t("noCurrentOccupation")}</p>
+                <p className="text-sm text-muted-foreground bg-muted rounded-md px-3 py-2">{t("noCurrentOccupation")}</p>
               )}
             </CardContent>
           </Card>
@@ -262,7 +271,7 @@ export default function SalleDetails() {
             </CardHeader>
             <CardContent className="space-y-2">
               {room.upcomingConsultations.length === 0 ? (
-                <p className="text-sm text-muted-foreground">{t("noCurrentOccupation")}</p>
+                <p className="text-sm text-muted-foreground bg-muted rounded-md px-3 py-2">{t("noCurrentOccupation")}</p>
               ) : (
                 room.upcomingConsultations.map((c) => (
                   <div key={c.id} className="flex justify-between text-sm" data-testid={`row-upcoming-${c.id}`}>
@@ -282,7 +291,7 @@ export default function SalleDetails() {
             </CardHeader>
             <CardContent className="space-y-2">
               {room.recentHistory.length === 0 ? (
-                <p className="text-sm text-muted-foreground">{t("noCurrentOccupation")}</p>
+                <p className="text-sm text-muted-foreground bg-muted rounded-md px-3 py-2">{t("noCurrentOccupation")}</p>
               ) : (
                 room.recentHistory.map((c) => (
                   <div key={c.id} className="flex justify-between text-sm" data-testid={`row-history-${c.id}`}>

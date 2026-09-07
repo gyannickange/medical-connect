@@ -6,7 +6,7 @@ function room(overrides: Partial<Room> = {}): Room {
     id: "room-1",
     tenantId: "tenant-1",
     number: "101",
-    type: "Cardiologie",
+    roomType: "Cardiologie",
     floor: null,
     capacity: 2,
     equipment: [],

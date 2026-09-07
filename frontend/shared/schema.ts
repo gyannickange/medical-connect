@@ -68,8 +68,8 @@ export type RoomStatus = "disponible" | "en_maintenance";
 export interface RoomAssignment { patientId: string; consultationId: string }
 export type RoomEffectiveStatus = "occupee" | "reservee" | "disponible" | "en_maintenance";
 
-export interface Room { id: string; tenantId: string; number: string; type: string; floor: string | null; capacity: number; equipment: string[]; notes: string | null; status: RoomStatus; assignments: RoomAssignment[]; createdAt: string; updatedAt: string }
-export interface InsertRoom { id?: string; number: string; type: string; floor?: string | null; capacity: number; equipment?: string[]; notes?: string | null; status?: RoomStatus; tenantId: string }
+export interface Room { id: string; tenantId: string; number: string; roomType: string; floor: string | null; capacity: number; equipment: string[]; notes: string | null; status: RoomStatus; assignments: RoomAssignment[]; createdAt: string; updatedAt: string }
+export interface InsertRoom { id?: string; number: string; roomType: string; floor?: string | null; capacity: number; equipment?: string[]; notes?: string | null; status?: RoomStatus; tenantId: string }
 
 export type PermissionModule =
   | "patients"
@@ -293,7 +293,7 @@ export const insertPatientSchema = z.object({ id, lastName: z.string().min(1), f
 export const insertServiceSchema = z.object({ id, name: z.string().min(1), isActive: z.boolean().optional(), tenantId: z.string() });
 export const insertSpecialtySchema = z.object({ id, name: z.string().min(1), isActive: z.boolean().optional(), tenantId: z.string() });
 export const insertConsultationSchema = z.object({ id, patientId: z.string().min(1), scheduledAt: z.union([z.date(), z.string()]), specialty: z.string().min(1), assignedDoctorId: z.string().min(1), roomId: nullableString, priority: z.enum(["normal", "urgent", "tres_urgent"]).optional(), reason: z.string().min(1), nurseNotes: nullableString, tenantId: z.string() });
-export const insertRoomSchema = z.object({ id, number: z.string().min(1), type: z.string().min(1), floor: nullableString, capacity: z.number().int().min(1), equipment: z.array(z.string()).optional(), notes: nullableString, status: z.enum(["disponible", "en_maintenance"]).optional(), tenantId: z.string() });
+export const insertRoomSchema = z.object({ id, number: z.string().min(1), roomType: z.string().min(1), floor: nullableString, capacity: z.number().int().min(1), equipment: z.array(z.string()).optional(), notes: nullableString, status: z.enum(["disponible", "en_maintenance"]).optional(), tenantId: z.string() });
 export const insertRoleSchema = z.object({ id, name: z.string().min(1), description: nullableString, permissions: z.record(z.string(), z.record(z.string(), z.boolean())), tenantId: z.string() });
 export const insertProductSchema = z.object({ id, name: z.string().min(1), description: nullableString, price: money, cost: money, barcode: nullableString, qrCode: nullableString, categoryId: nullableString, supplierId: nullableString, rayonId: nullableString, tenantId: z.string(), minStockAlert: z.number().int().optional(), isActive: z.boolean().optional() });
 export const insertSupplierSchema = z.object({ id, name: z.string().min(1), contactName: nullableString, phone: nullableString, email: nullableString, tenantId: z.string(), isActive: z.boolean().optional() });

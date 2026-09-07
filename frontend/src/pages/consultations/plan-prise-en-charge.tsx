@@ -509,7 +509,7 @@ export default function PlanPriseEnCharge() {
                     </SelectTrigger>
                     <SelectContent>
                       {availableRooms.map((room) => (
-                        <SelectItem key={room.id} value={room.id}>{room.number} — {room.type}</SelectItem>
+                        <SelectItem key={room.id} value={room.id}>{room.number} — {room.roomType}</SelectItem>
                       ))}
                       {assignedRoomId && !availableRooms.some((r) => r.id === assignedRoomId) && (
                         <SelectItem value={assignedRoomId} disabled>{assignedRoomId}</SelectItem>

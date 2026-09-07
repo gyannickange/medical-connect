@@ -164,7 +164,7 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
             className="space-y-1 mt-5"
           >
             <CollapsibleTrigger
-              className="flex w-full items-center justify-between rounded-lg px-3 py-2 text-[11px] font-semibold capitalize text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+              className="flex w-full items-center justify-between rounded-lg px-3 py-2 text-sm font-semibold capitalize text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
               data-testid="admin-section-toggle"
             >
               {t("administrationSectionLabel")}
