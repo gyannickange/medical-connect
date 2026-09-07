@@ -5,9 +5,10 @@ import { RoomsPolicy } from "./rooms.policy";
 import { AuthModule } from "../auth/auth.module";
 import { RoomsRepositoryModule } from "./rooms.repository.module";
 import { ConsultationsRepositoryModule } from "../consultations/consultations.repository.module";
+import { PatientsRepositoryModule } from "../patients/patients.repository.module";
 
 @Module({
-  imports: [AuthModule, RoomsRepositoryModule, ConsultationsRepositoryModule],
+  imports: [AuthModule, RoomsRepositoryModule, ConsultationsRepositoryModule, PatientsRepositoryModule],
   controllers: [RoomsController],
   providers: [RoomsService, RoomsPolicy],
   exports: [RoomsService],
