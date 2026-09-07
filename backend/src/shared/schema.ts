@@ -68,7 +68,7 @@ export interface DiagnosisPrincipal {
 export type RoomStatus = "disponible" | "en_maintenance";
 export type RoomEffectiveStatus = "occupee" | "reservee" | "disponible" | "en_maintenance";
 
-export interface Room { id: string; tenantId: string; number: string; type: string; floor: string | null; capacity: number; equipment: string[]; notes: string | null; status: RoomStatus; createdAt: Date; updatedAt: Date }
+export interface Room { id: string; tenantId: string; number: string; type: string; floor: string | null; capacity: number; equipment: string[]; notes: string | null; status: RoomStatus; assignedPatientId: string | null; assignedConsultationId: string | null; createdAt: Date; updatedAt: Date }
 export interface InsertRoom { id?: string; number: string; type: string; floor?: string | null; capacity: number; equipment?: string[]; notes?: string | null; status?: RoomStatus; tenantId: string }
 
 export type PermissionModule =
